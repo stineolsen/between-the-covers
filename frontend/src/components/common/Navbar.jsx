@@ -22,7 +22,7 @@ const Navbar = () => {
           {/* Logo/Brand */}
           <Link to="/" className="flex items-center gap-3 transform transition-transform hover:scale-105" onClick={closeMobileMenu}>
             <img
-              src="/logo.png"
+              src="/logo_croppped.png"
               alt="Between The Covers"
               className="h-12 w-12 drop-shadow-lg"
             />
@@ -34,19 +34,19 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <Link to="/" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
-                  Home
+                  Hjem
                 </Link>
                 <Link to="/books" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
-                  Books
+                  Bøker
                 </Link>
                 <Link to="/meetings" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
-                  Meetings
+                  Møter
                 </Link>
                 <Link to="/history" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
-                  History
+                  Din lesehistorie
                 </Link>
                 <Link to="/shop" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
-                  Shop
+                  Butikk
                 </Link>
                 {isAdmin && (
                   <Link to="/admin" className="text-yellow-300 hover:text-yellow-200 font-bold transition-all transform hover:scale-110">
@@ -57,16 +57,16 @@ const Navbar = () => {
                   👤 {user?.displayName || user?.username}
                 </Link>
                 <button onClick={handleLogout} className="btn-accent text-sm py-2 px-4">
-                  Logout
+                  Logg ut
                 </button>
               </>
             ) : (
               <>
                 <Link to="/login" className="text-white hover:text-white/80 font-medium transition-all">
-                  Login
+                  Logg inn
                 </Link>
                 <Link to="/register" className="btn-accent text-sm py-2 px-4">
-                  Register
+                  Registrer
                 </Link>
               </>
             )}
@@ -92,7 +92,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  🏠 Home
+                  🏠 Hjem
                 </Link>
                 <Link
                   to="/books"
@@ -100,7 +100,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  📚 Books
+                  📚 Bøker
                 </Link>
                 <Link
                   to="/meetings"
@@ -108,7 +108,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  🗓️ Meetings
+                  🗓️ Møter
                 </Link>
                 <Link
                   to="/history"
@@ -116,7 +116,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  📊 Reading History
+                  📊 Din lesehistorie
                 </Link>
                 <Link
                   to="/shop"
@@ -124,7 +124,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  🛍️ Shop
+                  🛍️ Butikk
                 </Link>
                 {isAdmin && (
                   <Link
@@ -149,7 +149,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all text-left"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  🚪 Logout
+                  🚪 Logg ut
                 </button>
               </div>
             ) : (
@@ -160,7 +160,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  Login
+                  Logg inn
                 </Link>
                 <Link
                   to="/register"
@@ -168,7 +168,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  Register
+                  Registrer
                 </Link>
               </div>
             )}

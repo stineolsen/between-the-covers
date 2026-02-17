@@ -47,7 +47,7 @@ const NextMeeting = () => {
       <div className="container-gradient text-center py-12 animate-fadeIn">
         <div className="animate-pulse">
           <div className="text-6xl mb-4">📅</div>
-          <p className="text-gray-600 text-lg font-bold">Loading next meeting...</p>
+          <p className="text-gray-600 text-lg font-bold">Laster neste møte...</p>
         </div>
       </div>
     );
@@ -60,13 +60,13 @@ const NextMeeting = () => {
         style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}
       >
         <div className="text-6xl mb-4">📅</div>
-        <h2 className="text-3xl font-bold gradient-text mb-3">No Upcoming Meetings</h2>
-        <p className="text-gray-600 mb-6 text-lg">Check back later for our next bookclub gathering!</p>
+        <h2 className="text-3xl font-bold gradient-text mb-3">Ingen kommende møter</h2>
+        <p className="text-gray-600 mb-6 text-lg">Sjekk tilbake senere for neste bokklubbsamling!</p>
         <Link
           to="/meetings"
           className="btn-primary inline-block"
         >
-          View All Meetings
+          Se alle møtene
         </Link>
       </div>
     );
@@ -93,7 +93,11 @@ const NextMeeting = () => {
   const isTomorrow = daysUntil === 1;
 
   // Check if user is attending
-  const isAttending = meeting.attendees?.some(attendee => attendee._id === user?._id);
+  const isAttending = meeting.attendees?.some(attendee => {
+    // Handle both populated user objects and ObjectId references
+    const attendeeId = attendee._id || attendee;
+    return attendeeId.toString() === user?._id?.toString();
+  });
   const attendeeCount = meeting.attendeeCount || meeting.attendees?.length || 0;
   const isFull = meeting.isFull || (meeting.maxAttendees > 0 && attendeeCount >= meeting.maxAttendees);
 
@@ -110,20 +114,20 @@ const NextMeeting = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="text-6xl mb-3 animate-bounce">🎉</div>
-          <h2 className="text-4xl font-bold gradient-text mb-2">Next Bookclub Meeting!</h2>
+          <h2 className="text-4xl font-bold gradient-text mb-2">Neste bokklubbmøte!</h2>
           {isToday && (
             <p className="text-2xl font-bold" style={{ color: '#f5576c' }}>
-              📢 TODAY!
+              📢 IDAG!
             </p>
           )}
           {isTomorrow && (
             <p className="text-2xl font-bold" style={{ color: '#f5576c' }}>
-              📢 Tomorrow!
+              📢 I morgen!
             </p>
           )}
           {!isToday && !isTomorrow && daysUntil > 0 && (
             <p className="text-xl text-gray-600 font-bold">
-              in {daysUntil} {daysUntil === 1 ? 'day' : 'days'}
+              om {daysUntil} {daysUntil === 1 ? 'dag' : 'dager'}
             </p>
           )}
         </div>
@@ -168,40 +172,46 @@ const NextMeeting = () => {
               style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)' }}
             >
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xl font-bold">👥 Who's Coming?</h4>
+                <h4 className="text-xl font-bold">👥 Hvem kommer?</h4>
                 <span className="text-lg font-bold">
-                  {attendeeCount} {attendeeCount === 1 ? 'person' : 'people'}
+                  {attendeeCount} {attendeeCount === 1 ? 'medlem' : 'medlemmer'}
                 </span>
               </div>
 
               {meeting.attendees && meeting.attendees.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {meeting.attendees.slice(0, 8).map((attendee) => (
+                  {meeting.attendees.slice(0, 8).map((attendee, index) => {
+                    // Handle case where attendee might be just an ObjectId or string
+                    if (typeof attendee === 'string' || !attendee.username) return null;
+                    const displayName = attendee?.displayName || attendee?.username || 'User';
+                    const attendeeId = attendee._id || attendee.toString?.() || index;
+
+                    return (
                     <div
-                      key={attendee._id}
+                      key={`attendee-${attendeeId}-${index}`}
                       className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm"
                     >
                       <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm">
                         {attendee.avatar ? (
                           <img
                             src={`http://localhost:5000/uploads/avatars/${attendee.avatar}`}
-                            alt={attendee.displayName}
+                            alt={displayName}
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
                           <span className="text-purple-600 font-bold">
-                            {(attendee.displayName || attendee.username).charAt(0).toUpperCase()}
+                            {displayName.charAt(0).toUpperCase()}
                           </span>
                         )}
                       </div>
                       <span className="text-sm font-medium">
-                        {attendee.displayName || attendee.username}
+                        {displayName}
                       </span>
                     </div>
-                  ))}
+                  )})}
                   {attendeeCount > 8 && (
                     <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                      <span className="text-sm font-bold">+{attendeeCount - 8} more</span>
+                      <span className="text-sm font-bold">+{attendeeCount - 8} flere</span>
                     </div>
                   )}
                 </div>
@@ -214,7 +224,7 @@ const NextMeeting = () => {
             {/* Book */}
             {meeting.book && (
               <div className="p-6 rounded-2xl bg-white shadow-lg">
-                <h4 className="font-bold text-gray-900 mb-4 text-xl">📚 We'll be discussing:</h4>
+                <h4 className="font-bold text-gray-900 mb-4 text-xl">📚 Vi skal diskutere:</h4>
                 <Link
                   to={`/books/${meeting.book._id}`}
                   className="block transform transition-all hover:scale-105"
@@ -249,7 +259,7 @@ const NextMeeting = () => {
                   : 'linear-gradient(135deg, #10b981, #14b8a6)'
               }}
             >
-              {isRSVPing ? '⏳ Processing...' : isAttending ? '✓ You\'re Attending!' : isFull ? '😔 Meeting Full' : '🎉 Count Me In!'}
+              {isRSVPing ? '⏳ Behandler...' : isAttending ? '✓ Du deltar!' : isFull ? '😔 Møtet er fult' : '🎉 Jeg vil være med! '}
             </button>
 
             {/* View all meetings link */}
@@ -258,7 +268,7 @@ const NextMeeting = () => {
               className="block text-center py-4 rounded-2xl font-bold text-white shadow-lg transition-all transform hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
             >
-              📅 View All Meetings
+              📅 Se alle møtene
             </Link>
           </div>
         </div>

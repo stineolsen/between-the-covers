@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed';
+      const message = error.response?.data?.message || 'Greide ikke logge inn';
       setError(message);
       return { success: false, error: message };
     }
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       const data = await authApi.register(userData);
       return { success: true, message: data.message };
     } catch (error) {
-      const message = error.response?.data?.message || 'Registration failed';
+      const message = error.response?.data?.message || 'Greide ikke registrere';
       setError(message);
       return { success: false, error: message };
     }
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
       return { success: true };
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Logg ut error:', error);
       // Clear user anyway
       setUser(null);
       return { success: true };
@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
     loading,
     error,
     login,

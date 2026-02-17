@@ -43,14 +43,14 @@ const BookDetail = () => {
       const data = await booksApi.getBook(id);
       setBook(data.book);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load book');
+      setError(err.response?.data?.message || 'Greide ikke laste bok');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(`Are you sure you want to delete "${book.title}"? This action cannot be undone.`)) {
+    if (!window.confirm(`Er du sikker på at du vil slette "${book.title}"? Dette er permanent.`)) {
       return;
     }
 
@@ -59,7 +59,7 @@ const BookDetail = () => {
       await booksApi.deleteBook(id);
       navigate('/books');
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete book');
+      alert(err.response?.data?.message || 'Greide ikke slette bok');
       setDeleting(false);
     }
   };
@@ -71,7 +71,7 @@ const BookDetail = () => {
       const data = await reviewsApi.getReviews({ bookId: id });
       setReviews(data.reviews || []);
     } catch (err) {
-      console.error('Failed to fetch reviews:', err);
+      console.error('Greide ikke hente anmeldelser:', err);
     } finally {
       setReviewsLoading(false);
     }
@@ -108,7 +108,7 @@ const BookDetail = () => {
       setShowReviewForm(false);
       setEditingReview(null);
     } catch (err) {
-      throw new Error(err.response?.data?.message || 'Failed to save review');
+      throw new Error(err.response?.data?.message || 'Greide ikke lagre anmeldelse');
     }
   };
 
@@ -119,7 +119,7 @@ const BookDetail = () => {
       // Refresh reviews
       await fetchReviews();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to toggle like');
+      alert(err.response?.data?.message || 'Greide ikke endre like status');
     }
   };
 
@@ -131,7 +131,7 @@ const BookDetail = () => {
 
   // Delete review
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm('Are you sure you want to delete this review?')) {
+    if (!window.confirm('Er du sikker på at du vil slette denne anmeldelsen?')) {
       return;
     }
 
@@ -140,7 +140,7 @@ const BookDetail = () => {
       // Refresh data
       await Promise.all([fetchBook(), fetchReviews(), fetchUserReview()]);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to delete review');
+      alert(err.response?.data?.message || 'Greide ikke slette anmeldelse');
     }
   };
 
@@ -162,19 +162,19 @@ const BookDetail = () => {
   // Handle status change
   const handleStatusChange = async (status) => {
     try {
-      console.log('Updating status to:', status, 'for book:', id);
+      console.log('Oppdater status til:', status, 'for bok:', id);
       setStatusLoading(true);
       const result = await userBooksApi.setBookStatus(id, status);
-      console.log('Status update result:', result);
+      console.log('Status oppdatert resultat:', result);
       setUserBookStatus(status);
 
       // Show success message
-      toast.success('Reading status updated successfully!');
+      toast.success('Lese status oppdatert!');
     } catch (err) {
-      console.error('Status update error:', err);
+      console.error('Status oppdatering error:', err);
       console.error('Error response:', err.response);
       console.error('Error data:', err.response?.data);
-      toast.error(err.response?.data?.message || 'Failed to update status. Please check the console for details.');
+      toast.error(err.response?.data?.message || 'Greide ikke oppdatere status. Venligst sjekk logg for detaljer.');
     } finally {
       setStatusLoading(false);
     }
@@ -185,7 +185,7 @@ const BookDetail = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <div className="animate-spin rounded-full h-20 w-20 mx-auto mb-4" style={{ border: '4px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
-          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Loading book details...</p>
+          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Laster bokdetaljer...</p>
         </div>
       </div>
     );
@@ -198,7 +198,7 @@ const BookDetail = () => {
           <div className="container-gradient text-center py-12 animate-fadeIn" style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)' }}>
             <p className="text-white text-2xl font-bold mb-6">😢 {error || 'Book not found'}</p>
             <Link to="/books" className="btn-accent">
-              ← Back to Books
+              ← Tilbake til bøker
             </Link>
           </div>
         </div>
@@ -214,7 +214,7 @@ const BookDetail = () => {
       <div className="max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <Link to="/books" className="inline-flex items-center text-white hover:text-white/80 mb-6 font-bold text-lg transform transition-all hover:scale-105">
-          <span className="mr-2">←</span> Back to Books
+          <span className="mr-2">←</span> Tilbakee til bøker
         </Link>
 
         <div className="grid md:grid-cols-3 gap-8 animate-fadeIn">
@@ -240,7 +240,7 @@ const BookDetail = () => {
               {/* Library Links */}
               {(book.libraryLinks?.audiobook || book.libraryLinks?.ebook) && (
                 <div className="space-y-3 mb-4">
-                  <h3 className="font-bold text-gray-900 mb-3 text-lg">📚 Library Links</h3>
+                  <h3 className="font-bold text-gray-900 mb-3 text-lg">📚 Bibiloteklenker</h3>
                   {book.libraryLinks.audiobook && (
                     <a
                       href={book.libraryLinks.audiobook}
@@ -248,7 +248,7 @@ const BookDetail = () => {
                       rel="noopener noreferrer"
                       className="block w-full btn-secondary text-center"
                     >
-                      🎧 Audiobook
+                      🎧 Lydbok
                     </a>
                   )}
                   {book.libraryLinks.ebook && (
@@ -258,7 +258,7 @@ const BookDetail = () => {
                       rel="noopener noreferrer"
                       className="block w-full btn-primary text-center"
                     >
-                      📱 E-book
+                      📱 E-bok
                     </a>
                   )}
                 </div>
@@ -272,7 +272,7 @@ const BookDetail = () => {
                   rel="noopener noreferrer"
                   className="block w-full btn-accent text-center mb-4"
                 >
-                  📥 Download from Calibre
+                  📥 Last ned fra Calibre
                 </a>
               )}
 
@@ -284,7 +284,7 @@ const BookDetail = () => {
                     className="block w-full text-white text-center py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
                     style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
                   >
-                    ✏️ Edit Book
+                    ✏️ Rediger bok
                   </Link>
                   <button
                     onClick={handleDelete}
@@ -292,7 +292,7 @@ const BookDetail = () => {
                     className="w-full text-white py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
                     style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
                   >
-                    {deleting ? 'Deleting...' : '🗑️ Delete Book'}
+                    {deleting ? 'Sletter...' : '🗑️ Slett bok'}
                   </button>
                 </div>
               )}
@@ -304,7 +304,7 @@ const BookDetail = () => {
             <div className="container-gradient">
               {/* Title and Author */}
               <h1 className="text-5xl font-bold gradient-text mb-3">{book.title}</h1>
-              <p className="text-2xl text-gray-600 font-semibold mb-6">by {book.author}</p>
+              <p className="text-2xl text-gray-600 font-semibold mb-6">av {book.author}</p>
 
               {/* Rating */}
               {book.averageRating > 0 && (
@@ -331,7 +331,7 @@ const BookDetail = () => {
               {/* Description */}
               {book.description && (
                 <div className="mb-6 p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))' }}>
-                  <h2 className="text-2xl font-bold gradient-text mb-3">📖 Description</h2>
+                  <h2 className="text-2xl font-bold gradient-text mb-3">📖 Beskrivelse</h2>
                   <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">{book.description}</p>
                 </div>
               )}
@@ -346,37 +346,37 @@ const BookDetail = () => {
                 )}
                 {book.publishedYear && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">📅 Published Year</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">📅 Publisert</h3>
                     <p className="text-gray-700 font-medium">{book.publishedYear}</p>
                   </div>
                 )}
                 {book.pageCount && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">📄 Pages</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">📄 Sider</h3>
                     <p className="text-gray-700 font-medium">{book.pageCount}</p>
                   </div>
                 )}
                 {book.publisher && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">🏢 Publisher</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">🏢 Utgiver</h3>
                     <p className="text-gray-700 font-medium">{book.publisher}</p>
                   </div>
                 )}
                 {book.language && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">🌐 Language</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">🌐 Språk</h3>
                     <p className="text-gray-700 font-medium">{book.language}</p>
                   </div>
                 )}
                 {book.dateAdded && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">➕ Added to Collection</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">➕ Lagt til samling</h3>
                     <p className="text-gray-700 font-medium">{new Date(book.dateAdded).toLocaleDateString()}</p>
                   </div>
                 )}
                 {book.bookclubMonth && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">📅 Bokklubb Month</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">📅 Bokklubb bok</h3>
                     <p className="text-gray-700 font-medium">{book.bookclubMonth}</p>
                   </div>
                 )}
@@ -385,7 +385,7 @@ const BookDetail = () => {
               {/* Genres */}
               {book.genres && book.genres.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-xl">🎨 Genres</h3>
+                  <h3 className="font-bold text-gray-900 mb-3 text-xl">🎨 Sjanger</h3>
                   <div className="flex flex-wrap gap-3">
                     {book.genres.map((genre, index) => (
                       <span
@@ -402,7 +402,7 @@ const BookDetail = () => {
 
               {/* Reviews Section */}
               <div className="pt-6 mt-6">
-                <h2 className="text-3xl font-bold gradient-text mb-6">💬 Reviews</h2>
+                <h2 className="text-3xl font-bold gradient-text mb-6">💬 Anmeldelser</h2>
 
                 {/* Write/Edit Review Button */}
                 {!showReviewForm && (
@@ -412,7 +412,7 @@ const BookDetail = () => {
                         onClick={() => handleEditReview(userReview)}
                         className="btn-secondary"
                       >
-                        ✏️ Edit Your Review
+                        ✏️ Rediger din anmeldelse
                       </button>
                     ) : (
                       <button
@@ -422,7 +422,7 @@ const BookDetail = () => {
                         }}
                         className="btn-primary"
                       >
-                        ✨ Write a Review
+                        ✨ Skriv en anmeldelse
                       </button>
                     )}
                   </div>

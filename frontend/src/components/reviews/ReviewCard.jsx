@@ -51,7 +51,7 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
               className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110"
               style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)', color: 'white' }}
             >
-              ✏️ Edit
+              ✏️ Rediger
             </button>
           )}
           {(isOwner || isAdmin) && onDelete && (
@@ -60,7 +60,7 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
               className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110"
               style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: 'white' }}
             >
-              🗑️ Delete
+              🗑️ Slett
             </button>
           )}
         </div>
@@ -81,12 +81,12 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
       {/* Spoiler Warning */}
       {review.spoilers && !showFullContent && (
         <div className="p-4 rounded-2xl mb-4 text-center" style={{ background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1))' }}>
-          <p className="text-red-700 font-bold mb-2">⚠️ This review contains spoilers!</p>
+          <p className="text-red-700 font-bold mb-2">⚠️ Denne anmeldelsen inneholder spoilere!</p>
           <button
             onClick={handleToggleSpoilers}
             className="btn-accent"
           >
-            Show Review
+            Vis anmeldelse
           </button>
         </div>
       )}
@@ -103,7 +103,7 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
               onClick={handleToggleSpoilers}
               className="text-sm text-gray-600 hover:text-gray-900 font-medium mb-4"
             >
-              Hide spoilers
+              Skjul spoilere
             </button>
           )}
         </>
@@ -112,7 +112,7 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
       {/* Reading Date */}
       {review.readingDate && (
         <p className="text-sm text-gray-600 mb-4">
-          📅 Read on {formatDate(review.readingDate)}
+          📅 Lesedato {formatDate(review.readingDate)}
         </p>
       )}
 
@@ -128,12 +128,12 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
           style={isLiked ? { background: 'linear-gradient(135deg, #f093fb, #f5576c)' } : {}}
         >
           <span className="text-xl">{isLiked ? '❤️' : '🤍'}</span>
-          <span>{review.likeCount || 0} {review.likeCount === 1 ? 'like' : 'likes'}</span>
+          <span>{review.likeCount || 0} {review.likeCount === 1 ? 'liker' : 'likes'}</span>
         </button>
 
         {review.updatedAt && review.updatedAt !== review.createdAt && (
           <p className="text-xs text-gray-500">
-            Edited {formatDate(review.updatedAt)}
+            Redigert {formatDate(review.updatedAt)}
           </p>
         )}
       </div>

@@ -68,7 +68,7 @@ const BookCard = ({ book }) => {
             ))}
             {book.genres.length > 2 && (
               <span className="text-xs text-white font-bold px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-400 to-pink-400">
-                +{book.genres.length - 2} more
+                +{book.genres.length - 2} mer
               </span>
             )}
           </div>

@@ -15,7 +15,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
     genres: [],
     pageCount: '',
     publisher: '',
-    language: 'English',
+    language: 'Engelsk',
     bookclubMonth: '',
     audiobookLink: '',
     ebookLink: '',
@@ -64,13 +64,13 @@ const BookForm = ({ bookId = null, initialData = null }) => {
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        alert('Vennligst velg en bildefil');
         return;
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        alert('Image size must be less than 5MB');
+        alert('Bildestørrelse må være mindre enn 5MB');
         return;
       }
 
@@ -142,8 +142,8 @@ const BookForm = ({ bookId = null, initialData = null }) => {
       // Navigate to the book detail page
       navigate(`/books/${result.book._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} book`);
-      console.error('Error saving book:', err);
+      setError(err.response?.data?.message || `Greide ikke ${isEditing ? 'oppdatere' : 'opprette'} bok`);
+      console.error('Lagre bok feilmelding:', err);
     } finally {
       setLoading(false);
     }
@@ -153,7 +153,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
     <div className="max-w-4xl mx-auto">
       <div className="container-gradient animate-fadeIn">
         <h2 className="text-4xl font-bold gradient-text mb-6">
-          {isEditing ? '✏️ Edit Book' : '✨ Add New Book'}
+          {isEditing ? '✏️ Rediger bok' : '✨ Legg til ny bok'}
         </h2>
 
         {error && (
@@ -166,12 +166,12 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           {/* Cover Image Upload */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              📸 Book Cover Image
+              📸 Bokomslag bilde
             </label>
             <div className="flex items-start gap-4">
               {coverPreview && (
                 <div className="w-32 h-48 rounded-lg overflow-hidden shadow-md flex-shrink-0">
-                  <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+                  <img src={coverPreview} alt="Omslagsbilde forhåndvisning" className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="flex-1">
@@ -182,7 +182,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                   className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Recommended: 300x450px, max 5MB (JPG, PNG, GIF, WebP)
+                  Anbefalt: 300x450px, maks 5MB (JPG, PNG, GIF, WebP)
                 </p>
               </div>
             </div>
@@ -192,7 +192,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Title <span className="text-red-500">*</span>
+                Tittel <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -201,13 +201,13 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                 value={formData.title}
                 onChange={handleChange}
                 className="input-field"
-                placeholder="Enter book title"
+                placeholder="Fyll inn boktittel"
               />
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Author <span className="text-red-500">*</span>
+                Forfatter <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -216,7 +216,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                 value={formData.author}
                 onChange={handleChange}
                 className="input-field"
-                placeholder="Enter author name"
+                placeholder="Fyll inn forfatter"
               />
             </div>
           </div>
@@ -224,7 +224,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description
+              Beskrivelse
             </label>
             <textarea
               name="description"
@@ -232,7 +232,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               onChange={handleChange}
               rows="5"
               className="input-field"
-              placeholder="Enter book description"
+              placeholder="Fyll inn beskrivelse"
             />
           </div>
 
@@ -254,7 +254,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Published Year
+                Utgivelsesår
               </label>
               <input
                 type="number"
@@ -270,7 +270,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Page Count
+                Antall sider
               </label>
               <input
                 type="number"
@@ -287,7 +287,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Publisher
+                Forlag
               </label>
               <input
                 type="text"
@@ -301,7 +301,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Language
+                Språk
               </label>
               <input
                 type="text"
@@ -317,7 +317,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           {/* Bokklubb Status */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              📅 Bokklubb Status (Month discussed in book club)
+              📅 Bokklubb status (måned vi leser boken)
             </label>
             <select
               name="bookclubMonth"
@@ -325,12 +325,12 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               onChange={handleChange}
               className="input-field"
             >
-              <option value="">Not a bookclub book</option>
+              <option value="">Ikke en bokklubb-bok</option>
               {(() => {
                 const options = [];
                 const currentYear = new Date().getFullYear();
-                const months = ['January', 'February', 'March', 'April', 'May', 'June',
-                               'July', 'August', 'September', 'October', 'November', 'December'];
+                const months = ['Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni',
+                               'Juli', 'August', 'September', 'Oktober', 'November', 'Desember'];
 
                 // Generate options for past 2 years and future 1 year
                 for (let year = currentYear - 2; year <= currentYear + 1; year++) {
@@ -344,30 +344,30 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               })()}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Select the month this book was/will be discussed in the book club, or leave blank
+              Velg måned/år denne boken ble/vil bli lest av bokklubben, eller la være tom
             </p>
           </div>
 
           {/* Genres */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Genres
+              Sjangere
             </label>
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
                 value={genreInput}
                 onChange={(e) => setGenreInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddGenre())}
+                onKeyPress={(e) => e.key === 'Legg til' && (e.preventDefault(), handleAddGenre())}
                 className="input-field flex-1"
-                placeholder="Add a genre and press Enter"
+                placeholder="Legg til en sjanger og trykk på legg til"
               />
               <button
                 type="button"
                 onClick={handleAddGenre}
                 className="btn-accent"
               >
-                Add
+                Legg til
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -396,7 +396,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Audiobook Link
+                  Lenke til lydbok
                 </label>
                 <input
                   type="url"
@@ -410,7 +410,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                  E-book Link
+                  Lenke til e-bok
                 </label>
                 <input
                   type="url"
@@ -444,7 +444,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Calibre Download Link
+                  Calibre nedlastingslenke
                 </label>
                 <input
                   type="url"
@@ -465,7 +465,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               disabled={loading}
               className="btn-primary flex-1 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (isEditing ? '⏳ Updating...' : '⏳ Creating...') : (isEditing ? '✏️ Update Book' : '✨ Create Book')}
+              {loading ? (isEditing ? '⏳ Oppdaterer...' : '⏳ Oppretter...') : (isEditing ? '✏️ Oppdater bok' : '✨ Opprett bok')}
             </button>
             <button
               type="button"
@@ -473,7 +473,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               className="px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-lg"
               style={{ background: 'linear-gradient(135deg, #9ca3af, #6b7280)', color: 'white' }}
             >
-              Cancel
+              Avbryt
             </button>
           </div>
         </form>

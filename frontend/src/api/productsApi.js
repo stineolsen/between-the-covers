@@ -33,7 +33,19 @@ export const productsApi = {
 
   // Submit contact form order
   submitContactOrder: async (orderData) => {
-    const response = await api.post('/api/shop/contact-order', orderData);
+    const response = await api.post('/api/products/shop/order', orderData);
+    return response.data;
+  },
+
+  // Get all orders (admin only)
+  getOrders: async (params = {}) => {
+    const response = await api.get('/api/products/orders', { params });
+    return response.data;
+  },
+
+  // Update order status (admin only)
+  updateOrderStatus: async (orderId, status, adminNotes) => {
+    const response = await api.put(`/api/products/orders/${orderId}/status`, { status, adminNotes });
     return response.data;
   },
 

@@ -47,14 +47,14 @@ const StarRating = ({ rating = 0, onRatingChange = null, readOnly = false, size 
             ${star <= displayRating ? 'text-yellow-400' : 'text-gray-300'}
             focus:outline-none
           `}
-          aria-label={`${star} star${star > 1 ? 's' : ''}`}
+          aria-label={`${star} stjerne${star > 1 ? 'r' : ''}`}
         >
           {star <= displayRating ? '★' : '☆'}
         </button>
       ))}
       {!readOnly && hoverRating > 0 && (
         <span className="ml-2 text-gray-600 font-medium animate-fadeIn">
-          {hoverRating} {hoverRating === 1 ? 'star' : 'stars'}
+          {hoverRating} {hoverRating === 1 ? 'stjerne' : 'stjerner'}
         </span>
       )}
     </div>

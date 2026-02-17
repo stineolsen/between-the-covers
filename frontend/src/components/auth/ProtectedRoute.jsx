@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <p className="mt-4 text-gray-600">Laster...</p>
         </div>
       </div>
     );
@@ -24,7 +24,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="card text-center max-w-md">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Access Denied</h2>
-          <p className="text-gray-600">You don't have permission to access this page.</p>
+          <p className="text-gray-600">Du har ikke rettigheter til denne siden.</p>
         </div>
       </div>
     );
@@ -35,11 +35,11 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="card text-center max-w-md">
-          <h2 className="text-2xl font-bold text-secondary mb-4">Account Pending</h2>
+          <h2 className="text-2xl font-bold text-secondary mb-4">Bruker til godkjenning</h2>
           <p className="text-gray-600 mb-4">
-            Your account is currently pending approval. You'll be able to access the bookclub once an admin approves your account.
+            Din bruker venter på godkjenning. Du kan bruke bokklubben sin nettside etter du har blitt godkjent av en admin. 
           </p>
-          <p className="text-sm text-gray-500">Please check back later!</p>
+          <p className="text-sm text-gray-500">Kom tilbake senere!</p>
         </div>
       </div>
     );

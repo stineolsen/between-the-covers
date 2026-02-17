@@ -30,12 +30,12 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
 
     // Validation
     if (formData.rating === 0) {
-      setError('Please select a rating');
+      setError('Vennligst velg en rating');
       return;
     }
 
     if (formData.content.trim().length < 10) {
-      setError('Review must be at least 10 characters');
+      setError('Anmeldelse må være minst 10 tegn');
       return;
     }
 
@@ -44,7 +44,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
     try {
       await onSubmit({ ...formData, bookId });
     } catch (err) {
-      setError(err.message || 'Failed to save review');
+      setError(err.message || 'Greide ikke lagre anmeldelse');
       setLoading(false);
     }
   };
@@ -61,7 +61,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       {/* Rating */}
       <div className="p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15))' }}>
         <label className="block text-lg font-bold text-gray-900 mb-3">
-          ⭐ Your Rating
+          ⭐ Din vurdering
         </label>
         <StarRating
           rating={formData.rating}
@@ -73,7 +73,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       {/* Review Title */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-2">
-          📝 Review Title (Optional)
+          📝 Anmeldelse tittel (valgfritt)
         </label>
         <input
           type="text"
@@ -89,7 +89,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       {/* Review Content */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-2">
-          💭 Your Review <span className="text-red-500">*</span>
+          💭 Din anmeldelse <span className="text-red-500">*</span>
         </label>
         <textarea
           name="content"
@@ -103,14 +103,14 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
           placeholder="Share your thoughts about this book... What did you love? What could have been better?"
         />
         <p className="text-xs text-gray-500 mt-1">
-          {formData.content.length}/5000 characters (min 10)
+          {formData.content.length}/5000 tegn (min 10)
         </p>
       </div>
 
       {/* Reading Date */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-2">
-          📅 Reading Date (Optional)
+          📅 Lesedato (valgfritt)
         </label>
         <input
           type="date"
@@ -134,7 +134,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
           style={{ accentColor: '#f5576c' }}
         />
         <label htmlFor="spoilers" className="ml-3 text-sm font-bold text-gray-700 cursor-pointer">
-          ⚠️ This review contains spoilers
+          ⚠️ Denne anmeldelsen inneholder spoilere
         </label>
       </div>
 
@@ -145,7 +145,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
           disabled={loading}
           className="btn-primary flex-1 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? '⏳ Saving...' : (initialData ? '✏️ Update Review' : '✨ Post Review')}
+          {loading ? '⏳ Lagrer...' : (initialData ? '✏️ Oppdater anmeldelse' : '✨ Post anmeldelse')}
         </button>
         {onCancel && (
           <button
@@ -154,7 +154,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
             className="px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-lg"
             style={{ background: 'linear-gradient(135deg, #9ca3af, #6b7280)', color: 'white' }}
           >
-            Cancel
+            Avbryt
           </button>
         )}
       </div>

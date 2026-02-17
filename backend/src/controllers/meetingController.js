@@ -279,6 +279,12 @@ exports.rsvpMeeting = async (req, res) => {
     if (isAttending) {
       // Remove RSVP
       await meeting.removeAttendee(req.user._id);
+      // Re-populate after save
+      await meeting.populate([
+        { path: 'book', select: 'title author coverImage' },
+        { path: 'createdBy', select: 'username displayName avatar' },
+        { path: 'attendees', select: 'username displayName avatar' }
+      ]);
       res.status(200).json({
         success: true,
         message: 'RSVP removed successfully',
@@ -288,6 +294,12 @@ exports.rsvpMeeting = async (req, res) => {
     } else {
       // Add RSVP
       await meeting.addAttendee(req.user._id);
+      // Re-populate after save
+      await meeting.populate([
+        { path: 'book', select: 'title author coverImage' },
+        { path: 'createdBy', select: 'username displayName avatar' },
+        { path: 'attendees', select: 'username displayName avatar' }
+      ]);
       res.status(200).json({
         success: true,
         message: 'RSVP confirmed successfully',

@@ -22,7 +22,11 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
   });
 
   // Check if user is attending
-  const isAttending = meeting.attendees?.some(attendee => attendee._id === user?._id);
+  const isAttending = meeting.attendees?.some(attendee => {
+    // Handle both populated user objects and ObjectId references
+    const attendeeId = attendee._id || attendee;
+    return attendeeId.toString() === user?._id?.toString();
+  });
   const attendeeCount = meeting.attendeeCount || meeting.attendees?.length || 0;
   const isFull = meeting.isFull || (meeting.maxAttendees > 0 && attendeeCount >= meeting.maxAttendees);
 
@@ -37,6 +41,20 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
         return 'linear-gradient(135deg, #6b7280, #4b5563)';
       default:
         return 'linear-gradient(135deg, #667eea, #764ba2)';
+    }
+  };
+
+  // Get status text in Norwegian
+  const getStatusText = () => {
+    switch (meeting.status) {
+      case 'upcoming':
+        return 'Kommende';
+      case 'past':
+        return 'Tidligere';
+      case 'cancelled':
+        return 'Avlyst';
+      default:
+        return 'Kommende';
     }
   };
 
@@ -61,7 +79,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
         className="absolute top-4 right-4 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg"
         style={{ background: getStatusGradient() }}
       >
-        {meeting.status.charAt(0).toUpperCase() + meeting.status.slice(1)}
+        {getStatusText()}
       </div>
 
       {/* Date Badge */}
@@ -104,7 +122,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
               />
             )}
             <div>
-              <p className="text-sm text-gray-600 font-semibold">📚 Discussing:</p>
+              <p className="text-sm text-gray-600 font-semibold">📚 Diskuterer:</p>
               <Link
                 to={`/books/${meeting.book._id}`}
                 className="font-bold text-lg gradient-text hover:underline"
@@ -123,12 +141,12 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
           <div className="flex items-center gap-2">
             <span className="text-xl">👥</span>
             <span className="text-gray-700 font-bold">
-              {attendeeCount} {attendeeCount === 1 ? 'person' : 'people'} attending
+              {attendeeCount} {attendeeCount === 1 ? 'medlem' : 'medlemmer'} påmeldt
             </span>
           </div>
           {meeting.maxAttendees > 0 && (
             <span className="text-gray-600 text-sm">
-              (Max: {meeting.maxAttendees})
+              (Maks: {meeting.maxAttendees})
             </span>
           )}
         </div>
@@ -136,26 +154,32 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
         {/* Attendee avatars */}
         {meeting.attendees && meeting.attendees.length > 0 && (
           <div className="flex -space-x-2">
-            {meeting.attendees.slice(0, 5).map((attendee, index) => (
+            {meeting.attendees.slice(0, 5).map((attendee, index) => {
+              // Handle case where attendee might be just an ObjectId or string
+              if (typeof attendee === 'string' || !attendee.username) return null;
+              const displayName = attendee?.displayName || attendee?.username || 'User';
+              const attendeeId = attendee._id || attendee.toString?.() || index;
+
+              return (
               <div
-                key={attendee._id}
+                key={`attendee-${attendeeId}-${index}`}
                 className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-lg flex items-center justify-center text-xl"
                 style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
-                title={attendee.displayName || attendee.username}
+                title={displayName}
               >
                 {attendee.avatar ? (
                   <img
                     src={`http://localhost:5000/uploads/avatars/${attendee.avatar}`}
-                    alt={attendee.displayName}
+                    alt={displayName}
                     className="w-full h-full rounded-full object-cover"
                   />
                 ) : (
                   <span className="text-white font-bold">
-                    {(attendee.displayName || attendee.username).charAt(0).toUpperCase()}
+                    {displayName.charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
-            ))}
+            )})}
             {attendeeCount > 5 && (
               <div
                 className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-lg flex items-center justify-center"
@@ -171,7 +195,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
       {/* Notes (for past meetings) */}
       {meeting.status === 'past' && meeting.notes && (
         <div className="mb-4 p-4 rounded-2xl" style={{ background: 'rgba(240, 147, 251, 0.1)' }}>
-          <h4 className="font-bold text-gray-900 mb-2">📝 Meeting Notes:</h4>
+          <h4 className="font-bold text-gray-900 mb-2">📝 Møtenotater:</h4>
           <p className="text-gray-700 whitespace-pre-line">{meeting.notes}</p>
         </div>
       )}
@@ -192,7 +216,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
                 : 'linear-gradient(135deg, #10b981, #14b8a6)'
             }}
           >
-            {isRSVPing ? 'Processing...' : isAttending ? '✓ Attending' : isFull ? 'Meeting Full' : '+ RSVP'}
+            {isRSVPing ? 'Behandler...' : isAttending ? '✓ Påmeldt' : isFull ? 'Møtet er fullt' : '+ Meld deg på'}
           </button>
         )}
 
@@ -204,14 +228,14 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
               className="flex-1 py-3 rounded-full font-bold text-white shadow-lg transition-all transform hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
             >
-              ✏️ Edit
+              ✏️ Rediger
             </button>
             <button
               onClick={() => onDelete(meeting._id)}
               className="flex-1 py-3 rounded-full font-bold text-white shadow-lg transition-all transform hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
             >
-              🗑️ Delete
+              🗑️ Slett
             </button>
           </>
         )}
@@ -220,7 +244,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
       {/* Created by */}
       {meeting.createdBy && (
         <div className="mt-4 text-sm text-gray-500 text-center">
-          Created by {meeting.createdBy.displayName || meeting.createdBy.username}
+          Opprettet av {meeting.createdBy.displayName || meeting.createdBy.username}
         </div>
       )}
     </div>

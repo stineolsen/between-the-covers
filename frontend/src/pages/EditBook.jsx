@@ -19,7 +19,7 @@ const EditBook = () => {
       const data = await booksApi.getBook(id);
       setBook(data.book);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load book');
+      setError(err.response?.data?.message || 'Greide ikke laste bok');
     } finally {
       setLoading(false);
     }
@@ -30,7 +30,7 @@ const EditBook = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading book data...</p>
+          <p className="text-gray-600">Laster inn bokdata...</p>
         </div>
       </div>
     );
@@ -43,7 +43,7 @@ const EditBook = () => {
           <div className="card bg-red-50 border border-red-200 text-center py-12">
             <p className="text-red-700 text-lg mb-4">{error || 'Book not found'}</p>
             <Link to="/books" className="btn-primary">
-              Back to Books
+              Tilbake til bøker
             </Link>
           </div>
         </div>
@@ -55,7 +55,7 @@ const EditBook = () => {
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4">
         <Link to={`/books/${id}`} className="inline-flex items-center text-gray-600 hover:text-primary mb-6">
-          <span className="mr-2">←</span> Back to Book
+          <span className="mr-2">←</span> Tilbake til bøker
         </Link>
 
         <BookForm bookId={id} initialData={book} />

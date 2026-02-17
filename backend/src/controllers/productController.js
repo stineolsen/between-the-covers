@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const Order = require('../models/Order');
 
 // @desc    Get all products (with optional filters)
 // @route   GET /api/products
@@ -69,8 +70,8 @@ exports.createProduct = async (req, res) => {
       name,
       description,
       price,
-      currency: currency || 'USD',
-      category: category || 'other',
+      currency: currency || 'NOK',
+      category: category || 'annet',
       stock: stock || 0,
       book: bookId || null,
       images: images || []
@@ -195,32 +196,160 @@ exports.submitContactOrder = async (req, res) => {
       });
     }
 
-    // In a real application, you would:
-    // 1. Send email notification to admin
-    // 2. Store order in database
-    // 3. Send confirmation email to customer
+    // Validate and process items
+    const orderItems = [];
+    let totalAmount = 0;
 
-    // For now, just log the order and send success response
-    console.log('New order received:', {
-      user: req.user.email,
-      name,
-      email,
-      phone,
-      items,
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: `Product not found: ${item.productId}`
+        });
+      }
+
+      if (!product.isAvailable) {
+        return res.status(400).json({
+          success: false,
+          message: `Product "${product.name}" is not available`
+        });
+      }
+
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient stock for "${product.name}". Only ${product.stock} available.`
+        });
+      }
+
+      // Calculate item total
+      const itemTotal = product.price * item.quantity;
+      totalAmount += itemTotal;
+
+      // Add to order items
+      orderItems.push({
+        product: product._id,
+        productName: product.name,
+        quantity: item.quantity,
+        price: product.price,
+        currency: product.currency
+      });
+
+      // Reduce stock
+      product.stock -= item.quantity;
+      await product.save();
+    }
+
+    // Create order
+    const order = await Order.create({
+      user: req.user._id,
+      customerName: name,
+      customerEmail: email,
+      customerPhone: phone,
+      items: orderItems,
+      totalAmount,
       deliveryAddress,
       notes,
-      timestamp: new Date()
+      status: 'pending'
     });
 
-    res.status(200).json({
+    console.log('New order created:', {
+      orderId: order._id,
+      user: req.user.email,
+      name,
+      totalAmount,
+      itemCount: items.length
+    });
+
+    res.status(201).json({
       success: true,
-      message: 'Order received! We will contact you shortly via email to arrange payment and delivery.'
+      message: 'Order received! We will contact you shortly via email to arrange payment and delivery.',
+      order: {
+        _id: order._id,
+        status: order.status,
+        totalAmount: order.totalAmount,
+        createdAt: order.createdAt
+      }
     });
   } catch (error) {
     console.error('Submit contact order error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to submit order'
+    });
+  }
+};
+
+// @desc    Get all orders (admin only)
+// @route   GET /api/orders
+// @access  Private (Admin)
+exports.getOrders = async (req, res) => {
+  try {
+    const { status } = req.query;
+
+    let query = {};
+    if (status) {
+      query.status = status;
+    }
+
+    const orders = await Order.find(query).sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: orders.length,
+      orders
+    });
+  } catch (error) {
+    console.error('Get orders error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch orders'
+    });
+  }
+};
+
+// @desc    Update order status (admin only)
+// @route   PUT /api/orders/:id/status
+// @access  Private (Admin)
+exports.updateOrderStatus = async (req, res) => {
+  try {
+    const { status, adminNotes } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status is required'
+      });
+    }
+
+    const order = await Order.findById(req.params.id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    order.status = status;
+    if (adminNotes !== undefined) {
+      order.adminNotes = adminNotes;
+    }
+
+    await order.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Order status updated successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Update order status error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update order status'
     });
   }
 };

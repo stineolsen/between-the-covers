@@ -19,32 +19,33 @@ const Footer = () => {
                 📚 Between The Covers
               </h3>
               <p className="text-white/90 leading-relaxed">
-                A vibrant community of book lovers sharing reviews, discussing literature, and connecting over our passion for reading.
+                En bokklubb for en gjeng som deler en glede og kjærlighet for bøker. Vi diskuterer bøker vi elser, hater og alt mellom. 
+                Det finnes en bok for alle, og vi elsker å diskutere de. 
               </p>
             </div>
 
             {/* Quick Links */}
             <div>
-              <h3 className="text-white font-bold text-xl mb-4">Quick Links</h3>
+              <h3 className="text-white font-bold text-xl mb-4">Lenker</h3>
               <ul className="space-y-2">
                 <li>
                   <Link to="/books" className="text-white/90 hover:text-white transition-colors font-medium">
-                    📖 Browse Books
+                    📖 Utforsk bøker
                   </Link>
                 </li>
                 <li>
                   <Link to="/meetings" className="text-white/90 hover:text-white transition-colors font-medium">
-                    🗓️ Meetings
+                    🗓️ Møter
                   </Link>
                 </li>
                 <li>
                   <Link to="/shop" className="text-white/90 hover:text-white transition-colors font-medium">
-                    🛍️ Shop
+                    🛍️ Butikken
                   </Link>
                 </li>
                 <li>
                   <Link to="/history" className="text-white/90 hover:text-white transition-colors font-medium">
-                    📊 Reading History
+                    📊 Din lesehistorie
                   </Link>
                 </li>
               </ul>
@@ -52,9 +53,9 @@ const Footer = () => {
 
             {/* Community */}
             <div>
-              <h3 className="text-white font-bold text-xl mb-4">Community</h3>
+              <h3 className="text-white font-bold text-xl mb-4">Fellesskap</h3>
               <p className="text-white/90 mb-3 leading-relaxed">
-                Join our book club to share your thoughts, discover new reads, and connect with fellow bibliophiles!
+                Bli med i bokklubben for å dele dine tanker, utforske nye bøker og hold deg oppdatert på hva som skjer i bokklubben
               </p>
               <div className="flex gap-3">
                 <div
@@ -85,7 +86,7 @@ const Footer = () => {
             style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
           >
             <p className="text-white/90 font-medium">
-              © {currentYear} Between The Covers. Made with ❤️ for book lovers.
+              © {currentYear} Between The Covers. Lager med ❤️ for bokklubben.
             </p>
           </div>
         </div>

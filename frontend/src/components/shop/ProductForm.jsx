@@ -9,8 +9,8 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
     name: '',
     description: '',
     price: '',
-    currency: 'USD',
-    category: 'other',
+    currency: 'NOK',
+    category: 'annet',
     stock: '',
     isAvailable: true,
     bookId: ''
@@ -28,8 +28,8 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         name: product.name || '',
         description: product.description || '',
         price: product.price || '',
-        currency: product.currency || 'USD',
-        category: product.category || 'other',
+        currency: product.currency || 'NOK',
+        category: product.category || 'annet',
         stock: product.stock || '',
         isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
         bookId: product.book?._id || ''
@@ -42,7 +42,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
       const data = await booksApi.getBooks();
       setBooks(data.books || []);
     } catch (err) {
-      console.error('Failed to fetch books:', err);
+      console.error('Greide ikke hente bøker:', err);
     }
   };
 
@@ -79,8 +79,8 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} product`);
-      console.error('Error saving product:', err);
+      setError(err.response?.data?.message || `Greide ikke ${isEditing ? 'oppdatere' : 'opprette'} vare`);
+      console.error('Greide ikke lagre vare:', err);
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
   return (
     <div className="container-gradient animate-fadeIn">
       <h2 className="text-3xl font-bold gradient-text mb-6">
-        {isEditing ? '✏️ Edit Product' : '✨ Add New Product'}
+        {isEditing ? '✏️ Rediger vare' : '✨ Legg til ny vare'}
       </h2>
 
       {error && (
@@ -102,7 +102,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         {/* Product Name */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Product Name <span className="text-red-500">*</span>
+            Varenavn <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -111,14 +111,14 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             value={formData.name}
             onChange={handleChange}
             className="input-field"
-            placeholder="Enter product name"
+            placeholder="Skriv inn varenavn"
           />
         </div>
 
         {/* Description */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Description
+            Beskrivelse
           </label>
           <textarea
             name="description"
@@ -126,7 +126,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             onChange={handleChange}
             rows="4"
             className="input-field"
-            placeholder="Enter product description"
+            placeholder="Skriv inn varebeskrivelse"
           />
         </div>
 
@@ -134,7 +134,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Price <span className="text-red-500">*</span>
+              Pris <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -151,7 +151,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Currency
+              Valutta
             </label>
             <select
               name="currency"
@@ -159,6 +159,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
               onChange={handleChange}
               className="input-field"
             >
+              <option value="NOK">NOK (kr)</option>
               <option value="USD">USD ($)</option>
               <option value="EUR">EUR (€)</option>
               <option value="GBP">GBP (£)</option>
@@ -170,7 +171,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Category
+              Kategori
             </label>
             <select
               name="category"
@@ -178,16 +179,16 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
               onChange={handleChange}
               className="input-field"
             >
-              <option value="book">Book</option>
-              <option value="merchandise">Merchandise</option>
-              <option value="accessory">Accessory</option>
-              <option value="other">Other</option>
+              <option value="book">Bokrelatert</option>
+              <option value="merchandise">Merch</option>
+              <option value="accessory">Tilbehør</option>
+              <option value="other">Annet</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Stock Quantity
+              Antall på lager
             </label>
             <input
               type="number"
@@ -204,7 +205,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         {/* Related Book (Optional) */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            📚 Related Book (Optional)
+            📚 Relatert til bok (valgritt)
           </label>
           <select
             name="bookId"
@@ -212,7 +213,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             onChange={handleChange}
             className="input-field"
           >
-            <option value="">None - Not related to a book</option>
+            <option value="">Ikke relatert til noe bok</option>
             {books.map((book) => (
               <option key={book._id} value={book._id}>
                 {book.title} by {book.author}
@@ -220,7 +221,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Link this product to a book if it's related (e.g., physical copy of a book in the library)
+            Link varer til en bok dersom de henger sammen (e.g., merch til en bok i bibiloteket)
           </p>
         </div>
 
@@ -235,7 +236,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             className="w-5 h-5 rounded cursor-pointer"
           />
           <label htmlFor="isAvailable" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
-            ✅ Product is available for purchase
+            ✅ Vare er tilgjengelig for kjøp
           </label>
         </div>
 
@@ -246,7 +247,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             disabled={loading}
             className="btn-primary flex-1 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? (isEditing ? '⏳ Updating...' : '⏳ Creating...') : (isEditing ? '✏️ Update Product' : '✨ Create Product')}
+            {loading ? (isEditing ? '⏳ Oppdatere...' : '⏳ Oppretter...') : (isEditing ? '✏️ Oppdater vare' : '✨ Opprett vare')}
           </button>
           <button
             type="button"
@@ -254,7 +255,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             className="px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-lg"
             style={{ background: 'linear-gradient(135deg, #9ca3af, #6b7280)', color: 'white' }}
           >
-            Cancel
+            Avbryt
           </button>
         </div>
       </form>

@@ -17,14 +17,14 @@ const ReadingHistory = () => {
     try {
       setLoading(true);
       // Fetch books with status='read'
-      const booksData = await userBooksApi.getUserBooks({ status: 'read' });
+      const booksData = await userBooksApi.getUserBooks({ status: 'Lest' });
       setReadBooks(booksData.userBooks || []);
 
       // Fetch reading statistics
       const statsData = await userBooksApi.getReadingStats();
       setStats(statsData.stats || {});
     } catch (error) {
-      console.error('Failed to fetch reading data:', error);
+      console.error('Greide ikke hente lesedata:', error);
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const ReadingHistory = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <div className="animate-spin rounded-full h-20 w-20 mx-auto mb-4" style={{ border: '4px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
-          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Loading reading history...</p>
+          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Laster lesehistorikk...</p>
         </div>
       </div>
     );
@@ -80,9 +80,9 @@ const ReadingHistory = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8 animate-fadeIn">
-          <h1 className="text-6xl font-bold gradient-text mb-4">📚 My Reading History</h1>
+          <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">📚 Min lesehistorikk</h1>
           <p className="text-xl text-white font-medium max-w-2xl mx-auto">
-            Track your literary journey and celebrate every book you've conquered!
+            Her kan du holde styr på bøker du har lest, både i bokklubben og ellers. 
           </p>
         </div>
 
@@ -95,7 +95,7 @@ const ReadingHistory = () => {
             >
               <div className="text-5xl mb-2">✅</div>
               <div className="text-4xl font-bold mb-1">{stats.read || 0}</div>
-              <div className="text-lg font-medium">Books Read</div>
+              <div className="text-lg font-medium">Bøker lest</div>
             </div>
 
             <div
@@ -104,7 +104,7 @@ const ReadingHistory = () => {
             >
               <div className="text-5xl mb-2">📖</div>
               <div className="text-4xl font-bold mb-1">{stats['currently-reading'] || 0}</div>
-              <div className="text-lg font-medium">Currently Reading</div>
+              <div className="text-lg font-medium">Leser for øyeblikket</div>
             </div>
 
             <div
@@ -113,7 +113,7 @@ const ReadingHistory = () => {
             >
               <div className="text-5xl mb-2">📚</div>
               <div className="text-4xl font-bold mb-1">{stats['to-read'] || 0}</div>
-              <div className="text-lg font-medium">Want to Read</div>
+              <div className="text-lg font-medium">TBR</div>
             </div>
           </div>
         )}
@@ -127,7 +127,7 @@ const ReadingHistory = () => {
             }`}
             style={filter === 'all' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
           >
-            All Time
+            All tid
           </button>
           <button
             onClick={() => setFilter('this-year')}
@@ -156,12 +156,12 @@ const ReadingHistory = () => {
             style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}
           >
             <div className="text-6xl mb-4">📚</div>
-            <h2 className="text-3xl font-bold gradient-text mb-3">No Books Read Yet</h2>
+            <h2 className="text-3xl font-bold gradient-text mb-3">Ingen bøker lest enda</h2>
             <p className="text-gray-600 text-lg mb-6">
-              Start your reading journey today! Mark books as read to see them here.
+              Begynn din leseferd i dag! Marker bøker som lest for å se dem her.
             </p>
             <Link to="/books" className="btn-primary inline-block">
-              Browse Books
+              Sjekk ut bøkene
             </Link>
           </div>
         ) : (
@@ -223,7 +223,7 @@ const ReadingHistory = () => {
                         {userBook.finishedAt && (
                           <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                             <span>📅</span>
-                            <span>Finished {new Date(userBook.finishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
+                            <span>Fullført {new Date(userBook.finishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
                           </div>
                         )}
 
@@ -261,10 +261,10 @@ const ReadingHistory = () => {
             className="mt-12 p-8 rounded-2xl text-center animate-fadeIn"
             style={{ background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))' }}
           >
-            <h3 className="text-2xl font-bold gradient-text mb-3">🎉 Keep Reading!</h3>
+            <h3 className="text-2xl font-bold gradient-text mb-3">🎉 Fortsett lesing!</h3>
             <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed text-lg">
-              You've read {readBooks.length} {readBooks.length === 1 ? 'book' : 'books'}! Every book is a new adventure.
-              Keep up the great work and continue expanding your literary horizons!
+              Du har lest {readBooks.length} {readBooks.length === 1 ? 'book' : 'books'}! Hver bok er et nytt eventyr!
+              Fortsett det gode arbeidet og fortsett å utforske nye bøker og sjangere! 
             </p>
           </div>
         )}

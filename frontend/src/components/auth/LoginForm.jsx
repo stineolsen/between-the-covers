@@ -40,8 +40,8 @@ const LoginForm = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full container-gradient animate-fadeIn">
         <div className="text-center mb-8">
-          <h2 className="text-5xl font-bold gradient-text mb-3">✨ Welcome Back!</h2>
-          <p className="mt-2 text-gray-600 text-lg font-medium">Sign in to your bookclub account</p>
+          <h2 className="text-5xl font-bold gradient-text mb-3">✨ Velkommen tilbake!</h2>
+          <p className="mt-2 text-gray-600 text-lg font-medium">Logg inn på bokklubb-kontoen din</p>
         </div>
 
         {error && (
@@ -53,7 +53,7 @@ const LoginForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
-              📧 Email Address
+              📧 E-postadresse
             </label>
             <input
               id="email"
@@ -63,13 +63,13 @@ const LoginForm = () => {
               value={formData.email}
               onChange={handleChange}
               className="input-field"
-              placeholder="you@example.com"
+              placeholder="deg@eksempel.com"
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">
-              🔒 Password
+              🔒 Passord
             </label>
             <input
               id="password"
@@ -88,15 +88,15 @@ const LoginForm = () => {
             disabled={loading}
             className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? '⏳ Signing in...' : '🚀 Sign In'}
+            {loading ? '⏳ Logger inn...' : '🚀 Logg inn'}
           </button>
         </form>
 
         <div className="mt-8 text-center p-4 rounded-2xl" style={{ background: 'rgba(102, 126, 234, 0.1)' }}>
           <p className="text-gray-700 font-medium">
-            Don't have an account?{' '}
+            Har du ikke en konto?{' '}
             <Link to="/register" className="font-bold hover:underline" style={{ color: '#f5576c' }}>
-              Register here ✨
+              Registrer deg her ✨
             </Link>
           </p>
         </div>

@@ -20,7 +20,7 @@ export const CartProvider = ({ children }) => {
       try {
         setCart(JSON.parse(savedCart));
       } catch (error) {
-        console.error('Failed to load cart from localStorage:', error);
+        console.error('Greide ikke laste inn handlekurv fra localStorage:', error);
       }
     }
   }, []);

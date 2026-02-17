@@ -4,30 +4,30 @@ const productSchema = new mongoose.Schema({
   // Product name
   name: {
     type: String,
-    required: [true, 'Product name is required'],
+    required: [true, 'Produktnavn er obligatorisk'],
     trim: true,
-    maxlength: [200, 'Product name cannot exceed 200 characters']
+    maxlength: [200, 'Produktnavn kan ikke være mer enn 200 tegn']
   },
 
   // Description
   description: {
     type: String,
     trim: true,
-    maxlength: [2000, 'Description cannot exceed 2000 characters']
+    maxlength: [2000, 'Beskrivelse kan ikke være lengre enn 2000 tegn']
   },
 
   // Price
   price: {
     type: Number,
-    required: [true, 'Price is required'],
-    min: [0, 'Price cannot be negative']
+    required: [true, 'Pris er obligatorisk'],
+    min: [0, 'Pris kan ikke være negativ']
   },
 
   // Currency
   currency: {
     type: String,
-    default: 'USD',
-    enum: ['USD', 'EUR', 'GBP']
+    default: 'NOK',
+    enum: ['NOK', 'EUR', 'GBP', 'USD']
   },
 
   // Product images (local file paths)
@@ -48,7 +48,7 @@ const productSchema = new mongoose.Schema({
   stock: {
     type: Number,
     default: 0,
-    min: [0, 'Stock cannot be negative']
+    min: [0, 'Antall tilgjengelige kan ikke være negativt']
   },
 
   // Availability status

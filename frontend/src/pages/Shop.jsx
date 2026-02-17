@@ -32,7 +32,7 @@ const Shop = () => {
       const data = await productsApi.getProducts({ available: 'true' });
       setProducts(data.products || []);
     } catch (error) {
-      console.error('Failed to fetch products:', error);
+      console.error('Greide ikke hente varer:', error);
     } finally {
       setLoading(false);
     }
@@ -40,14 +40,14 @@ const Shop = () => {
 
   const handleAddToCart = (product) => {
     addToCart(product, 1);
-    toast.success(`${product.name} added to cart!`);
+    toast.success(`${product.name} lagt til i handlekurven!`);
   };
 
   const handleCheckout = async (e) => {
     e.preventDefault();
 
     if (cart.length === 0) {
-      toast.warning('Your cart is empty!');
+      toast.warning('Din handlekurv er tom');
       return;
     }
 
@@ -74,9 +74,9 @@ const Shop = () => {
       setShowCheckout(false);
       setShowCart(false);
 
-      toast.success('Order submitted successfully! We will contact you shortly.');
+      toast.success('Besilling sendt med suksess! Du vil bli kontaktet fortløpende.');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to submit order');
+      toast.error(error.response?.data?.message || 'Greide ikke sende bestilling');
     } finally {
       setSubmitting(false);
     }
@@ -87,7 +87,7 @@ const Shop = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <div className="animate-spin rounded-full h-20 w-20 mx-auto mb-4" style={{ border: '4px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
-          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Loading products...</p>
+          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Laster inn varer...</p>
         </div>
       </div>
     );
@@ -99,8 +99,8 @@ const Shop = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
-            <h1 className="text-6xl font-bold gradient-text mb-2">🛍️ Bookclub Shop</h1>
-            <p className="text-xl text-white font-medium">Books, merchandise, and more!</p>
+            <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">🛍️ BTC butikken</h1>
+            <p className="text-xl text-white font-medium">Bøker, merch og mer!</p>
           </div>
 
           {/* Cart Button */}
@@ -109,7 +109,7 @@ const Shop = () => {
             className="relative px-6 py-4 rounded-full font-bold text-white shadow-lg transition-all transform hover:scale-105"
             style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
           >
-            🛒 Cart ({getTotalItems()})
+            🛒 Handlekurv ({getTotalItems()})
             {getTotalItems() > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold">
                 {getTotalItems()}
@@ -123,7 +123,7 @@ const Shop = () => {
           <div className="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 overflow-y-auto animate-fadeIn">
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold gradient-text">Your Cart</h2>
+                <h2 className="text-2xl font-bold gradient-text">Din handlekurv</h2>
                 <button
                   onClick={() => setShowCart(false)}
                   className="text-3xl text-gray-600 hover:text-gray-900"
@@ -135,7 +135,7 @@ const Shop = () => {
               {cart.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🛒</div>
-                  <p className="text-gray-600">Your cart is empty</p>
+                  <p className="text-gray-600">Din handlekurv er tom</p>
                 </div>
               ) : (
                 <>
@@ -181,7 +181,7 @@ const Shop = () => {
                       className="w-full py-4 rounded-full font-bold text-white shadow-lg"
                       style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
                     >
-                      Proceed to Checkout
+                      Fortsett til utsjekk
                     </button>
                   </div>
                 </>
@@ -195,7 +195,7 @@ const Shop = () => {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 animate-fadeIn">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold gradient-text">Checkout</h2>
+                <h2 className="text-3xl font-bold gradient-text">Utsjekk</h2>
                 <button
                   onClick={() => setShowCheckout(false)}
                   className="text-3xl text-gray-600 hover:text-gray-900"
@@ -206,7 +206,7 @@ const Shop = () => {
 
               <form onSubmit={handleCheckout} className="space-y-6">
                 <div>
-                  <label className="block text-gray-700 font-bold mb-2">Name *</label>
+                  <label className="block text-gray-700 font-bold mb-2">Navn *</label>
                   <input
                     type="text"
                     required
@@ -217,7 +217,7 @@ const Shop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-bold mb-2">Email *</label>
+                  <label className="block text-gray-700 font-bold mb-2">Epost *</label>
                   <input
                     type="email"
                     required
@@ -228,7 +228,7 @@ const Shop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-bold mb-2">Phone</label>
+                  <label className="block text-gray-700 font-bold mb-2">Telefon</label>
                   <input
                     type="tel"
                     value={checkoutForm.phone}
@@ -238,7 +238,7 @@ const Shop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-bold mb-2">Delivery Address</label>
+                  <label className="block text-gray-700 font-bold mb-2">Leveringsmåte</label>
                   <textarea
                     value={checkoutForm.deliveryAddress}
                     onChange={(e) => setCheckoutForm({ ...checkoutForm, deliveryAddress: e.target.value })}
@@ -248,7 +248,7 @@ const Shop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 font-bold mb-2">Notes</label>
+                  <label className="block text-gray-700 font-bold mb-2">Notater</label>
                   <textarea
                     value={checkoutForm.notes}
                     onChange={(e) => setCheckoutForm({ ...checkoutForm, notes: e.target.value })}
@@ -259,7 +259,7 @@ const Shop = () => {
                 </div>
 
                 <div className="border-t pt-4">
-                  <h3 className="font-bold text-lg mb-4">Order Summary</h3>
+                  <h3 className="font-bold text-lg mb-4">Bestilling oppsummering</h3>
                   {cart.map(item => (
                     <div key={item.product._id} className="flex justify-between mb-2">
                       <span>{item.product.name} × {item.quantity}</span>
@@ -267,7 +267,7 @@ const Shop = () => {
                     </div>
                   ))}
                   <div className="border-t pt-2 mt-2 flex justify-between text-xl font-bold">
-                    <span>Total:</span>
+                    <span>Totalt:</span>
                     <span className="gradient-text">${getTotalPrice().toFixed(2)}</span>
                   </div>
                 </div>
@@ -282,7 +282,7 @@ const Shop = () => {
                 </button>
 
                 <p className="text-sm text-gray-600 text-center">
-                  We'll contact you via email to arrange payment and delivery.
+                  Du vil bli kontaktet ang din bestilling (betaling og levering).
                 </p>
               </form>
             </div>
@@ -296,8 +296,8 @@ const Shop = () => {
             style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}
           >
             <div className="text-6xl mb-4">🛍️</div>
-            <h2 className="text-3xl font-bold gradient-text mb-3">No Products Available</h2>
-            <p className="text-gray-600 text-lg">Check back later for new items!</p>
+            <h2 className="text-3xl font-bold gradient-text mb-3">Ingen varer tilgjendelig</h2>
+            <p className="text-gray-600 text-lg">Kom tilbake senere for nye varer!</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -321,9 +321,9 @@ const Shop = () => {
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-2xl font-bold gradient-text">${product.price.toFixed(2)}</span>
                   {product.inStock ? (
-                    <span className="text-green-600 text-sm font-bold">✓ In Stock</span>
+                    <span className="text-green-600 text-sm font-bold">✓ På lager</span>
                   ) : (
-                    <span className="text-red-600 text-sm font-bold">Out of Stock</span>
+                    <span className="text-red-600 text-sm font-bold">Ikke på lager</span>
                   )}
                 </div>
 
@@ -334,7 +334,7 @@ const Shop = () => {
                   className="w-full py-3 rounded-full font-bold text-white shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
                 >
-                  {product.inStock ? '🛒 Add to Cart' : 'Out of Stock'}
+                  {product.inStock ? '🛒 Legg til i handlekurven' : 'Ikke tilgjengelig for øyeblikket'}
                 </button>
               </div>
             ))}

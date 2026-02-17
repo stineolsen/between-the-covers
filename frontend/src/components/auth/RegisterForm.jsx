@@ -31,13 +31,13 @@ const RegisterForm = () => {
 
     // Validate password match
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Passordene stemmer ikke overens');
       return;
     }
 
     // Validate password length
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('Passordet må være minst 6 tegn');
       return;
     }
 
@@ -63,8 +63,8 @@ const RegisterForm = () => {
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full container-gradient animate-fadeIn">
         <div className="text-center mb-8">
-          <h2 className="text-5xl font-bold gradient-text mb-3">✨ Join Our Bookclub</h2>
-          <p className="mt-2 text-gray-600 text-lg font-medium">Create your account (pending approval)</p>
+          <h2 className="text-5xl font-bold gradient-text mb-3">✨ Bli med i bokklubben vår</h2>
+          <p className="mt-2 text-gray-600 text-lg font-medium">Opprett konto (venter på godkjenning)</p>
         </div>
 
         {error && (
@@ -82,7 +82,7 @@ const RegisterForm = () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="username" className="block text-sm font-bold text-gray-700 mb-2">
-              👤 Username
+              👤 Brukernavn
             </label>
             <input
               id="username"
@@ -92,13 +92,13 @@ const RegisterForm = () => {
               value={formData.username}
               onChange={handleChange}
               className="input-field"
-              placeholder="bookworm123"
+              placeholder="bokormen123"
             />
           </div>
 
           <div>
             <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
-              📧 Email Address
+              📧 E-postadresse
             </label>
             <input
               id="email"
@@ -108,13 +108,13 @@ const RegisterForm = () => {
               value={formData.email}
               onChange={handleChange}
               className="input-field"
-              placeholder="you@example.com"
+              placeholder="deg@eksempel.com"
             />
           </div>
 
           <div>
             <label htmlFor="displayName" className="block text-sm font-bold text-gray-700 mb-2">
-              ✨ Display Name (Optional)
+              ✨ Visningsnavn (valgfritt)
             </label>
             <input
               id="displayName"
@@ -123,13 +123,13 @@ const RegisterForm = () => {
               value={formData.displayName}
               onChange={handleChange}
               className="input-field"
-              placeholder="Jane Doe"
+              placeholder="Ola Nordmann"
             />
           </div>
 
           <div>
             <label htmlFor="password" className="block text-sm font-bold text-gray-700 mb-2">
-              🔒 Password
+              🔒 Passord
             </label>
             <input
               id="password"
@@ -145,7 +145,7 @@ const RegisterForm = () => {
 
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-bold text-gray-700 mb-2">
-              🔐 Confirm Password
+              🔒 Bekreft passord
             </label>
             <input
               id="confirmPassword"
@@ -164,15 +164,15 @@ const RegisterForm = () => {
             disabled={loading}
             className="w-full btn-primary py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? '⏳ Creating Account...' : '🚀 Register'}
+            {loading ? '⏳ Oppretter konto...' : '🚀 Registrer'}
           </button>
         </form>
 
         <div className="mt-8 text-center p-4 rounded-2xl" style={{ background: 'rgba(102, 126, 234, 0.1)' }}>
           <p className="text-gray-700 font-medium">
-            Already have an account?{' '}
+            Har du allerede en konto?{' '}
             <Link to="/login" className="font-bold hover:underline" style={{ color: '#f5576c' }}>
-              Sign in here ✨
+              Logg inn her ✨
             </Link>
           </p>
         </div>

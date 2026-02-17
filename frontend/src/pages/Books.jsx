@@ -73,16 +73,16 @@ const Books = () => {
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
             <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">
-              ✨ Book Collection
+              ✨ Boksamling
             </h1>
             <p className="text-white/90 text-lg font-medium">
-              📚 {books.length} {books.length === 1 ? 'book' : 'books'} in our collection
+              📚 {books.length} {books.length === 1 ? 'bok' : 'bøker'} i vår samling
             </p>
           </div>
 
           {isAdmin && (
             <Link to="/books/new" className="btn-accent">
-              ✨ Add New Book
+              ✨ Legg til ny bok
             </Link>
           )}
         </div>
@@ -93,7 +93,7 @@ const Books = () => {
             {/* Search */}
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                🔍 Search Books
+                🔍 Søk etter bøker
               </label>
               <input
                 type="text"
@@ -114,31 +114,31 @@ const Books = () => {
                 className="w-5 h-5 rounded cursor-pointer"
               />
               <label htmlFor="bookclubOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
-                📅 Bokklubb Books Only
+                📅 Bare bokklubb bøker
               </label>
             </div>
 
             {/* Sort */}
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                🔄 Sort By
+                🔄 Sorter etter
               </label>
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 className="input-field"
               >
-                <option value="newest">Newest First</option>
-                <option value="title">Title A-Z</option>
-                <option value="author">Author A-Z</option>
-                <option value="rating">Highest Rated</option>
+                <option value="newest">Nyeste først</option>
+                <option value="title">Tittel A-Z</option>
+                <option value="author">Forfatter A-Z</option>
+                <option value="rating">Høyest rated</option>
               </select>
             </div>
 
             {/* Genre Filter */}
             <div className="md:col-span-3">
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                🎨 Genre
+                🎨 Sjanger
               </label>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -150,7 +150,7 @@ const Books = () => {
                   }`}
                   style={genre === '' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
                 >
-                  All Genres
+                  Alle sjangere
                 </button>
                 {availableGenres.map((g) => (
                   <button
@@ -176,7 +176,7 @@ const Books = () => {
                 className="text-sm font-bold px-4 py-2 rounded-full bg-white hover:shadow-md transition-all transform hover:scale-105"
                 style={{ color: '#f5576c' }}
               >
-                ✖️ Clear All
+                ✖️ Fjern alt filtrering
               </button>
             </div>
           </div>

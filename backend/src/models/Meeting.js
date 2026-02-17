@@ -94,7 +94,11 @@ meetingSchema.virtual('isFull').get(function() {
 
 // Method to check if user is attending
 meetingSchema.methods.isUserAttending = function(userId) {
-  return this.attendees.some(attendee => attendee.toString() === userId.toString());
+  return this.attendees.some(attendee => {
+    // Handle both populated user objects and ObjectId references
+    const attendeeId = attendee._id || attendee;
+    return attendeeId.toString() === userId.toString();
+  });
 };
 
 // Method to add attendee
@@ -117,14 +121,16 @@ meetingSchema.methods.removeAttendee = async function(userId) {
     throw new Error('You are not registered for this meeting');
   }
 
-  this.attendees = this.attendees.filter(
-    attendee => attendee.toString() !== userId.toString()
-  );
+  this.attendees = this.attendees.filter(attendee => {
+    // Handle both populated user objects and ObjectId references
+    const attendeeId = attendee._id || attendee;
+    return attendeeId.toString() !== userId.toString();
+  });
   return this.save();
 };
 
 // Automatically update status based on date
-meetingSchema.pre('save', function(next) {
+meetingSchema.pre('save', function() {
   const now = new Date();
   const meetingDate = new Date(this.date);
 
@@ -132,8 +138,6 @@ meetingSchema.pre('save', function(next) {
   if (meetingDate < now && this.status === 'upcoming') {
     this.status = 'past';
   }
-
-  next();
 });
 
 // Populate book and creator details when querying

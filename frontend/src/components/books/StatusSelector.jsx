@@ -11,24 +11,24 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
   const statuses = [
     {
       value: 'to-read',
-      label: '📚 Want to Read',
+      label: '📚 Ønsker å lese',
       icon: '📚',
       gradient: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-      description: 'Add to your reading list'
+      description: 'Legg til på din leseliste'
     },
     {
       value: 'currently-reading',
-      label: '📖 Currently Reading',
+      label: '📖 Leser nå',
       icon: '📖',
       gradient: 'linear-gradient(135deg, #f093fb, #f5576c)',
-      description: 'You\'re reading this now'
+      description: 'Du leser denne nå'
     },
     {
       value: 'read',
-      label: '✅ Read',
+      label: '✅ Lest',
       icon: '✅',
       gradient: 'linear-gradient(135deg, #10b981, #14b8a6)',
-      description: 'You\'ve finished this book'
+      description: 'Du har fullført denne boka'
     }
   ];
 
@@ -43,14 +43,14 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
       } catch (error) {
         // Revert to previous status if save failed
         setSelectedStatus(currentStatus);
-        console.error('Failed to save status:', error);
+        console.error('Greide ikke lagre status:', error);
       }
     }
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-bold text-gray-900">📚 Your Reading Status</h3>
+      <h3 className="text-lg font-bold text-gray-900">📚 Din lesestatus</h3>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {statuses.map((status) => {
@@ -104,9 +104,9 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
       {selectedStatus && (
         <div className="p-4 rounded-2xl text-center animate-fadeIn" style={{ background: 'rgba(102, 126, 234, 0.1)' }}>
           <p className="text-sm font-bold text-gray-700">
-            {selectedStatus === 'to-read' && '📚 Added to your Want to Read list'}
-            {selectedStatus === 'currently-reading' && '📖 You\'re currently reading this book'}
-            {selectedStatus === 'read' && '✅ Marked as Read'}
+            {selectedStatus === 'to-read' && '📚 Lagt til på din TBR-liste'}
+            {selectedStatus === 'currently-reading' && '📖 Du leser denne boken for øyeblikket'}
+            {selectedStatus === 'read' && '✅ Markert som lest'}
           </p>
         </div>
       )}

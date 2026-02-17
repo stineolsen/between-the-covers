@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { meetingsApi } from '../api/meetingsApi';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import MeetingCard from '../components/meetings/MeetingCard';
+import MeetingForm from '../components/meetings/MeetingForm';
 
 const Meetings = () => {
   const { isAdmin } = useAuth();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('upcoming');
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingMeeting, setEditingMeeting] = useState(null);
 
   useEffect(() => {
     fetchMeetings();
@@ -29,6 +34,28 @@ const Meetings = () => {
     }
   };
 
+  const handleCreateMeeting = () => {
+    setEditingMeeting(null);
+    setShowForm(true);
+  };
+
+  const handleEditMeeting = (meeting) => {
+    setEditingMeeting(meeting);
+    setShowForm(true);
+  };
+
+  const handleFormSuccess = () => {
+    toast.success(`Møte ${editingMeeting ? 'oppdatert' : 'opprettet'}!`);
+    setShowForm(false);
+    setEditingMeeting(null);
+    fetchMeetings();
+  };
+
+  const handleFormCancel = () => {
+    setShowForm(false);
+    setEditingMeeting(null);
+  };
+
   const handleRSVP = async (meetingId) => {
     try {
       const data = await meetingsApi.rsvpMeeting(meetingId);
@@ -37,54 +64,58 @@ const Meetings = () => {
 
       // Show success message
       if (data.isAttending) {
-        alert('✅ You\'re now registered for this meeting!');
+        toast.success('Du er nå registrert for møtet!');
       } else {
-        alert('👋 Your RSVP has been removed');
+        toast.success('Din RSVP har blitt fjernet');
       }
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to RSVP to meeting');
+      toast.error(error.response?.data?.message || 'Greide ikke RSVP til møtet');
     }
   };
 
-  const handleEdit = (meeting) => {
-    // TODO: Implement edit functionality with modal/form
-    alert('Edit meeting functionality coming soon!');
-  };
-
   const handleDelete = async (meetingId) => {
-    if (!window.confirm('Are you sure you want to delete this meeting? This action cannot be undone.')) {
+    if (!window.confirm('Er du sikker på at du vil slette dette møtet? Dette kan ikke angres.')) {
       return;
     }
 
     try {
       await meetingsApi.deleteMeeting(meetingId);
       setMeetings(meetings.filter(m => m._id !== meetingId));
-      alert('✅ Meeting deleted successfully');
+      toast.success('Møtet slettet');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to delete meeting');
+      toast.error(error.response?.data?.message || 'Greide ikke slette møte');
     }
   };
 
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-8 animate-fadeIn">
-          <h1 className="text-6xl font-bold gradient-text mb-4">📅 Bookclub Meetings</h1>
-          <p className="text-xl text-white font-medium max-w-2xl mx-auto mb-6">
-            Join us for lively discussions, great company, and a shared love of books!
-          </p>
+        {/* Show form or main content */}
+        {showForm ? (
+          <MeetingForm
+            meeting={editingMeeting}
+            onSuccess={handleFormSuccess}
+            onCancel={handleFormCancel}
+          />
+        ) : (
+          <>
+            {/* Header */}
+            <div className="text-center mb-8 animate-fadeIn">
+              <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">📅 Between the covers møter</h1>
+              <p className="text-xl text-white font-medium max-w-2xl mx-auto mb-6">
+                Bli med på bokdiskusjoner i godt selskap!
+              </p>
 
-          {/* Admin: Create Meeting Button */}
-          {isAdmin && (
-            <button
-              onClick={() => alert('Create meeting functionality coming soon!')}
-              className="btn-primary text-lg px-8 py-4"
-            >
-              ✨ Create New Meeting
-            </button>
-          )}
-        </div>
+              {/* Admin: Create Meeting Button */}
+              {isAdmin && (
+                <button
+                  onClick={handleCreateMeeting}
+                  className="btn-primary text-lg px-8 py-4"
+                >
+                  ✨ Opprett nytt møte
+                </button>
+              )}
+            </div>
 
         {/* Tabs */}
         <div className="flex justify-center gap-4 mb-8 animate-fadeIn">
@@ -97,7 +128,7 @@ const Meetings = () => {
             }`}
             style={activeTab === 'upcoming' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
           >
-            📅 Upcoming
+            📅 Kommende
           </button>
           <button
             onClick={() => setActiveTab('past')}
@@ -108,7 +139,7 @@ const Meetings = () => {
             }`}
             style={activeTab === 'past' ? { background: 'linear-gradient(135deg, #f093fb, #f5576c)' } : {}}
           >
-            📚 Past Meetings
+            📚 Arkiverte møter
           </button>
         </div>
 
@@ -116,7 +147,7 @@ const Meetings = () => {
         {loading && (
           <div className="text-center py-20 animate-fadeIn">
             <div className="animate-spin rounded-full h-20 w-20 mx-auto mb-4" style={{ border: '4px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
-            <p className="text-white text-xl font-bold drop-shadow-lg">✨ Loading meetings...</p>
+            <p className="text-white text-xl font-bold drop-shadow-lg">✨ Laster møter...</p>
           </div>
         )}
 
@@ -147,27 +178,29 @@ const Meetings = () => {
                     key={meeting._id}
                     meeting={meeting}
                     onRSVP={handleRSVP}
-                    onEdit={handleEdit}
+                    onEdit={handleEditMeeting}
                     onDelete={handleDelete}
                   />
                 ))}
               </div>
             )}
+
+            {/* Info Section */}
+            <div
+              className="mt-12 p-8 rounded-2xl text-center animate-fadeIn"
+              style={{ background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))' }}
+            >
+              <h3 className="text-2xl font-bold gradient-text mb-3">💡 Om våre møter</h3>
+              <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed text-lg">
+                Bokklubben vår er en fantastisk plass for alle oss bokelskere til å diskutere både månedens bok og alle andre bøker vi kunne ønske å diskutere! 
+                Her er det mulighet for å snakke om bøker du elsker, bøker du hater og alle andre følelser du har rundt bøkene du har eller vil lese. 
+                Skal vi se på historikken, er dette også en fantastisk arena for å bli oppdatret på gjenens gossip og bare kose deg med litt yapping. 
+              </p>
+            </div>
           </>
         )}
-
-        {/* Info Section */}
-        <div
-          className="mt-12 p-8 rounded-2xl text-center animate-fadeIn"
-          style={{ background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))' }}
-        >
-          <h3 className="text-2xl font-bold gradient-text mb-3">💡 About Our Meetings</h3>
-          <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed text-lg">
-            Our bookclub meetings are a wonderful opportunity to connect with fellow readers, share insights,
-            and explore new perspectives. Whether you've finished the book or you're still reading,
-            all are welcome to join the conversation. RSVP to let us know you're coming, and we'll see you there!
-          </p>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
