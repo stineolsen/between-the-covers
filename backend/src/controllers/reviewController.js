@@ -163,8 +163,9 @@ exports.updateReview = async (req, res, next) => {
       });
     }
 
-    // Check ownership
-    if (review.user.toString() !== req.user._id.toString()) {
+    // Check ownership (handle both populated and unpopulated user field)
+    const reviewUserId = review.user._id || review.user;
+    if (reviewUserId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this review'
@@ -222,8 +223,9 @@ exports.deleteReview = async (req, res, next) => {
       });
     }
 
-    // Check ownership or admin
-    if (review.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    // Check ownership or admin (handle both populated and unpopulated user field)
+    const reviewUserId = review.user._id || review.user;
+    if (reviewUserId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this review'

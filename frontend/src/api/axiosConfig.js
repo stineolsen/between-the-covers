@@ -33,6 +33,15 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
+      // Don't log 404s for user-specific resources (expected when resource doesn't exist)
+      const is404 = error.response.status === 404;
+      const isUserResource = error.config?.url?.match(/\/(user-books|reviews)\/book\/[^/]+(?:\/user)?$/);
+
+      if (is404 && isUserResource) {
+        // Silently pass through expected 404s for user reviews/books
+        return Promise.reject(error);
+      }
+
       // Handle specific error codes
       if (error.response.status === 401) {
         // Unauthorized - redirect to login

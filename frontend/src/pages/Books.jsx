@@ -12,7 +12,7 @@ const Books = () => {
 
   // Filter states
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
+  const [bookclubOnly, setBookclubOnly] = useState(false);
   const [genre, setGenre] = useState('');
   const [sort, setSort] = useState('newest');
 
@@ -32,7 +32,7 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [search, status, genre, sort]);
+  }, [search, bookclubOnly, genre, sort]);
 
   const fetchBooks = async () => {
     try {
@@ -41,7 +41,7 @@ const Books = () => {
 
       const params = {};
       if (search) params.search = search;
-      if (status) params.status = status;
+      if (bookclubOnly) params.bookclubOnly = 'true';
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
 
@@ -61,7 +61,7 @@ const Books = () => {
 
   const clearFilters = () => {
     setSearch('');
-    setStatus('');
+    setBookclubOnly(false);
     setGenre('');
     setSort('newest');
   };
@@ -104,21 +104,18 @@ const Books = () => {
               />
             </div>
 
-            {/* Status Filter */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                📖 Status
+            {/* Bokklubb Filter */}
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
+              <input
+                type="checkbox"
+                id="bookclubOnly"
+                checked={bookclubOnly}
+                onChange={(e) => setBookclubOnly(e.target.checked)}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+              <label htmlFor="bookclubOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+                📅 Bokklubb Books Only
               </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="input-field"
-              >
-                <option value="">All Status</option>
-                <option value="to-read">To Read</option>
-                <option value="currently-reading">Currently Reading</option>
-                <option value="read">Read</option>
-              </select>
             </div>
 
             {/* Sort */}

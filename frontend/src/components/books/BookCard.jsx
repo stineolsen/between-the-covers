@@ -1,37 +1,9 @@
 import { Link } from 'react-router-dom';
 import { booksApi } from '../../api/booksApi';
+import BookCoverFallback from '../common/BookCoverFallback';
 
 const BookCard = ({ book }) => {
   const coverUrl = book.coverImage ? booksApi.getCoverUrl(book.coverImage) : null;
-
-  // Default placeholder image (can be replaced with an actual placeholder)
-  const placeholderImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300"%3E%3Crect fill="%23e5e7eb" width="200" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="20" text-anchor="middle" alignment-baseline="middle" font-family="monospace, sans-serif" fill="%239ca3af"%3ENo Cover%3C/text%3E%3C/svg%3E';
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'read':
-        return 'bg-gradient-to-r from-green-400 to-teal-500';
-      case 'currently-reading':
-        return 'bg-gradient-to-r from-pink-400 to-purple-500';
-      case 'to-read':
-        return 'bg-gradient-to-r from-blue-400 to-indigo-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'read':
-        return 'Read';
-      case 'currently-reading':
-        return 'Reading';
-      case 'to-read':
-        return 'To Read';
-      default:
-        return status;
-    }
-  };
 
   return (
     <Link
@@ -40,16 +12,19 @@ const BookCard = ({ book }) => {
     >
       {/* Book Cover */}
       <div className="relative aspect-[2/3] overflow-hidden" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
-        <img
-          src={coverUrl || placeholderImage}
+        <BookCoverFallback
+          src={coverUrl}
           alt={book.title}
+          category="book"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 group-hover:rotate-2"
         />
 
-        {/* Status Badge */}
-        <div className={`absolute top-3 right-3 ${getStatusColor(book.status)} text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg animate-pulse`}>
-          {getStatusText(book.status)}
-        </div>
+        {/* Bokklubb Month Badge */}
+        {book.bookclubMonth && (
+          <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+            📅 {book.bookclubMonth}
+          </div>
+        )}
 
         {/* Hover Overlay with Gradient */}
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5" style={{ background: 'linear-gradient(to top, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.8) 50%, transparent)' }}>

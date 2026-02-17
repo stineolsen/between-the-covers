@@ -48,22 +48,15 @@ const bookSchema = new mongoose.Schema({
   },
 
   // Club-specific data
-  status: {
+  bookclubMonth: {
     type: String,
-    enum: ['to-read', 'currently-reading', 'read'],
-    default: 'to-read'
+    default: null,
+    trim: true
+    // Format: "January 2026", "February 2025", etc. or null
   },
   dateAdded: {
     type: Date,
     default: Date.now
-  },
-  dateStarted: {
-    type: Date,
-    default: null
-  },
-  dateFinished: {
-    type: Date,
-    default: null
   },
 
   // Library links (audiobook and ebook)
@@ -114,7 +107,7 @@ const bookSchema = new mongoose.Schema({
 
 // Indexes for better query performance
 bookSchema.index({ title: 'text', author: 'text', description: 'text' });
-bookSchema.index({ status: 1 });
+bookSchema.index({ bookclubMonth: 1 });
 bookSchema.index({ genres: 1 });
 bookSchema.index({ averageRating: -1 });
 

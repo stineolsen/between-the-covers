@@ -97,7 +97,7 @@ reviewSchema.methods.toggleLike = function(userId) {
 // Static method to calculate average rating for a book
 reviewSchema.statics.calculateAverageRating = async function(bookId) {
   const result = await this.aggregate([
-    { $match: { book: mongoose.Types.ObjectId(bookId) } },
+    { $match: { book: new mongoose.Types.ObjectId(bookId) } },
     {
       $group: {
         _id: '$book',

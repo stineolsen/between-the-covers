@@ -63,10 +63,12 @@ exports.getUserBookStatus = async (req, res) => {
 exports.setBookStatus = async (req, res) => {
   try {
     const { bookId, status, notes } = req.body;
+    console.log('Set book status request:', { userId: req.user?._id, bookId, status, notes });
 
     // Validate book exists
     const book = await Book.findById(bookId);
     if (!book) {
+      console.log('Book not found:', bookId);
       return res.status(404).json({
         success: false,
         message: 'Book not found'

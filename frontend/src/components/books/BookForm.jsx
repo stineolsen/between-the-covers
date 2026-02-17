@@ -16,7 +16,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
     pageCount: '',
     publisher: '',
     language: 'English',
-    status: 'to-read',
+    bookclubMonth: '',
     audiobookLink: '',
     ebookLink: '',
     calibreId: '',
@@ -41,7 +41,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
         pageCount: initialData.pageCount || '',
         publisher: initialData.publisher || '',
         language: initialData.language || 'English',
-        status: initialData.status || 'to-read',
+        bookclubMonth: initialData.bookclubMonth || '',
         audiobookLink: initialData.libraryLinks?.audiobook || '',
         ebookLink: initialData.libraryLinks?.ebook || '',
         calibreId: initialData.calibreId || '',
@@ -118,7 +118,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
         pageCount: formData.pageCount ? parseInt(formData.pageCount) : undefined,
         publisher: formData.publisher,
         language: formData.language,
-        status: formData.status,
+        bookclubMonth: formData.bookclubMonth || null,
         libraryLinks: {
           audiobook: formData.audiobookLink || null,
           ebook: formData.ebookLink || null
@@ -314,21 +314,38 @@ const BookForm = ({ bookId = null, initialData = null }) => {
             </div>
           </div>
 
-          {/* Status */}
+          {/* Bokklubb Status */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Reading Status
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              📅 Bokklubb Status (Month discussed in book club)
             </label>
             <select
-              name="status"
-              value={formData.status}
+              name="bookclubMonth"
+              value={formData.bookclubMonth}
               onChange={handleChange}
               className="input-field"
             >
-              <option value="to-read">To Read</option>
-              <option value="currently-reading">Currently Reading</option>
-              <option value="read">Read</option>
+              <option value="">Not a bookclub book</option>
+              {(() => {
+                const options = [];
+                const currentYear = new Date().getFullYear();
+                const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                               'July', 'August', 'September', 'October', 'November', 'December'];
+
+                // Generate options for past 2 years and future 1 year
+                for (let year = currentYear - 2; year <= currentYear + 1; year++) {
+                  for (const month of months) {
+                    const value = `${month} ${year}`;
+                    options.push(<option key={value} value={value}>{value}</option>);
+                  }
+                }
+
+                return options.reverse(); // Most recent first
+              })()}
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Select the month this book was/will be discussed in the book club, or leave blank
+            </p>
           </div>
 
           {/* Genres */}

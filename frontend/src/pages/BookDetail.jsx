@@ -4,6 +4,7 @@ import { booksApi } from '../api/booksApi';
 import { reviewsApi } from '../api/reviewsApi';
 import { userBooksApi } from '../api/userBooksApi';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import ReviewList from '../components/reviews/ReviewList';
 import ReviewForm from '../components/reviews/ReviewForm';
 import StatusSelector from '../components/books/StatusSelector';
@@ -12,6 +13,7 @@ const BookDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAdmin, user } = useAuth();
+  const toast = useToast();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -167,11 +169,12 @@ const BookDetail = () => {
       setUserBookStatus(status);
 
       // Show success message
-      alert('✅ Reading status updated successfully!');
+      toast.success('Reading status updated successfully!');
     } catch (err) {
       console.error('Status update error:', err);
       console.error('Error response:', err.response);
-      alert(err.response?.data?.message || 'Failed to update status. Please try logging in again.');
+      console.error('Error data:', err.response?.data);
+      toast.error(err.response?.data?.message || 'Failed to update status. Please check the console for details.');
     } finally {
       setStatusLoading(false);
     }
@@ -206,24 +209,6 @@ const BookDetail = () => {
   const coverUrl = book.coverImage ? booksApi.getCoverUrl(book.coverImage) : null;
   const placeholderImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"%3E%3Crect fill="%23e5e7eb" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" font-size="24" text-anchor="middle" alignment-baseline="middle" font-family="monospace, sans-serif" fill="%239ca3af"%3ENo Cover%3C/text%3E%3C/svg%3E';
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'read': return { background: 'linear-gradient(135deg, #10b981, #14b8a6)' };
-      case 'currently-reading': return { background: 'linear-gradient(135deg, #f093fb, #f5576c)' };
-      case 'to-read': return { background: 'linear-gradient(135deg, #667eea, #764ba2)' };
-      default: return { background: '#6b7280' };
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'read': return 'Read';
-      case 'currently-reading': return 'Currently Reading';
-      case 'to-read': return 'To Read';
-      default: return status;
-    }
-  };
-
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4">
@@ -242,13 +227,15 @@ const BookDetail = () => {
                 className="w-full rounded-2xl shadow-2xl mb-4 transform transition-transform hover:scale-105"
               />
 
-              {/* Status Badge */}
-              <div
-                className="text-white text-center py-3 rounded-2xl font-bold mb-4 text-lg shadow-lg animate-pulse"
-                style={getStatusColor(book.status)}
-              >
-                {getStatusText(book.status)}
-              </div>
+              {/* Bokklubb Month Badge (if applicable) */}
+              {book.bookclubMonth && (
+                <div
+                  className="text-white text-center py-3 rounded-2xl font-bold mb-4 text-lg shadow-lg"
+                  style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}
+                >
+                  📅 {book.bookclubMonth}
+                </div>
+              )}
 
               {/* Library Links */}
               {(book.libraryLinks?.audiobook || book.libraryLinks?.ebook) && (
@@ -387,10 +374,10 @@ const BookDetail = () => {
                     <p className="text-gray-700 font-medium">{new Date(book.dateAdded).toLocaleDateString()}</p>
                   </div>
                 )}
-                {book.dateFinished && (
+                {book.bookclubMonth && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">✅ Finished Reading</h3>
-                    <p className="text-gray-700 font-medium">{new Date(book.dateFinished).toLocaleDateString()}</p>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">📅 Bokklubb Month</h3>
+                    <p className="text-gray-700 font-medium">{book.bookclubMonth}</p>
                   </div>
                 )}
               </div>

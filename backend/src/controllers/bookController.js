@@ -7,7 +7,7 @@ const fs = require('fs');
 // @access  Private
 exports.getBooks = async (req, res, next) => {
   try {
-    const { search, status, genre, sort } = req.query;
+    const { search, bookclubOnly, genre, sort } = req.query;
 
     // Build query
     let query = {};
@@ -17,9 +17,9 @@ exports.getBooks = async (req, res, next) => {
       query.$text = { $search: search };
     }
 
-    // Filter by status
-    if (status && ['to-read', 'currently-reading', 'read'].includes(status)) {
-      query.status = status;
+    // Filter by bookclub books only (books with bookclubMonth set)
+    if (bookclubOnly === 'true') {
+      query.bookclubMonth = { $nin: [null, '', undefined] };
     }
 
     // Filter by genre
@@ -99,8 +99,10 @@ exports.createBook = async (req, res, next) => {
       pageCount,
       publisher,
       language,
-      status,
-      libraryLinks
+      bookclubMonth,
+      libraryLinks,
+      calibreId,
+      calibreDownloadLink
     } = req.body;
 
     // Handle cover image upload
@@ -137,8 +139,10 @@ exports.createBook = async (req, res, next) => {
       pageCount,
       publisher,
       language,
-      status: status || 'to-read',
+      bookclubMonth: bookclubMonth || null,
       libraryLinks: parsedLibraryLinks || {},
+      calibreId: calibreId || null,
+      calibreDownloadLink: calibreDownloadLink || null,
       addedBy: req.user.id
     });
 
@@ -183,9 +187,7 @@ exports.updateBook = async (req, res, next) => {
       pageCount,
       publisher,
       language,
-      status,
-      dateStarted,
-      dateFinished,
+      bookclubMonth,
       libraryLinks,
       calibreId,
       calibreDownloadLink
@@ -212,9 +214,7 @@ exports.updateBook = async (req, res, next) => {
     if (pageCount !== undefined) book.pageCount = pageCount;
     if (publisher !== undefined) book.publisher = publisher;
     if (language) book.language = language;
-    if (status) book.status = status;
-    if (dateStarted !== undefined) book.dateStarted = dateStarted;
-    if (dateFinished !== undefined) book.dateFinished = dateFinished;
+    if (bookclubMonth !== undefined) book.bookclubMonth = bookclubMonth || null;
     if (calibreId !== undefined) book.calibreId = calibreId;
     if (calibreDownloadLink !== undefined) book.calibreDownloadLink = calibreDownloadLink;
 

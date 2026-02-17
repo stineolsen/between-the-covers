@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
+import { ToastProvider } from './contexts/ToastContext';
 import Navbar from './components/common/Navbar';
+import Footer from './components/common/Footer';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Pages
@@ -23,9 +25,10 @@ function App() {
     <Router>
       <AuthProvider>
         <CartProvider>
-          <div className="min-h-screen animate-fadeIn">
-            <Navbar />
-            <Routes>
+          <ToastProvider>
+            <div className="min-h-screen flex flex-col animate-fadeIn">
+              <Navbar />
+              <Routes>
             {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -116,10 +119,12 @@ function App() {
 
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </div>
-      </CartProvider>
-    </AuthProvider>
+            </Routes>
+            <Footer />
+            </div>
+          </ToastProvider>
+        </CartProvider>
+      </AuthProvider>
     </Router>
   );
 }

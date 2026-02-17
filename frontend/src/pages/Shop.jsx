@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { productsApi } from '../api/productsApi';
 import { useCart } from '../contexts/CartContext';
+import { useToast } from '../contexts/ToastContext';
+import BookCoverFallback from '../components/common/BookCoverFallback';
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -8,6 +10,7 @@ const Shop = () => {
   const [showCart, setShowCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const { cart, addToCart, removeFromCart, updateQuantity, getTotalPrice, getTotalItems, clearCart } = useCart();
+  const toast = useToast();
 
   // Checkout form state
   const [checkoutForm, setCheckoutForm] = useState({
@@ -37,14 +40,14 @@ const Shop = () => {
 
   const handleAddToCart = (product) => {
     addToCart(product, 1);
-    alert(`✅ ${product.name} added to cart!`);
+    toast.success(`${product.name} added to cart!`);
   };
 
   const handleCheckout = async (e) => {
     e.preventDefault();
 
     if (cart.length === 0) {
-      alert('Your cart is empty!');
+      toast.warning('Your cart is empty!');
       return;
     }
 
@@ -71,9 +74,9 @@ const Shop = () => {
       setShowCheckout(false);
       setShowCart(false);
 
-      alert('✅ Order submitted successfully! We will contact you shortly.');
+      toast.success('Order submitted successfully! We will contact you shortly.');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to submit order');
+      toast.error(error.response?.data?.message || 'Failed to submit order');
     } finally {
       setSubmitting(false);
     }
@@ -300,13 +303,13 @@ const Shop = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {products.map(product => (
               <div key={product._id} className="container-gradient group transform transition-all hover:scale-105">
-                {/* Product Image Placeholder */}
-                <div
-                  className="h-48 rounded-2xl mb-4 flex items-center justify-center text-6xl"
-                  style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2))' }}
-                >
-                  {product.category === 'book' ? '📚' : product.category === 'merchandise' ? '🎁' : '🛍️'}
-                </div>
+                {/* Product Image */}
+                <BookCoverFallback
+                  src={product.images && product.images[0] ? productsApi.getImageUrl(product.images[0]) : null}
+                  alt={product.name}
+                  category={product.category || 'merchandise'}
+                  className="h-48 w-full rounded-2xl mb-4 object-cover"
+                />
 
                 {/* Product Info */}
                 <h3 className="text-lg font-bold gradient-text mb-2">{product.name}</h3>

@@ -51,7 +51,7 @@ userBookSchema.index({ user: 1, book: 1 }, { unique: true });
 userBookSchema.index({ user: 1, status: 1 });
 
 // Middleware to update dates based on status changes
-userBookSchema.pre('save', function(next) {
+userBookSchema.pre('save', function() {
   // If status changed to 'currently-reading' and no startedAt date, set it
   if (this.isModified('status')) {
     if (this.status === 'currently-reading' && !this.startedAt) {
@@ -63,8 +63,6 @@ userBookSchema.pre('save', function(next) {
       this.finishedAt = new Date();
     }
   }
-
-  next();
 });
 
 // Populate book details when querying
