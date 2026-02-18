@@ -80,8 +80,8 @@ const ReadingHistory = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8 animate-fadeIn">
-          <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">📚 Min lesehistorikk</h1>
-          <p className="text-xl text-white font-medium max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold gradient-text mb-3 drop-shadow-lg">📚 Min lesehistorikk</h1>
+          <p className="text-xl text-gray font-medium max-w-2xl mx-auto">
             Her kan du holde styr på bøker du har lest, både i bokklubben og ellers. 
           </p>
         </div>

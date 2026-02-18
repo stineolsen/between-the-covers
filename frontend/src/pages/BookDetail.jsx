@@ -214,7 +214,7 @@ const BookDetail = () => {
       <div className="max-w-6xl mx-auto px-4">
         {/* Back Button */}
         <Link to="/books" className="inline-flex items-center text-white hover:text-white/80 mb-6 font-bold text-lg transform transition-all hover:scale-105">
-          <span className="mr-2">←</span> Tilbakee til bøker
+          <span className="mr-2">←</span> Tilbake til bøker
         </Link>
 
         <div className="grid md:grid-cols-3 gap-8 animate-fadeIn">
@@ -338,9 +338,17 @@ const BookDetail = () => {
 
               {/* Book Details Grid */}
               <div className="grid sm:grid-cols-2 gap-4 mb-6 p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}>
+                {book.series && (
+                  <div className="p-3 bg-white rounded-xl">
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">📚 Serie</h3>
+                    <p className="text-gray-700 font-medium">
+                      {book.series}{book.seriesNumber ? ` #${book.seriesNumber}` : ''}
+                    </p>
+                  </div>
+                )}
                 {book.isbn && (
                   <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">📚 ISBN</h3>
+                    <h3 className="font-bold text-gray-900 text-sm mb-1">📖 ISBN</h3>
                     <p className="text-gray-700 font-medium">{book.isbn}</p>
                   </div>
                 )}

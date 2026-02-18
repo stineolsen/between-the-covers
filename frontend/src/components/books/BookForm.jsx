@@ -16,6 +16,8 @@ const BookForm = ({ bookId = null, initialData = null }) => {
     pageCount: '',
     publisher: '',
     language: 'Engelsk',
+    series: '',
+    seriesNumber: '',
     bookclubMonth: '',
     audiobookLink: '',
     ebookLink: '',
@@ -41,6 +43,8 @@ const BookForm = ({ bookId = null, initialData = null }) => {
         pageCount: initialData.pageCount || '',
         publisher: initialData.publisher || '',
         language: initialData.language || 'English',
+        series: initialData.series || '',
+        seriesNumber: initialData.seriesNumber || '',
         bookclubMonth: initialData.bookclubMonth || '',
         audiobookLink: initialData.libraryLinks?.audiobook || '',
         ebookLink: initialData.libraryLinks?.ebook || '',
@@ -118,6 +122,8 @@ const BookForm = ({ bookId = null, initialData = null }) => {
         pageCount: formData.pageCount ? parseInt(formData.pageCount) : undefined,
         publisher: formData.publisher,
         language: formData.language,
+        series: formData.series || null,
+        seriesNumber: formData.seriesNumber ? parseInt(formData.seriesNumber) : null,
         bookclubMonth: formData.bookclubMonth || null,
         libraryLinks: {
           audiobook: formData.audiobookLink || null,
@@ -314,6 +320,38 @@ const BookForm = ({ bookId = null, initialData = null }) => {
             </div>
           </div>
 
+          {/* Series Information */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                📚 Serie
+              </label>
+              <input
+                type="text"
+                name="series"
+                value={formData.series}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="F.eks. Harry Potter"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                # Bok i serien
+              </label>
+              <input
+                type="number"
+                name="seriesNumber"
+                value={formData.seriesNumber}
+                onChange={handleChange}
+                className="input-field"
+                placeholder="1"
+                min="0"
+              />
+            </div>
+          </div>
+
           {/* Bokklubb Status */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -328,16 +366,28 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               <option value="">Ikke en bokklubb-bok</option>
               {(() => {
                 const options = [];
-                const currentYear = new Date().getFullYear();
                 const months = ['Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni',
                                'Juli', 'August', 'September', 'Oktober', 'November', 'Desember'];
 
-                // Generate options for past 2 years and future 1 year
-                for (let year = currentYear - 2; year <= currentYear + 1; year++) {
-                  for (const month of months) {
-                    const value = `${month} ${year}`;
-                    options.push(<option key={value} value={value}>{value}</option>);
-                  }
+                // Start from January 2025
+                const startDate = new Date(2025, 0, 1); // January 2025
+
+                // End 2 months from now
+                const now = new Date();
+                const endDate = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+
+                // Generate all months from start to end
+                const current = new Date(startDate);
+                while (current <= endDate) {
+                  const year = current.getFullYear();
+                  const monthIndex = current.getMonth();
+                  const monthName = months[monthIndex];
+                  const value = `${monthName} ${year}`;
+
+                  options.push(<option key={value} value={value}>{value}</option>);
+
+                  // Move to next month
+                  current.setMonth(current.getMonth() + 1);
                 }
 
                 return options.reverse(); // Most recent first

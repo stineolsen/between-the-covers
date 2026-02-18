@@ -47,6 +47,18 @@ const bookSchema = new mongoose.Schema({
     default: 'English'
   },
 
+  // Series information
+  series: {
+    type: String,
+    trim: true,
+    default: null
+  },
+  seriesNumber: {
+    type: Number,
+    min: 0,
+    default: null
+  },
+
   // Club-specific data
   bookclubMonth: {
     type: String,
@@ -106,9 +118,10 @@ const bookSchema = new mongoose.Schema({
 });
 
 // Indexes for better query performance
-bookSchema.index({ title: 'text', author: 'text', description: 'text' });
+bookSchema.index({ title: 'text', author: 'text', series: 'text' });
 bookSchema.index({ bookclubMonth: 1 });
 bookSchema.index({ genres: 1 });
+bookSchema.index({ series: 1 });
 bookSchema.index({ averageRating: -1 });
 
 // Virtual for checking if book has cover image

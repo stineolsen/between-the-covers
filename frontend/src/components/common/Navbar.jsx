@@ -16,7 +16,7 @@ const Navbar = () => {
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <nav className="sticky top-0 z-50 backdrop-blur-sm" style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.95))' }}>
+    <nav className="sticky top-0 z-50 shadow-md" style={{ background: 'var(--color-primary)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo/Brand */}

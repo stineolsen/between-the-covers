@@ -9,10 +9,10 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h1 className="text-7xl font-bold text-white mb-6 drop-shadow-2xl">
+          <h1 className="text-6xl font-bold gradient-text mb-4">
             ✨ Velkommen til Between The Covers! 📚
           </h1>
-          <p className="text-2xl text-white/90 max-w-2xl mx-auto font-medium drop-shadow-lg">
+          <p className="text-xl text-gray-700 max-w-2xl mx-auto">
             {user ? `Heisann ${user.displayName || user.username}! 👋` : 'Utforsk, diskuter og nyt en god bok i godt selskap!'}
           </p>
         </div>

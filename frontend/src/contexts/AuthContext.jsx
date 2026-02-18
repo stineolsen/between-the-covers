@@ -23,10 +23,19 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
+      // Check if token exists in localStorage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       const data = await authApi.getMe();
       setUser(data.user);
     } catch (error) {
       setUser(null);
+      localStorage.removeItem('token'); // Clear invalid token
     } finally {
       setLoading(false);
     }
@@ -36,6 +45,12 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       const data = await authApi.login(credentials);
+
+      // Store token in localStorage for mobile compatibility
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+
       setUser(data.user);
       return { success: true };
     } catch (error) {
@@ -60,11 +75,13 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authApi.logout();
+      localStorage.removeItem('token'); // Clear token
       setUser(null);
       return { success: true };
     } catch (error) {
       console.error('Logg ut error:', error);
-      // Clear user anyway
+      // Clear user and token anyway
+      localStorage.removeItem('token');
       setUser(null);
       return { success: true };
     }

@@ -13,6 +13,7 @@ const Books = () => {
   // Filter states
   const [search, setSearch] = useState('');
   const [bookclubOnly, setBookclubOnly] = useState(false);
+  const [audiobookOnly, setAudiobookOnly] = useState(false);
   const [genre, setGenre] = useState('');
   const [sort, setSort] = useState('newest');
 
@@ -32,7 +33,7 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [search, bookclubOnly, genre, sort]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort]);
 
   const fetchBooks = async () => {
     try {
@@ -42,6 +43,7 @@ const Books = () => {
       const params = {};
       if (search) params.search = search;
       if (bookclubOnly) params.bookclubOnly = 'true';
+      if (audiobookOnly) params.audiobookOnly = 'true';
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
 
@@ -62,6 +64,7 @@ const Books = () => {
   const clearFilters = () => {
     setSearch('');
     setBookclubOnly(false);
+    setAudiobookOnly(false);
     setGenre('');
     setSort('newest');
   };
@@ -72,11 +75,11 @@ const Books = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
-            <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">
-              ✨ Boksamling
+            <h1 className="text-5xl font-bold gradient-text mb-3">
+              📚 Boksamling
             </h1>
-            <p className="text-white/90 text-lg font-medium">
-              📚 {books.length} {books.length === 1 ? 'bok' : 'bøker'} i vår samling
+            <p className="text-gray-700 text-lg">
+              {books.length} {books.length === 1 ? 'bok' : 'bøker'} i vår samling
             </p>
           </div>
 
@@ -89,7 +92,7 @@ const Books = () => {
 
         {/* Filters */}
         <div className="container-gradient mb-8">
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-5 gap-4">
             {/* Search */}
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -97,7 +100,7 @@ const Books = () => {
               </label>
               <input
                 type="text"
-                placeholder="Search by title, author, or description..."
+                placeholder="Søk etter tittel, forfatter eller serie..."
                 value={search}
                 onChange={handleSearchChange}
                 className="input-field"
@@ -115,6 +118,20 @@ const Books = () => {
               />
               <label htmlFor="bookclubOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
                 📅 Bare bokklubb bøker
+              </label>
+            </div>
+
+            {/* Audiobook Filter */}
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
+              <input
+                type="checkbox"
+                id="audiobookOnly"
+                checked={audiobookOnly}
+                onChange={(e) => setAudiobookOnly(e.target.checked)}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+              <label htmlFor="audiobookOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+                🎧 Lydbøker
               </label>
             </div>
 
@@ -136,19 +153,19 @@ const Books = () => {
             </div>
 
             {/* Genre Filter */}
-            <div className="md:col-span-3">
+            <div className="md:col-span-4">
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 🎨 Sjanger
               </label>
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setGenre('')}
-                  className={`px-4 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                     genre === ''
-                      ? 'text-white shadow-lg'
-                      : 'bg-white text-gray-700 hover:shadow-md'
+                      ? 'text-white shadow-md'
+                      : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
                   }`}
-                  style={genre === '' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
+                  style={genre === '' ? { background: 'var(--color-primary)' } : {}}
                 >
                   Alle sjangere
                 </button>
@@ -156,12 +173,12 @@ const Books = () => {
                   <button
                     key={g}
                     onClick={() => setGenre(g)}
-                    className={`px-4 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                       genre === g
-                        ? 'text-white shadow-lg'
-                        : 'bg-white text-gray-700 hover:shadow-md'
+                        ? 'text-white shadow-md'
+                        : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
                     }`}
-                    style={genre === g ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
+                    style={genre === g ? { background: 'var(--color-primary)' } : {}}
                   >
                     {g}
                   </button>

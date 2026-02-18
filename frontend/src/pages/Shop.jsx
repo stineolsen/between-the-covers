@@ -99,8 +99,8 @@ const Shop = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
-            <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">🛍️ BTC butikken</h1>
-            <p className="text-xl text-white font-medium">Bøker, merch og mer!</p>
+            <h1 className="text-5xl font-bold gradient-text mb-3 drop-shadow-lg">🛍️ BTC butikken</h1>
+            <p className="text-xl text-gray font-medium">Bøker, merch og mer!</p>
           </div>
 
           {/* Cart Button */}

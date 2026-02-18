@@ -41,6 +41,13 @@ const BookCard = ({ book }) => {
         </h3>
         <p className="text-sm text-gray-600 font-medium mb-3">by {book.author}</p>
 
+        {/* Series */}
+        {book.series && (
+          <p className="text-sm text-purple-600 font-semibold mb-3">
+            📚 {book.series}{book.seriesNumber ? ` #${book.seriesNumber}` : ''}
+          </p>
+        )}
+
         {/* Rating */}
         {book.averageRating > 0 && (
           <div className="flex items-center gap-2 text-sm mb-3">

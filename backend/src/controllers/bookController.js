@@ -7,7 +7,7 @@ const fs = require('fs');
 // @access  Private
 exports.getBooks = async (req, res, next) => {
   try {
-    const { search, bookclubOnly, genre, sort } = req.query;
+    const { search, bookclubOnly, audiobookOnly, genre, sort } = req.query;
 
     // Build query
     let query = {};
@@ -20,6 +20,11 @@ exports.getBooks = async (req, res, next) => {
     // Filter by bookclub books only (books with bookclubMonth set)
     if (bookclubOnly === 'true') {
       query.bookclubMonth = { $nin: [null, '', undefined] };
+    }
+
+    // Filter by audiobook availability
+    if (audiobookOnly === 'true') {
+      query['libraryLinks.audiobook'] = { $nin: [null, '', undefined] };
     }
 
     // Filter by genre
@@ -99,6 +104,8 @@ exports.createBook = async (req, res, next) => {
       pageCount,
       publisher,
       language,
+      series,
+      seriesNumber,
       bookclubMonth,
       libraryLinks,
       calibreId,
@@ -139,6 +146,8 @@ exports.createBook = async (req, res, next) => {
       pageCount,
       publisher,
       language,
+      series: series || null,
+      seriesNumber: seriesNumber || null,
       bookclubMonth: bookclubMonth || null,
       libraryLinks: parsedLibraryLinks || {},
       calibreId: calibreId || null,
@@ -187,6 +196,8 @@ exports.updateBook = async (req, res, next) => {
       pageCount,
       publisher,
       language,
+      series,
+      seriesNumber,
       bookclubMonth,
       libraryLinks,
       calibreId,
@@ -214,6 +225,8 @@ exports.updateBook = async (req, res, next) => {
     if (pageCount !== undefined) book.pageCount = pageCount;
     if (publisher !== undefined) book.publisher = publisher;
     if (language) book.language = language;
+    if (series !== undefined) book.series = series || null;
+    if (seriesNumber !== undefined) book.seriesNumber = seriesNumber || null;
     if (bookclubMonth !== undefined) book.bookclubMonth = bookclubMonth || null;
     if (calibreId !== undefined) book.calibreId = calibreId;
     if (calibreDownloadLink !== undefined) book.calibreDownloadLink = calibreDownloadLink;

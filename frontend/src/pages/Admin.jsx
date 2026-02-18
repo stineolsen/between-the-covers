@@ -148,7 +148,7 @@ const Admin = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="mb-8">
           <h1 className="text-5xl font-bold gradient-text mb-2">Admin Dashboard</h1>
-          <p className="text-white text-lg drop-shadow-lg">Rediger brukere, varer og bestillinger</p>
+          <p className="text-gray text-lg drop-shadow-lg">Rediger brukere, varer og bestillinger</p>
         </div>
 
         {/* Tabs */}

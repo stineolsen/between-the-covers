@@ -1,20 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  /* Vibrant gradient color scheme */
-  --color-primary: #667eea;
-  --color-primary-dark: #764ba2;
-  --color-secondary: #f093fb;
-  --color-accent: #f5576c;
-  --color-teal: #4fd1c5;
-  --color-text: #1f2937;
-  --color-text-light: #666;
+  /* Simplified bookclub-inspired color palette */
+  --color-primary: #6B5B95;         /* Sophisticated purple - bookish and elegant */
+  --color-secondary: #ce4419;       /* Burnt orange - warm accent */
+  --color-background: #f7f7f7;      /* Light gray background */
+  --color-card: #ffffff;            /* Pure white cards */
+  --color-text: #2d3748;            /* Charcoal text */
+  --color-text-muted: #718096;      /* Medium gray for secondary text */
+  --color-border: #e2e8f0;          /* Subtle borders */
 
-  /* Gradient definitions */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-  --gradient-secondary: linear-gradient(135deg, #f093fb, #f5576c);
-  --gradient-card: linear-gradient(135deg, #667eea, #764ba2);
-  --gradient-accent: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+  /* Minimal gradient for special elements only */
+  --gradient-primary: linear-gradient(135deg, #6B5B95 0%, #544179 100%);
+  --gradient-secondary: linear-gradient(135deg, #ce4419 0%, #b33915 100%);
 }
 
 /* Keyframe animations */
@@ -60,153 +58,147 @@
 
 /* Custom component classes */
 @layer components {
-  /* Playful gradient buttons */
+  /* Simplified button styles */
   .btn-primary {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--color-primary);
     color: white;
     padding: 0.75rem 1.75rem;
-    border-radius: 25px;
+    border-radius: 8px;
     font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(107, 91, 149, 0.2);
   }
 
   .btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: #544179;
+    box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
   }
 
   .btn-primary:active {
-    transform: scale(0.98);
+    transform: translateY(1px);
   }
 
   .btn-primary:disabled {
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
   }
 
   .btn-secondary {
-    background: linear-gradient(135deg, #f093fb, #f5576c);
+    background: var(--color-secondary);
     color: white;
     padding: 0.75rem 1.75rem;
-    border-radius: 25px;
+    border-radius: 8px;
     font-weight: 600;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(206, 68, 25, 0.2);
   }
 
   .btn-secondary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+    background: #b33915;
+    box-shadow: 0 4px 12px rgba(206, 68, 25, 0.3);
   }
 
   .btn-secondary:active {
-    transform: scale(0.98);
+    transform: translateY(1px);
   }
 
   .btn-accent {
     background: white;
-    color: #f5576c;
+    color: var(--color-primary);
     padding: 0.75rem 1.75rem;
-    border-radius: 25px;
+    border-radius: 8px;
     font-weight: 600;
-    border: none;
+    border: 2px solid var(--color-primary);
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
   }
 
   .btn-accent:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    background: var(--color-primary);
+    color: white;
   }
 
   .btn-accent:active {
-    transform: scale(0.98);
+    transform: translateY(1px);
   }
 
-  /* Animated gradient cards */
+  /* Simplified card styles */
   .card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
+    background: var(--color-card);
+    border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.2s ease;
     animation: fadeIn 0.6s ease-out;
   }
 
   .card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   }
 
-  /* Gradient card variant */
+  /* Primary colored card variant */
   .card-gradient {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: var(--color-primary);
     color: white;
-    border-radius: 20px;
+    border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(107, 91, 149, 0.2);
+    transition: box-shadow 0.2s ease;
   }
 
   .card-gradient:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 16px rgba(107, 91, 149, 0.3);
   }
 
   /* Interactive section */
   .interactive-section {
-    background: linear-gradient(135deg, #f093fb, #f5576c);
-    border-radius: 20px;
+    background: var(--color-secondary);
+    border-radius: 12px;
     padding: 2rem;
     color: white;
     animation: fadeIn 0.8s ease-out;
   }
 
-  /* Input fields with playful styling */
+  /* Simplified input fields */
   .input-field {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: none;
-    border-radius: 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
     outline: none;
     font-size: 1rem;
-    transition: box-shadow 0.2s ease;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    background: var(--color-card);
   }
 
   .input-field:focus {
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(107, 91, 149, 0.1);
   }
 
-  /* Container with gradient background */
+  /* Simplified container */
   .container-gradient {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 30px;
+    background: var(--color-card);
+    border-radius: 16px;
     padding: 2.5rem;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     animation: fadeIn 0.6s ease-out;
   }
 
-  /* Gradient text */
+  /* Primary text color */
   .gradient-text {
-    background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--color-primary);
+    font-weight: 700;
   }
 }
 
 /* Base styles */
 body {
-  background: linear-gradient(135deg, #87548c 0%, #59589e 50%, #ba86c3 100%);
+  background: var(--color-background);
   color: var(--color-text);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;

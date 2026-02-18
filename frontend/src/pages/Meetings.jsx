@@ -101,8 +101,8 @@ const Meetings = () => {
           <>
             {/* Header */}
             <div className="text-center mb-8 animate-fadeIn">
-              <h1 className="text-5xl font-bold text-white mb-3 drop-shadow-lg">📅 Between the covers møter</h1>
-              <p className="text-xl text-white font-medium max-w-2xl mx-auto mb-6">
+              <h1 className="text-5xl font-bold gradient-text mb-3">📅 Between the covers møter</h1>
+              <p className="text-xl text-gray-700 max-w-2xl mx-auto mb-6">
                 Bli med på bokdiskusjoner i godt selskap!
               </p>
 
@@ -121,23 +121,23 @@ const Meetings = () => {
         <div className="flex justify-center gap-4 mb-8 animate-fadeIn">
           <button
             onClick={() => setActiveTab('upcoming')}
-            className={`px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg ${
+            className={`px-8 py-4 rounded-lg font-bold text-lg transition-all ${
               activeTab === 'upcoming'
-                ? 'text-white'
-                : 'bg-white text-gray-700 hover:shadow-xl'
+                ? 'text-white shadow-md'
+                : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
             }`}
-            style={activeTab === 'upcoming' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
+            style={activeTab === 'upcoming' ? { background: 'var(--color-primary)' } : {}}
           >
             📅 Kommende
           </button>
           <button
             onClick={() => setActiveTab('past')}
-            className={`px-8 py-4 rounded-full font-bold text-lg transition-all transform hover:scale-105 shadow-lg ${
+            className={`px-8 py-4 rounded-lg font-bold text-lg transition-all ${
               activeTab === 'past'
-                ? 'text-white'
-                : 'bg-white text-gray-700 hover:shadow-xl'
+                ? 'text-white shadow-md'
+                : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
             }`}
-            style={activeTab === 'past' ? { background: 'linear-gradient(135deg, #f093fb, #f5576c)' } : {}}
+            style={activeTab === 'past' ? { background: 'var(--color-secondary)' } : {}}
           >
             📚 Arkiverte møter
           </button>
@@ -146,8 +146,8 @@ const Meetings = () => {
         {/* Loading State */}
         {loading && (
           <div className="text-center py-20 animate-fadeIn">
-            <div className="animate-spin rounded-full h-20 w-20 mx-auto mb-4" style={{ border: '4px solid rgba(255,255,255,0.3)', borderTopColor: 'white' }}></div>
-            <p className="text-white text-xl font-bold drop-shadow-lg">✨ Laster møter...</p>
+            <div className="animate-spin rounded-full h-20 w-20 mx-auto mb-4" style={{ border: '4px solid rgba(107, 91, 149, 0.3)', borderTopColor: 'var(--color-primary)' }}></div>
+            <p className="text-gray-700 text-xl font-bold">✨ Laster møter...</p>
           </div>
         )}
 
