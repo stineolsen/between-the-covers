@@ -48,6 +48,11 @@ const Footer = () => {
                     📊 Din lesehistorie
                   </Link>
                 </li>
+                <li>
+                  <Link to="/howto" className="text-white/90 hover:text-white transition-colors font-medium">
+                    🎧 How to lydbokbibiloteket
+                  </Link>
+                </li>
               </ul>
             </div>
 

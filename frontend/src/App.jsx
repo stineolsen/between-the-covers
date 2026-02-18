@@ -19,6 +19,7 @@ import ReadingHistory from './pages/ReadingHistory';
 import Shop from './pages/Shop';
 import Profile from './pages/Profile';
 import Admin from './pages/Admin';
+import Howto from './pages/Howto';
 
 function App() {
   return (
@@ -103,6 +104,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/howto"
+              element={
+                <ProtectedRoute>
+                  <Howto />
                 </ProtectedRoute>
               }
             />

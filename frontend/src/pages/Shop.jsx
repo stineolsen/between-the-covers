@@ -144,7 +144,7 @@ const Shop = () => {
                       <div key={item.product._id} className="flex gap-4 p-4 rounded-xl bg-gray-50">
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-900 mb-1">{item.product.name}</h3>
-                          <p className="text-gray-600">${item.product.price.toFixed(2)}</p>
+                          <p className="text-gray-600">kr {item.product.price.toFixed(2)}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
@@ -174,7 +174,7 @@ const Shop = () => {
                   <div className="border-t pt-4 mb-6">
                     <div className="flex justify-between text-xl font-bold mb-4">
                       <span>Total:</span>
-                      <span className="gradient-text">${getTotalPrice().toFixed(2)}</span>
+                      <span className="gradient-text">kr {getTotalPrice().toFixed(2)}</span>
                     </div>
                     <button
                       onClick={() => setShowCheckout(true)}
@@ -263,12 +263,12 @@ const Shop = () => {
                   {cart.map(item => (
                     <div key={item.product._id} className="flex justify-between mb-2">
                       <span>{item.product.name} × {item.quantity}</span>
-                      <span className="font-bold">${(item.product.price * item.quantity).toFixed(2)}</span>
+                      <span className="font-bold">kr {(item.product.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                   <div className="border-t pt-2 mt-2 flex justify-between text-xl font-bold">
                     <span>Totalt:</span>
-                    <span className="gradient-text">${getTotalPrice().toFixed(2)}</span>
+                    <span className="gradient-text">kr {getTotalPrice().toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -319,7 +319,7 @@ const Shop = () => {
 
                 {/* Price and Stock */}
                 <div className="flex justify-between items-center mb-4">
-                  <span className="text-2xl font-bold gradient-text">${product.price.toFixed(2)}</span>
+                  <span className="text-2xl font-bold gradient-text">kr {product.price.toFixed(2)}</span>
                   {product.inStock ? (
                     <span className="text-green-600 text-sm font-bold">✓ På lager</span>
                   ) : (
