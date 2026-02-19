@@ -10,12 +10,18 @@ const Books = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Filter states
-  const [search, setSearch] = useState('');
-  const [bookclubOnly, setBookclubOnly] = useState(false);
-  const [audiobookOnly, setAudiobookOnly] = useState(false);
-  const [genre, setGenre] = useState('');
-  const [sort, setSort] = useState('newest');
+  // Filter states - restored from sessionStorage so filters persist when navigating back
+  const savedFilters = JSON.parse(sessionStorage.getItem('bookFilters') || '{}');
+  const [search, setSearch] = useState(savedFilters.search || '');
+  const [bookclubOnly, setBookclubOnly] = useState(savedFilters.bookclubOnly || false);
+  const [audiobookOnly, setAudiobookOnly] = useState(savedFilters.audiobookOnly || false);
+  const [genre, setGenre] = useState(savedFilters.genre || '');
+  const [sort, setSort] = useState(savedFilters.sort || 'newest');
+
+  // Save filters to sessionStorage whenever they change
+  useEffect(() => {
+    sessionStorage.setItem('bookFilters', JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort }));
+  }, [search, bookclubOnly, audiobookOnly, genre, sort]);
 
   // Available genres (you can make this dynamic by fetching from books)
   const availableGenres = [
@@ -67,6 +73,7 @@ const Books = () => {
     setAudiobookOnly(false);
     setGenre('');
     setSort('newest');
+    sessionStorage.removeItem('bookFilters');
   };
 
   return (
