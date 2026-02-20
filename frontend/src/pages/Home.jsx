@@ -1,7 +1,6 @@
 import { useAuth } from "../contexts/AuthContext";
 import NextMeeting from "../components/meetings/NextMeeting";
 import { Link } from "react-router-dom";
-import { LuCalendar } from "react-icons/lu";
 
 const Home = () => {
   const { user } = useAuth();
