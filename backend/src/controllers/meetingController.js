@@ -1,5 +1,5 @@
-const Meeting = require('../models/Meeting');
-const Book = require('../models/Book');
+const Meeting = require("../models/Meeting");
+const Book = require("../models/Book");
 
 // @desc    Get all meetings (with optional filters)
 // @route   GET /api/meetings
@@ -13,15 +13,15 @@ exports.getMeetings = async (req, res) => {
     // Filter by status
     if (status) {
       query.status = status;
-    } else if (upcoming === 'true') {
-      query.status = 'upcoming';
-    } else if (past === 'true') {
-      query.status = 'past';
+    } else if (upcoming === "true") {
+      query.status = "upcoming";
+    } else if (past === "true") {
+      query.status = "past";
     }
 
     // Get meetings and sort by date (upcoming: ascending, past: descending)
     let sortOrder = 1; // ascending (oldest first for upcoming)
-    if (query.status === 'past') {
+    if (query.status === "past") {
       sortOrder = -1; // descending (newest first for past)
     }
 
@@ -30,13 +30,13 @@ exports.getMeetings = async (req, res) => {
     res.status(200).json({
       success: true,
       count: meetings.length,
-      meetings
+      meetings,
     });
   } catch (error) {
-    console.error('Get meetings error:', error);
+    console.error("Get meetings error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch meetings'
+      message: "Failed to fetch meetings",
     });
   }
 };
@@ -49,26 +49,26 @@ exports.getNextMeeting = async (req, res) => {
     const now = new Date();
 
     const meeting = await Meeting.findOne({
-      status: 'upcoming',
-      date: { $gte: now }
+      status: "upcoming",
+      date: { $gte: now },
     }).sort({ date: 1 });
 
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        message: 'No upcoming meetings found'
+        message: "No upcoming meetings found",
       });
     }
 
     res.status(200).json({
       success: true,
-      meeting
+      meeting,
     });
   } catch (error) {
-    console.error('Get next meeting error:', error);
+    console.error("Get next meeting error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch next meeting'
+      message: "Failed to fetch next meeting",
     });
   }
 };
@@ -83,19 +83,19 @@ exports.getMeeting = async (req, res) => {
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        message: 'Meeting not found'
+        message: "Meeting not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      meeting
+      meeting,
     });
   } catch (error) {
-    console.error('Get meeting error:', error);
+    console.error("Get meeting error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch meeting'
+      message: "Failed to fetch meeting",
     });
   }
 };
@@ -105,7 +105,8 @@ exports.getMeeting = async (req, res) => {
 // @access  Private (Admin only)
 exports.createMeeting = async (req, res) => {
   try {
-    const { title, date, time, location, description, bookId, maxAttendees } = req.body;
+    const { title, date, time, location, description, bookId, maxAttendees } =
+      req.body;
 
     // Validate book if provided
     if (bookId) {
@@ -113,7 +114,7 @@ exports.createMeeting = async (req, res) => {
       if (!book) {
         return res.status(404).json({
           success: false,
-          message: 'Book not found'
+          message: "Book not found",
         });
       }
     }
@@ -127,28 +128,28 @@ exports.createMeeting = async (req, res) => {
       description,
       book: bookId || null,
       maxAttendees: maxAttendees || 0,
-      createdBy: req.user._id
+      createdBy: req.user._id,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Meeting created successfully',
-      meeting
+      message: "Meeting created successfully",
+      meeting,
     });
   } catch (error) {
-    console.error('Create meeting error:', error);
+    console.error("Create meeting error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to create meeting'
+      message: "Failed to create meeting",
     });
   }
 };
@@ -158,14 +159,24 @@ exports.createMeeting = async (req, res) => {
 // @access  Private (Admin only)
 exports.updateMeeting = async (req, res) => {
   try {
-    const { title, date, time, location, description, bookId, status, maxAttendees, notes } = req.body;
+    const {
+      title,
+      date,
+      time,
+      location,
+      description,
+      bookId,
+      status,
+      maxAttendees,
+      notes,
+    } = req.body;
 
     const meeting = await Meeting.findById(req.params.id);
 
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        message: 'Meeting not found'
+        message: "Meeting not found",
       });
     }
 
@@ -175,7 +186,7 @@ exports.updateMeeting = async (req, res) => {
       if (!book) {
         return res.status(404).json({
           success: false,
-          message: 'Book not found'
+          message: "Book not found",
         });
       }
     }
@@ -195,23 +206,23 @@ exports.updateMeeting = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Meeting updated successfully',
-      meeting
+      message: "Meeting updated successfully",
+      meeting,
     });
   } catch (error) {
-    console.error('Update meeting error:', error);
+    console.error("Update meeting error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to update meeting'
+      message: "Failed to update meeting",
     });
   }
 };
@@ -226,7 +237,7 @@ exports.deleteMeeting = async (req, res) => {
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        message: 'Meeting not found'
+        message: "Meeting not found",
       });
     }
 
@@ -234,13 +245,13 @@ exports.deleteMeeting = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Meeting deleted successfully'
+      message: "Meeting deleted successfully",
     });
   } catch (error) {
-    console.error('Delete meeting error:', error);
+    console.error("Delete meeting error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete meeting'
+      message: "Failed to delete meeting",
     });
   }
 };
@@ -255,22 +266,22 @@ exports.rsvpMeeting = async (req, res) => {
     if (!meeting) {
       return res.status(404).json({
         success: false,
-        message: 'Meeting not found'
+        message: "Meeting not found",
       });
     }
 
     // Check if meeting is in the past or cancelled
-    if (meeting.status === 'past') {
+    if (meeting.status === "past") {
       return res.status(400).json({
         success: false,
-        message: 'Cannot RSVP to past meetings'
+        message: "Cannot RSVP to past meetings",
       });
     }
 
-    if (meeting.status === 'cancelled') {
+    if (meeting.status === "cancelled") {
       return res.status(400).json({
         success: false,
-        message: 'This meeting has been cancelled'
+        message: "This meeting has been cancelled",
       });
     }
 
@@ -281,37 +292,37 @@ exports.rsvpMeeting = async (req, res) => {
       await meeting.removeAttendee(req.user._id);
       // Re-populate after save
       await meeting.populate([
-        { path: 'book', select: 'title author coverImage' },
-        { path: 'createdBy', select: 'username displayName avatar' },
-        { path: 'attendees', select: 'username displayName avatar' }
+        { path: "book", select: "title author coverImage" },
+        { path: "createdBy", select: "username displayName avatar" },
+        { path: "attendees", select: "username displayName avatar" },
       ]);
       res.status(200).json({
         success: true,
-        message: 'RSVP removed successfully',
+        message: "RSVP removed successfully",
         meeting,
-        isAttending: false
+        isAttending: false,
       });
     } else {
       // Add RSVP
       await meeting.addAttendee(req.user._id);
       // Re-populate after save
       await meeting.populate([
-        { path: 'book', select: 'title author coverImage' },
-        { path: 'createdBy', select: 'username displayName avatar' },
-        { path: 'attendees', select: 'username displayName avatar' }
+        { path: "book", select: "title author coverImage" },
+        { path: "createdBy", select: "username displayName avatar" },
+        { path: "attendees", select: "username displayName avatar" },
       ]);
       res.status(200).json({
         success: true,
-        message: 'RSVP confirmed successfully',
+        message: "RSVP confirmed successfully",
         meeting,
-        isAttending: true
+        isAttending: true,
       });
     }
   } catch (error) {
-    console.error('RSVP meeting error:', error);
+    console.error("RSVP meeting error:", error);
     res.status(400).json({
       success: false,
-      message: error.message || 'Failed to RSVP to meeting'
+      message: error.message || "Failed to RSVP to meeting",
     });
   }
 };

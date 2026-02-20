@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { meetingsApi } from '../../api/meetingsApi';
-import { booksApi } from '../../api/booksApi';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { meetingsApi } from "../../api/meetingsApi";
+import { booksApi } from "../../api/booksApi";
+import { useAuth } from "../../contexts/AuthContext";
 
 const NextMeeting = () => {
   const { user } = useAuth();
@@ -22,7 +22,7 @@ const NextMeeting = () => {
         setMeeting(data.meeting);
       }
     } catch (error) {
-      console.error('Failed to fetch next meeting:', error);
+      console.error("Failed to fetch next meeting:", error);
     } finally {
       setLoading(false);
     }
@@ -36,7 +36,7 @@ const NextMeeting = () => {
       const data = await meetingsApi.rsvpMeeting(meeting._id);
       setMeeting(data.meeting);
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to RSVP');
+      alert(error.response?.data?.message || "Failed to RSVP");
     } finally {
       setIsRSVPing(false);
     }
@@ -47,7 +47,9 @@ const NextMeeting = () => {
       <div className="container-gradient text-center py-12 animate-fadeIn">
         <div className="animate-pulse">
           <div className="text-6xl mb-4">📅</div>
-          <p className="text-gray-600 text-lg font-bold">Laster neste møte...</p>
+          <p className="text-gray-600 text-lg font-bold">
+            Laster neste møte...
+          </p>
         </div>
       </div>
     );
@@ -57,15 +59,19 @@ const NextMeeting = () => {
     return (
       <div
         className="container-gradient text-center py-12 animate-fadeIn"
-        style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}
+        style={{
+          background:
+            "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
+        }}
       >
         <div className="text-6xl mb-4">📅</div>
-        <h2 className="text-3xl font-bold gradient-text mb-3">Ingen kommende møter</h2>
-        <p className="text-gray-600 mb-6 text-lg">Sjekk tilbake senere for neste bokklubbsamling!</p>
-        <Link
-          to="/meetings"
-          className="btn-primary inline-block"
-        >
+        <h2 className="text-3xl font-bold gradient-text mb-3">
+          Ingen kommende møter
+        </h2>
+        <p className="text-gray-600 mb-6 text-lg">
+          Sjekk tilbake senere for neste bokklubbsamling!
+        </p>
+        <Link to="/meetings" className="btn-primary inline-block">
           Se alle møtene
         </Link>
       </div>
@@ -74,17 +80,19 @@ const NextMeeting = () => {
 
   // Format date and time
   const meetingDate = new Date(meeting.date);
-  const formattedDate = meetingDate.toLocaleDateString('nb-NO', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  const formattedDate = meetingDate.toLocaleDateString("nb-NO", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  const formattedTime = meeting.time || meetingDate.toLocaleTimeString('nb-NO', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const formattedTime =
+    meeting.time ||
+    meetingDate.toLocaleTimeString("nb-NO", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
   // Calculate days until meeting
   const now = new Date();
@@ -93,20 +101,28 @@ const NextMeeting = () => {
   const isTomorrow = daysUntil === 1;
 
   // Check if user is attending
-  const isAttending = meeting.attendees?.some(attendee => {
+  const isAttending = meeting.attendees?.some((attendee) => {
     // Handle both populated user objects and ObjectId references
     const attendeeId = attendee._id || attendee;
     return attendeeId.toString() === user?._id?.toString();
   });
   const attendeeCount = meeting.attendeeCount || meeting.attendees?.length || 0;
-  const isFull = meeting.isFull || (meeting.maxAttendees > 0 && attendeeCount >= meeting.maxAttendees);
+  const isFull =
+    meeting.isFull ||
+    (meeting.maxAttendees > 0 && attendeeCount >= meeting.maxAttendees);
 
   return (
-    <div className="container-gradient animate-fadeIn overflow-hidden" style={{ position: 'relative' }}>
+    <div
+      className="container-gradient animate-fadeIn overflow-hidden"
+      style={{ position: "relative" }}
+    >
       {/* Decorative gradient background */}
       <div
         className="absolute inset-0 opacity-10"
-        style={{ background: 'linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c)' }}
+        style={{
+          background:
+            "linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c)",
+        }}
       ></div>
 
       {/* Content */}
@@ -114,20 +130,22 @@ const NextMeeting = () => {
         {/* Header */}
         <div className="text-center mb-6">
           <div className="text-6xl mb-3 animate-pulse">👥</div>
-          <h2 className="text-4xl font-bold gradient-text mb-2">Neste bokklubbmøte!</h2>
+          <h2 className="text-4xl font-bold gradient-text mb-2">
+            Neste bokklubbmøte!
+          </h2>
           {isToday && (
-            <p className="text-2xl font-bold" style={{ color: '#f5576c' }}>
+            <p className="text-2xl font-bold" style={{ color: "#f5576c" }}>
               📢 IDAG!
             </p>
           )}
           {isTomorrow && (
-            <p className="text-2xl font-bold" style={{ color: '#f5576c' }}>
+            <p className="text-2xl font-bold" style={{ color: "#f5576c" }}>
               📢 I morgen!
             </p>
           )}
           {!isToday && !isTomorrow && daysUntil > 0 && (
             <p className="text-xl text-gray-600 font-bold">
-              om {daysUntil} {daysUntil === 1 ? 'dag' : 'dager'}
+              om {daysUntil} {daysUntil === 1 ? "dag" : "dager"}
             </p>
           )}
         </div>
@@ -138,11 +156,13 @@ const NextMeeting = () => {
             {/* Title */}
             <div
               className="p-6 rounded-2xl text-white shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
+              style={{
+                background: "linear-gradient(135deg, #667eea, #764ba2)",
+              }}
             >
               <h3 className="text-3xl font-bold mb-2">{meeting.title}</h3>
               <div className="flex items-center gap-2 text-lg mb-2">
-                <span>📅</span>                                  
+                <span>📅</span>
                 <span>{formattedDate}</span>
               </div>
               <div className="flex items-center gap-2 text-lg mb-2">
@@ -169,12 +189,14 @@ const NextMeeting = () => {
             {/* Attendees */}
             <div
               className="p-5 rounded-2xl text-white shadow-lg"
-              style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)' }}
+              style={{
+                background: "linear-gradient(135deg, #f093fb, #f5576c)",
+              }}
             >
               <div className="flex items-center justify-between mb-3">
                 <h4 className="text-xl font-bold">👥 Hvem kommer?</h4>
                 <span className="text-lg font-bold">
-                  {attendeeCount} {attendeeCount === 1 ? 'medlem' : 'medlemmer'}
+                  {attendeeCount} {attendeeCount === 1 ? "medlem" : "medlemmer"}
                 </span>
               </div>
 
@@ -182,36 +204,42 @@ const NextMeeting = () => {
                 <div className="flex flex-wrap gap-2">
                   {meeting.attendees.slice(0, 8).map((attendee, index) => {
                     // Handle case where attendee might be just an ObjectId or string
-                    if (typeof attendee === 'string' || !attendee.username) return null;
-                    const displayName = attendee?.displayName || attendee?.username || 'User';
-                    const attendeeId = attendee._id || attendee.toString?.() || index;
+                    if (typeof attendee === "string" || !attendee.username)
+                      return null;
+                    const displayName =
+                      attendee?.displayName || attendee?.username || "User";
+                    const attendeeId =
+                      attendee._id || attendee.toString?.() || index;
 
                     return (
-                    <div
-                      key={`attendee-${attendeeId}-${index}`}
-                      className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm">
-                        {attendee.avatar ? (
-                          <img
-                            src={`http://localhost:5000/uploads/avatars/${attendee.avatar}`}
-                            alt={displayName}
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-purple-600 font-bold">
-                            {displayName.charAt(0).toUpperCase()}
-                          </span>
-                        )}
+                      <div
+                        key={`attendee-${attendeeId}-${index}`}
+                        className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm">
+                          {attendee.avatar ? (
+                            <img
+                              src={`http://localhost:5000/uploads/avatars/${attendee.avatar}`}
+                              alt={displayName}
+                              className="w-full h-full rounded-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-purple-600 font-bold">
+                              {displayName.charAt(0).toUpperCase()}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-sm font-medium">
+                          {displayName}
+                        </span>
                       </div>
-                      <span className="text-sm font-medium">
-                        {displayName}
-                      </span>
-                    </div>
-                  )})}
+                    );
+                  })}
                   {attendeeCount > 8 && (
                     <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm">
-                      <span className="text-sm font-bold">+{attendeeCount - 8} flere</span>
+                      <span className="text-sm font-bold">
+                        +{attendeeCount - 8} flere
+                      </span>
                     </div>
                   )}
                 </div>
@@ -224,7 +252,9 @@ const NextMeeting = () => {
             {/* Book */}
             {meeting.book && (
               <div className="p-6 rounded-2xl bg-white shadow-lg">
-                <h4 className="font-bold text-gray-900 mb-4 text-xl">📚 Vi skal diskutere:</h4>
+                <h4 className="font-bold text-gray-900 mb-4 text-xl">
+                  📚 Vi skal diskutere:
+                </h4>
                 <Link
                   to={`/books/${meeting.book._id}`}
                   className="block transform transition-all hover:scale-105"
@@ -240,7 +270,9 @@ const NextMeeting = () => {
                     <h5 className="text-2xl font-bold gradient-text mb-2">
                       {meeting.book.title}
                     </h5>
-                    <p className="text-gray-600 text-lg">by {meeting.book.author}</p>
+                    <p className="text-gray-600 text-lg">
+                      by {meeting.book.author}
+                    </p>
                   </div>
                 </Link>
               </div>
@@ -251,22 +283,30 @@ const NextMeeting = () => {
               onClick={handleRSVP}
               disabled={isRSVPing || (!isAttending && isFull)}
               className={`w-full py-6 rounded-2xl font-bold text-white text-2xl shadow-2xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${
-                isRSVPing ? 'animate-pulse' : ''
+                isRSVPing ? "animate-pulse" : ""
               }`}
               style={{
                 background: isAttending
-                  ? 'linear-gradient(135deg, #ef4444, #dc2626)'
-                  : 'linear-gradient(135deg, #10b981, #14b8a6)'
+                  ? "linear-gradient(135deg, #ef4444, #dc2626)"
+                  : "linear-gradient(135deg, #10b981, #14b8a6)",
               }}
             >
-              {isRSVPing ? '⏳ Behandler...' : isAttending ? '✓ Du deltar!' : isFull ? '😔 Møtet er fult' : '🎉 Jeg vil være med! '}
+              {isRSVPing
+                ? "⏳ Behandler..."
+                : isAttending
+                  ? "✓ Du deltar!"
+                  : isFull
+                    ? "😔 Møtet er fult"
+                    : "🎉 Jeg vil være med! "}
             </button>
 
             {/* View all meetings link */}
             <Link
               to="/meetings"
               className="block text-center py-4 rounded-2xl font-bold text-white shadow-lg transition-all transform hover:scale-105"
-              style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
+              style={{
+                background: "linear-gradient(135deg, #667eea, #764ba2)",
+              }}
             >
               📅 Se alle møtene
             </Link>

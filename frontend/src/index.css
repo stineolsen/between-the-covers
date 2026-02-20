@@ -2,17 +2,17 @@
 
 @theme {
   /* Simplified bookclub-inspired color palette */
-  --color-primary: #6B5B95;         /* Sophisticated purple - bookish and elegant */
-  --color-secondary: #d44aa84d;       /* Burnt orange - warm accent */
-  --color-background: #FAF8F5;      /* Warm cream background */
-  --color-card: #ffffff;            /* Pure white cards */
-  --color-text: #2d3748;            /* Charcoal text */
-  --color-text-muted: #718096;      /* Medium gray for secondary text */
-  --color-border: #e2e8f0;          /* Subtle borders */
+  --color-primary: #6b5b95; /* Sophisticated purple - bookish and elegant */
+  --color-secondary: #d44aa84d; /* Burnt orange - warm accent */
+  --color-background: #faf8f5; /* Warm cream background */
+  --color-card: #ffffff; /* Pure white cards */
+  --color-text: #2d3748; /* Charcoal text */
+  --color-text-muted: #718096; /* Medium gray for secondary text */
+  --color-border: #e2e8f0; /* Subtle borders */
 
   /* Minimal gradient for special elements only */
-  --gradient-primary: linear-gradient(135deg, #6B5B95 0%, #544179 100%);
-  --gradient-secondary: linear-gradient(135deg, #d44aa87d 0%, #6B5B957d 100%);
+  --gradient-primary: linear-gradient(135deg, #6b5b95 0%, #544179 100%);
+  --gradient-secondary: linear-gradient(135deg, #d44aa87d 0%, #6b5b957d 100%);
 }
 
 /* Keyframe animations */
@@ -39,7 +39,8 @@
 }
 
 @keyframes bounce {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
@@ -48,7 +49,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -149,7 +151,6 @@
     box-shadow: 0 2px 8px rgba(107, 91, 149, 0.2);
     transition: box-shadow 0.2s ease;
   }
-  
 
   .card-gradient:hover {
     box-shadow: 0 4px 16px rgba(107, 91, 149, 0.3);
@@ -201,8 +202,8 @@
 body {
   background: var(--color-background);
   color: var(--color-text);
-  font-family: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif;
-  /*'Segoe UI', Tahoma, Geneva, Verdana, sans-serif*/;
+  font-family: Charter, "Bitstream Charter", "Sitka Text", Cambria, serif;
+  /*'Segoe UI', Tahoma, Geneva, Verdana, sans-serif*/
   margin: 0;
   min-height: 100vh;
 }

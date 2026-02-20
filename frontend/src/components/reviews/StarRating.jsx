@@ -1,14 +1,19 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-const StarRating = ({ rating = 0, onRatingChange = null, readOnly = false, size = 'md' }) => {
+const StarRating = ({
+  rating = 0,
+  onRatingChange = null,
+  readOnly = false,
+  size = "md",
+}) => {
   const [hoverRating, setHoverRating] = useState(0);
 
   // Size classes
   const sizeClasses = {
-    sm: 'text-lg',
-    md: 'text-2xl',
-    lg: 'text-4xl',
-    xl: 'text-5xl'
+    sm: "text-lg",
+    md: "text-2xl",
+    lg: "text-4xl",
+    xl: "text-5xl",
   };
 
   const handleClick = (value) => {
@@ -43,18 +48,18 @@ const StarRating = ({ rating = 0, onRatingChange = null, readOnly = false, size 
           disabled={readOnly}
           className={`
             ${sizeClasses[size]}
-            ${readOnly ? 'cursor-default' : 'cursor-pointer transform transition-all hover:scale-125'}
-            ${star <= displayRating ? 'text-yellow-400' : 'text-gray-300'}
+            ${readOnly ? "cursor-default" : "cursor-pointer transform transition-all hover:scale-125"}
+            ${star <= displayRating ? "text-yellow-400" : "text-gray-300"}
             focus:outline-none
           `}
-          aria-label={`${star} stjerne${star > 1 ? 'r' : ''}`}
+          aria-label={`${star} stjerne${star > 1 ? "r" : ""}`}
         >
-          {star <= displayRating ? '★' : '☆'}
+          {star <= displayRating ? "★" : "☆"}
         </button>
       ))}
       {!readOnly && hoverRating > 0 && (
         <span className="ml-2 text-gray-600 font-medium animate-fadeIn">
-          {hoverRating} {hoverRating === 1 ? 'stjerne' : 'stjerner'}
+          {hoverRating} {hoverRating === 1 ? "stjerne" : "stjerner"}
         </span>
       )}
     </div>

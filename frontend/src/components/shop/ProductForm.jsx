@@ -1,38 +1,39 @@
-import { useState, useEffect } from 'react';
-import { productsApi } from '../../api/productsApi';
-import { booksApi } from '../../api/booksApi';
+import { useState, useEffect } from "react";
+import { productsApi } from "../../api/productsApi";
+import { booksApi } from "../../api/booksApi";
 
 const ProductForm = ({ product = null, onSuccess, onCancel }) => {
   const isEditing = !!product;
 
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    currency: 'NOK',
-    category: 'other',
-    stock: '',
+    name: "",
+    description: "",
+    price: "",
+    currency: "NOK",
+    category: "other",
+    stock: "",
     isAvailable: true,
-    bookId: ''
+    bookId: "",
   });
 
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchBooks();
 
     if (product) {
       setFormData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price || '',
-        currency: product.currency || 'NOK',
-        category: product.category || 'annet',
-        stock: product.stock || '',
-        isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
-        bookId: product.book?._id || ''
+        name: product.name || "",
+        description: product.description || "",
+        price: product.price || "",
+        currency: product.currency || "NOK",
+        category: product.category || "annet",
+        stock: product.stock || "",
+        isAvailable:
+          product.isAvailable !== undefined ? product.isAvailable : true,
+        bookId: product.book?._id || "",
       });
     }
   }, [product]);
@@ -42,22 +43,22 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
       const data = await booksApi.getBooks();
       setBooks(data.books || []);
     } catch (err) {
-      console.error('Greide ikke hente bøker:', err);
+      console.error("Greide ikke hente bøker:", err);
     }
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const productData = {
@@ -68,7 +69,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         category: formData.category,
         stock: parseInt(formData.stock) || 0,
         isAvailable: formData.isAvailable,
-        bookId: formData.bookId || null
+        bookId: formData.bookId || null,
       };
 
       if (isEditing) {
@@ -79,8 +80,11 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
 
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || `Greide ikke ${isEditing ? 'oppdatere' : 'opprette'} vare`);
-      console.error('Greide ikke lagre vare:', err);
+      setError(
+        err.response?.data?.message ||
+          `Greide ikke ${isEditing ? "oppdatere" : "opprette"} vare`,
+      );
+      console.error("Greide ikke lagre vare:", err);
     } finally {
       setLoading(false);
     }
@@ -89,11 +93,14 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
   return (
     <div className="container-gradient animate-fadeIn">
       <h2 className="text-3xl font-bold gradient-text mb-6">
-        {isEditing ? '✏️ Rediger vare' : '✨ Legg til ny vare'}
+        {isEditing ? "✏️ Rediger vare" : "✨ Legg til ny vare"}
       </h2>
 
       {error && (
-        <div className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+        <div
+          className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
+          style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+        >
           {error}
         </div>
       )}
@@ -221,7 +228,8 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             ))}
           </select>
           <p className="text-xs text-gray-500 mt-1">
-            Link varer til en bok dersom de henger sammen (e.g., merch til en bok i bibiloteket)
+            Link varer til en bok dersom de henger sammen (e.g., merch til en
+            bok i bibiloteket)
           </p>
         </div>
 
@@ -235,7 +243,10 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             onChange={handleChange}
             className="w-5 h-5 rounded cursor-pointer"
           />
-          <label htmlFor="isAvailable" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+          <label
+            htmlFor="isAvailable"
+            className="text-sm font-bold text-gray-700 cursor-pointer select-none"
+          >
             ✅ Vare er tilgjengelig for kjøp
           </label>
         </div>
@@ -247,13 +258,22 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             disabled={loading}
             className="btn-primary flex-1 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? (isEditing ? '⏳ Oppdatere...' : '⏳ Oppretter...') : (isEditing ? '✏️ Oppdater vare' : '✨ Opprett vare')}
+            {loading
+              ? isEditing
+                ? "⏳ Oppdatere..."
+                : "⏳ Oppretter..."
+              : isEditing
+                ? "✏️ Oppdater vare"
+                : "✨ Opprett vare"}
           </button>
           <button
             type="button"
             onClick={onCancel}
             className="px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-lg"
-            style={{ background: 'linear-gradient(135deg, #9ca3af, #6b7280)', color: 'white' }}
+            style={{
+              background: "linear-gradient(135deg, #9ca3af, #6b7280)",
+              color: "white",
+            }}
           >
             Avbryt
           </button>

@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const path = require('path');
-const fs = require('fs');
+const User = require("../models/User");
+const path = require("path");
+const fs = require("fs");
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
@@ -12,13 +12,13 @@ exports.getProfile = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      user
+      user,
     });
   } catch (error) {
     next(error);
@@ -37,7 +37,7 @@ exports.updateProfile = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
@@ -45,8 +45,8 @@ exports.updateProfile = async (req, res, next) => {
     if (displayName !== undefined) user.displayName = displayName;
     if (bio !== undefined) user.bio = bio;
     if (favoriteGenres !== undefined) {
-      if (typeof favoriteGenres === 'string') {
-        user.favoriteGenres = favoriteGenres.split(',').map(g => g.trim());
+      if (typeof favoriteGenres === "string") {
+        user.favoriteGenres = favoriteGenres.split(",").map((g) => g.trim());
       } else {
         user.favoriteGenres = favoriteGenres;
       }
@@ -56,8 +56,8 @@ exports.updateProfile = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Profile updated successfully',
-      user
+      message: "Profile updated successfully",
+      user,
     });
   } catch (error) {
     next(error);
@@ -74,7 +74,11 @@ exports.uploadAvatar = async (req, res, next) => {
     if (!user) {
       // Delete uploaded file if user not found
       if (req.file) {
-        const filePath = path.join(__dirname, '../../uploads/avatars', req.file.filename);
+        const filePath = path.join(
+          __dirname,
+          "../../uploads/avatars",
+          req.file.filename,
+        );
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
@@ -82,20 +86,24 @@ exports.uploadAvatar = async (req, res, next) => {
 
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'Please upload an image file'
+        message: "Please upload an image file",
       });
     }
 
     // Delete old avatar if it exists and is not a default avatar
-    if (user.avatar && !user.avatar.startsWith('default-')) {
-      const oldAvatarPath = path.join(__dirname, '../../uploads/avatars', user.avatar);
+    if (user.avatar && !user.avatar.startsWith("default-")) {
+      const oldAvatarPath = path.join(
+        __dirname,
+        "../../uploads/avatars",
+        user.avatar,
+      );
       if (fs.existsSync(oldAvatarPath)) {
         fs.unlinkSync(oldAvatarPath);
       }
@@ -106,13 +114,17 @@ exports.uploadAvatar = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Avatar uploaded successfully',
-      avatar: user.avatar
+      message: "Avatar uploaded successfully",
+      avatar: user.avatar,
     });
   } catch (error) {
     // If there was an error, delete uploaded file
     if (req.file) {
-      const filePath = path.join(__dirname, '../../uploads/avatars', req.file.filename);
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/avatars",
+        req.file.filename,
+      );
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -131,7 +143,7 @@ exports.selectDefaultAvatar = async (req, res, next) => {
     if (!avatarName) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide an avatar name'
+        message: "Please provide an avatar name",
       });
     }
 
@@ -140,13 +152,17 @@ exports.selectDefaultAvatar = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     // Delete old avatar if it exists and is not a default avatar
-    if (user.avatar && !user.avatar.startsWith('default-')) {
-      const oldAvatarPath = path.join(__dirname, '../../uploads/avatars', user.avatar);
+    if (user.avatar && !user.avatar.startsWith("default-")) {
+      const oldAvatarPath = path.join(
+        __dirname,
+        "../../uploads/avatars",
+        user.avatar,
+      );
       if (fs.existsSync(oldAvatarPath)) {
         fs.unlinkSync(oldAvatarPath);
       }
@@ -157,8 +173,8 @@ exports.selectDefaultAvatar = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Avatar updated successfully',
-      avatar: user.avatar
+      message: "Avatar updated successfully",
+      avatar: user.avatar,
     });
   } catch (error) {
     next(error);
@@ -175,13 +191,17 @@ exports.deleteAvatar = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
     // Delete avatar file if it exists and is not a default avatar
-    if (user.avatar && !user.avatar.startsWith('default-')) {
-      const avatarPath = path.join(__dirname, '../../uploads/avatars', user.avatar);
+    if (user.avatar && !user.avatar.startsWith("default-")) {
+      const avatarPath = path.join(
+        __dirname,
+        "../../uploads/avatars",
+        user.avatar,
+      );
       if (fs.existsSync(avatarPath)) {
         fs.unlinkSync(avatarPath);
       }
@@ -192,7 +212,7 @@ exports.deleteAvatar = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Avatar deleted successfully'
+      message: "Avatar deleted successfully",
     });
   } catch (error) {
     next(error);

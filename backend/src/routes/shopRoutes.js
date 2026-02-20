@@ -1,6 +1,6 @@
-const express = require('express');
-const { submitContactOrder } = require('../controllers/productController');
-const { protect } = require('../middleware/authMiddleware');
+const express = require("express");
+const { submitContactOrder } = require("../controllers/productController");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -8,6 +8,6 @@ const router = express.Router();
 router.use(protect);
 
 // Submit contact form order
-router.post('/contact-order', submitContactOrder);
+router.post("/contact-order", submitContactOrder);
 
 module.exports = router;

@@ -1,6 +1,6 @@
-const UserBook = require('../models/UserBook');
-const Book = require('../models/Book');
-const Review = require('../models/Review');
+const UserBook = require("../models/UserBook");
+const Book = require("../models/Book");
+const Review = require("../models/Review");
 
 // @desc    Get user's books (optionally filtered by status)
 // @route   GET /api/user-books
@@ -17,13 +17,13 @@ exports.getUserBooks = async (req, res) => {
     res.status(200).json({
       success: true,
       count: userBooks.length,
-      userBooks
+      userBooks,
     });
   } catch (error) {
-    console.error('Get user books error:', error);
+    console.error("Get user books error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch user books'
+      message: "Failed to fetch user books",
     });
   }
 };
@@ -35,25 +35,25 @@ exports.getUserBookStatus = async (req, res) => {
   try {
     const userBook = await UserBook.findOne({
       user: req.user._id,
-      book: req.params.bookId
+      book: req.params.bookId,
     });
 
     if (!userBook) {
       return res.status(404).json({
         success: false,
-        message: 'No status found for this book'
+        message: "No status found for this book",
       });
     }
 
     res.status(200).json({
       success: true,
-      userBook
+      userBook,
     });
   } catch (error) {
-    console.error('Get user book status error:', error);
+    console.error("Get user book status error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch book status'
+      message: "Failed to fetch book status",
     });
   }
 };
@@ -64,22 +64,27 @@ exports.getUserBookStatus = async (req, res) => {
 exports.setBookStatus = async (req, res) => {
   try {
     const { bookId, status, notes } = req.body;
-    console.log('Set book status request:', { userId: req.user?._id, bookId, status, notes });
+    console.log("Set book status request:", {
+      userId: req.user?._id,
+      bookId,
+      status,
+      notes,
+    });
 
     // Validate book exists
     const book = await Book.findById(bookId);
     if (!book) {
-      console.log('Book not found:', bookId);
+      console.log("Book not found:", bookId);
       return res.status(404).json({
         success: false,
-        message: 'Book not found'
+        message: "Book not found",
       });
     }
 
     // Check if user already has this book
     let userBook = await UserBook.findOne({
       user: req.user._id,
-      book: bookId
+      book: bookId,
     });
 
     if (userBook) {
@@ -93,30 +98,33 @@ exports.setBookStatus = async (req, res) => {
         user: req.user._id,
         book: bookId,
         status,
-        notes: notes || ''
+        notes: notes || "",
       });
-      await userBook.populate('book', 'title author coverImage genres averageRating');
+      await userBook.populate(
+        "book",
+        "title author coverImage genres averageRating",
+      );
     }
 
     res.status(200).json({
       success: true,
-      message: 'Reading status updated successfully',
-      userBook
+      message: "Reading status updated successfully",
+      userBook,
     });
   } catch (error) {
-    console.error('Set book status error:', error);
+    console.error("Set book status error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to update reading status'
+      message: "Failed to update reading status",
     });
   }
 };
@@ -131,25 +139,31 @@ exports.updateFinishedDate = async (req, res) => {
     const userBook = await UserBook.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       { $set: { finishedAt: finishedAt ? new Date(finishedAt) : null } },
-      { new: true }
+      { new: true },
     );
 
     if (!userBook) {
-      return res.status(404).json({ success: false, message: 'Book not found in your list' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Book not found in your list" });
     }
 
     // Sync readingDate on the user's review for this book (if one exists)
     if (finishedAt && userBook.book) {
       await Review.findOneAndUpdate(
         { book: userBook.book, user: req.user._id },
-        { $set: { readingDate: new Date(finishedAt) } }
+        { $set: { readingDate: new Date(finishedAt) } },
       );
     }
 
-    res.status(200).json({ success: true, message: 'Reading date updated', userBook });
+    res
+      .status(200)
+      .json({ success: true, message: "Reading date updated", userBook });
   } catch (error) {
-    console.error('Update finished date error:', error);
-    res.status(500).json({ success: false, message: 'Failed to update reading date' });
+    console.error("Update finished date error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to update reading date" });
   }
 };
 
@@ -160,13 +174,13 @@ exports.removeUserBook = async (req, res) => {
   try {
     const userBook = await UserBook.findOne({
       _id: req.params.id,
-      user: req.user._id
+      user: req.user._id,
     });
 
     if (!userBook) {
       return res.status(404).json({
         success: false,
-        message: 'Book not found in your list'
+        message: "Book not found in your list",
       });
     }
 
@@ -174,13 +188,13 @@ exports.removeUserBook = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Book removed from your list'
+      message: "Book removed from your list",
     });
   } catch (error) {
-    console.error('Remove user book error:', error);
+    console.error("Remove user book error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to remove book'
+      message: "Failed to remove book",
     });
   }
 };
@@ -194,31 +208,31 @@ exports.getReadingStats = async (req, res) => {
       { $match: { user: req.user._id } },
       {
         $group: {
-          _id: '$status',
-          count: { $sum: 1 }
-        }
-      }
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
     ]);
 
     const formattedStats = {
-      'to-read': 0,
-      'currently-reading': 0,
-      'read': 0
+      "to-read": 0,
+      "currently-reading": 0,
+      read: 0,
     };
 
-    stats.forEach(stat => {
+    stats.forEach((stat) => {
       formattedStats[stat._id] = stat.count;
     });
 
     res.status(200).json({
       success: true,
-      stats: formattedStats
+      stats: formattedStats,
     });
   } catch (error) {
-    console.error('Get reading stats error:', error);
+    console.error("Get reading stats error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch reading statistics'
+      message: "Failed to fetch reading statistics",
     });
   }
 };

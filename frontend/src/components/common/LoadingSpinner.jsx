@@ -1,9 +1,13 @@
-const LoadingSpinner = ({ size = 'md', message = 'Loading...', fullScreen = false }) => {
+const LoadingSpinner = ({
+  size = "md",
+  message = "Loading...",
+  fullScreen = false,
+}) => {
   const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-16 w-16',
-    lg: 'h-24 w-24',
-    xl: 'h-32 w-32'
+    sm: "h-8 w-8",
+    md: "h-16 w-16",
+    lg: "h-24 w-24",
+    xl: "h-32 w-32",
   };
 
   const spinner = (
@@ -11,10 +15,10 @@ const LoadingSpinner = ({ size = 'md', message = 'Loading...', fullScreen = fals
       <div
         className={`animate-spin rounded-full ${sizeClasses[size]} mx-auto mb-4`}
         style={{
-          border: '4px solid rgba(255,255,255,0.3)',
-          borderTopColor: 'white',
-          borderRightColor: '#667eea',
-          borderBottomColor: '#764ba2'
+          border: "4px solid rgba(255,255,255,0.3)",
+          borderTopColor: "white",
+          borderRightColor: "#667eea",
+          borderBottomColor: "#764ba2",
         }}
       ></div>
       {message && (
@@ -34,9 +38,7 @@ const LoadingSpinner = ({ size = 'md', message = 'Loading...', fullScreen = fals
   }
 
   return (
-    <div className="flex items-center justify-center py-12">
-      {spinner}
-    </div>
+    <div className="flex items-center justify-center py-12">{spinner}</div>
   );
 };
 

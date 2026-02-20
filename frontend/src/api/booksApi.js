@@ -1,9 +1,9 @@
-import api from './axiosConfig';
+import api from "./axiosConfig";
 
 export const booksApi = {
   // Get all books with optional filters
   getBooks: async (params = {}) => {
-    const response = await api.get('/api/books', { params });
+    const response = await api.get("/api/books", { params });
     return response.data;
   },
 
@@ -24,20 +24,20 @@ export const booksApi = {
     const formData = new FormData();
 
     // Append all book fields
-    Object.keys(bookData).forEach(key => {
-      if (key === 'genres' && Array.isArray(bookData[key])) {
-        formData.append(key, bookData[key].join(','));
-      } else if (key === 'libraryLinks') {
+    Object.keys(bookData).forEach((key) => {
+      if (key === "genres" && Array.isArray(bookData[key])) {
+        formData.append(key, bookData[key].join(","));
+      } else if (key === "libraryLinks") {
         formData.append(key, JSON.stringify(bookData[key]));
       } else if (bookData[key] !== null && bookData[key] !== undefined) {
         formData.append(key, bookData[key]);
       }
     });
 
-    const response = await api.post('/api/books', formData, {
+    const response = await api.post("/api/books", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   },
@@ -47,10 +47,10 @@ export const booksApi = {
     const formData = new FormData();
 
     // Append all book fields
-    Object.keys(bookData).forEach(key => {
-      if (key === 'genres' && Array.isArray(bookData[key])) {
-        formData.append(key, bookData[key].join(','));
-      } else if (key === 'libraryLinks') {
+    Object.keys(bookData).forEach((key) => {
+      if (key === "genres" && Array.isArray(bookData[key])) {
+        formData.append(key, bookData[key].join(","));
+      } else if (key === "libraryLinks") {
         formData.append(key, JSON.stringify(bookData[key]));
       } else if (bookData[key] !== null && bookData[key] !== undefined) {
         formData.append(key, bookData[key]);
@@ -59,8 +59,8 @@ export const booksApi = {
 
     const response = await api.put(`/api/books/${id}`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   },
@@ -74,12 +74,12 @@ export const booksApi = {
   // Upload/update book cover (admin only)
   uploadCover: async (id, coverImageFile) => {
     const formData = new FormData();
-    formData.append('coverImage', coverImageFile);
+    formData.append("coverImage", coverImageFile);
 
     const response = await api.post(`/api/books/${id}/cover`, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        "Content-Type": "multipart/form-data",
+      },
     });
     return response.data;
   },
@@ -87,9 +87,9 @@ export const booksApi = {
   // Helper: Get cover image URL
   getCoverUrl: (coverImage) => {
     if (!coverImage) return null;
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     return `${apiUrl}/uploads/books/${coverImage}`;
-  }
+  },
 };
 
 export default booksApi;

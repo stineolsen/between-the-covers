@@ -1,5 +1,5 @@
-const User = require('../models/User');
-const { sendTokenResponse } = require('../utils/tokens');
+const User = require("../models/User");
+const { sendTokenResponse } = require("../utils/tokens");
 
 // @desc    Register user
 // @route   POST /api/auth/register
@@ -13,7 +13,7 @@ exports.register = async (req, res, next) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this email or username'
+        message: "User already exists with this email or username",
       });
     }
 
@@ -23,18 +23,18 @@ exports.register = async (req, res, next) => {
       email,
       password,
       displayName: displayName || username,
-      status: 'pending'
+      status: "pending",
     });
 
     res.status(201).json({
       success: true,
-      message: 'Registration successful! Your account is pending approval.',
+      message: "Registration successful! Your account is pending approval.",
       user: {
         id: user._id,
         username: user.username,
         email: user.email,
-        status: user.status
-      }
+        status: user.status,
+      },
     });
   } catch (error) {
     next(error);
@@ -52,32 +52,32 @@ exports.login = async (req, res, next) => {
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email and password'
+        message: "Please provide email and password",
       });
     }
 
     // Check for user (include password for comparison)
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: "Invalid credentials",
       });
     }
 
     // Check if user is approved
-    if (user.status === 'pending') {
+    if (user.status === "pending") {
       return res.status(403).json({
         success: false,
-        message: 'Your account is pending approval'
+        message: "Your account is pending approval",
       });
     }
 
-    if (user.status === 'rejected') {
+    if (user.status === "rejected") {
       return res.status(403).json({
         success: false,
-        message: 'Your account has been rejected'
+        message: "Your account has been rejected",
       });
     }
 
@@ -87,7 +87,7 @@ exports.login = async (req, res, next) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: "Invalid credentials",
       });
     }
 
@@ -103,14 +103,14 @@ exports.login = async (req, res, next) => {
 // @access  Private
 exports.logout = async (req, res, next) => {
   try {
-    res.cookie('token', 'none', {
+    res.cookie("token", "none", {
       expires: new Date(Date.now() + 10 * 1000),
-      httpOnly: true
+      httpOnly: true,
     });
 
     res.status(200).json({
       success: true,
-      message: 'Logged out successfully'
+      message: "Logged out successfully",
     });
   } catch (error) {
     next(error);
@@ -126,7 +126,7 @@ exports.getMe = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      user
+      user,
     });
   } catch (error) {
     next(error);
@@ -138,12 +138,12 @@ exports.getMe = async (req, res, next) => {
 // @access  Private/Admin
 exports.getPendingUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ status: 'pending' }).select('-password');
+    const users = await User.find({ status: "pending" }).select("-password");
 
     res.status(200).json({
       success: true,
       count: users.length,
-      users
+      users,
     });
   } catch (error) {
     next(error);
@@ -157,10 +157,10 @@ exports.approveUser = async (req, res, next) => {
   try {
     const { status } = req.body; // 'approved' or 'rejected'
 
-    if (!['approved', 'rejected'].includes(status)) {
+    if (!["approved", "rejected"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Status must be either "approved" or "rejected"'
+        message: 'Status must be either "approved" or "rejected"',
       });
     }
 
@@ -169,7 +169,7 @@ exports.approveUser = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: "User not found",
       });
     }
 
@@ -180,7 +180,7 @@ exports.approveUser = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: `User ${status} successfully`,
-      user
+      user,
     });
   } catch (error) {
     next(error);

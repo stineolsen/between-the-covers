@@ -1,12 +1,12 @@
-const Review = require('../models/Review');
-const Book = require('../models/Book');
+const Review = require("../models/Review");
+const Book = require("../models/Book");
 
 // @desc    Get all reviews (with optional filters)
 // @route   GET /api/reviews
 // @access  Public (but need to be logged in)
 exports.getReviews = async (req, res, next) => {
   try {
-    const { bookId, userId, sort = 'newest' } = req.query;
+    const { bookId, userId, sort = "newest" } = req.query;
 
     // Build query
     let query = {};
@@ -16,19 +16,19 @@ exports.getReviews = async (req, res, next) => {
     // Sort options
     let sortOption = {};
     switch (sort) {
-      case 'newest':
+      case "newest":
         sortOption = { createdAt: -1 };
         break;
-      case 'oldest':
+      case "oldest":
         sortOption = { createdAt: 1 };
         break;
-      case 'highest-rated':
+      case "highest-rated":
         sortOption = { rating: -1, createdAt: -1 };
         break;
-      case 'lowest-rated':
+      case "lowest-rated":
         sortOption = { rating: 1, createdAt: -1 };
         break;
-      case 'most-liked':
+      case "most-liked":
         sortOption = { likeCount: -1, createdAt: -1 };
         break;
       default:
@@ -37,19 +37,19 @@ exports.getReviews = async (req, res, next) => {
 
     const reviews = await Review.find(query)
       .sort(sortOption)
-      .populate('book', 'title author coverImage')
-      .populate('user', 'username displayName avatar');
+      .populate("book", "title author coverImage")
+      .populate("user", "username displayName avatar");
 
     res.status(200).json({
       success: true,
       count: reviews.length,
-      reviews
+      reviews,
     });
   } catch (error) {
-    console.error('Get reviews error:', error);
+    console.error("Get reviews error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch reviews'
+      message: "Failed to fetch reviews",
     });
   }
 };
@@ -60,25 +60,25 @@ exports.getReviews = async (req, res, next) => {
 exports.getReview = async (req, res, next) => {
   try {
     const review = await Review.findById(req.params.id)
-      .populate('book', 'title author coverImage')
-      .populate('user', 'username displayName avatar');
+      .populate("book", "title author coverImage")
+      .populate("user", "username displayName avatar");
 
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      review
+      review,
     });
   } catch (error) {
-    console.error('Get review error:', error);
+    console.error("Get review error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch review'
+      message: "Failed to fetch review",
     });
   }
 };
@@ -95,20 +95,21 @@ exports.createReview = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: 'Book not found'
+        message: "Book not found",
       });
     }
 
     // Check if user already reviewed this book
     const existingReview = await Review.findOne({
       book: bookId,
-      user: req.user._id
+      user: req.user._id,
     });
 
     if (existingReview) {
       return res.status(400).json({
         success: false,
-        message: 'You have already reviewed this book. Please edit your existing review.'
+        message:
+          "You have already reviewed this book. Please edit your existing review.",
       });
     }
 
@@ -120,31 +121,31 @@ exports.createReview = async (req, res, next) => {
       title,
       content,
       readingDate,
-      spoilers: spoilers || false
+      spoilers: spoilers || false,
     });
 
     // Populate user info
-    await review.populate('user', 'username displayName avatar');
+    await review.populate("user", "username displayName avatar");
 
     res.status(201).json({
       success: true,
-      message: 'Review created successfully',
-      review
+      message: "Review created successfully",
+      review,
     });
   } catch (error) {
-    console.error('Create review error:', error);
+    console.error("Create review error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to create review'
+      message: "Failed to create review",
     });
   }
 };
@@ -159,7 +160,7 @@ exports.updateReview = async (req, res, next) => {
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
@@ -168,7 +169,7 @@ exports.updateReview = async (req, res, next) => {
     if (reviewUserId.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to update this review'
+        message: "Not authorized to update this review",
       });
     }
 
@@ -184,27 +185,27 @@ exports.updateReview = async (req, res, next) => {
     await review.save();
 
     // Populate user info
-    await review.populate('user', 'username displayName avatar');
+    await review.populate("user", "username displayName avatar");
 
     res.status(200).json({
       success: true,
-      message: 'Review updated successfully',
-      review
+      message: "Review updated successfully",
+      review,
     });
   } catch (error) {
-    console.error('Update review error:', error);
+    console.error("Update review error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to update review'
+      message: "Failed to update review",
     });
   }
 };
@@ -219,16 +220,19 @@ exports.deleteReview = async (req, res, next) => {
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
     // Check ownership or admin (handle both populated and unpopulated user field)
     const reviewUserId = review.user._id || review.user;
-    if (reviewUserId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    if (
+      reviewUserId.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
       return res.status(403).json({
         success: false,
-        message: 'Not authorized to delete this review'
+        message: "Not authorized to delete this review",
       });
     }
 
@@ -236,13 +240,13 @@ exports.deleteReview = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Review deleted successfully'
+      message: "Review deleted successfully",
     });
   } catch (error) {
-    console.error('Delete review error:', error);
+    console.error("Delete review error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete review'
+      message: "Failed to delete review",
     });
   }
 };
@@ -257,7 +261,7 @@ exports.toggleLike = async (req, res, next) => {
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'Review not found'
+        message: "Review not found",
       });
     }
 
@@ -265,15 +269,17 @@ exports.toggleLike = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Like toggled successfully',
+      message: "Like toggled successfully",
       likeCount: review.likeCount,
-      isLiked: review.likes.some(id => id.toString() === req.user._id.toString())
+      isLiked: review.likes.some(
+        (id) => id.toString() === req.user._id.toString(),
+      ),
     });
   } catch (error) {
-    console.error('Toggle like error:', error);
+    console.error("Toggle like error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to toggle like'
+      message: "Failed to toggle like",
     });
   }
 };
@@ -285,25 +291,25 @@ exports.getUserReviewForBook = async (req, res, next) => {
   try {
     const review = await Review.findOne({
       book: req.params.bookId,
-      user: req.user._id
-    }).populate('user', 'username displayName avatar');
+      user: req.user._id,
+    }).populate("user", "username displayName avatar");
 
     if (!review) {
       return res.status(404).json({
         success: false,
-        message: 'No review found'
+        message: "No review found",
       });
     }
 
     res.status(200).json({
       success: true,
-      review
+      review,
     });
   } catch (error) {
-    console.error('Get user review error:', error);
+    console.error("Get user review error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch review'
+      message: "Failed to fetch review",
     });
   }
 };

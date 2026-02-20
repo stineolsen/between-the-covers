@@ -1,12 +1,10 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 // Generate JWT token
 const generateToken = (userId, role) => {
-  return jwt.sign(
-    { id: userId, role: role },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
-  );
+  return jwt.sign({ id: userId, role: role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || "7d",
+  });
 };
 
 // Verify JWT token
@@ -25,13 +23,13 @@ const sendTokenResponse = (user, statusCode, res) => {
   const options = {
     expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
     httpOnly: true, // Cannot be accessed via JavaScript
-    secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // 'none' for cross-domain in production
+    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // 'none' for cross-domain in production
   };
 
   res
     .status(statusCode)
-    .cookie('token', token, options)
+    .cookie("token", token, options)
     .json({
       success: true,
       user: {
@@ -41,14 +39,14 @@ const sendTokenResponse = (user, statusCode, res) => {
         displayName: user.displayName,
         avatar: user.avatar,
         role: user.role,
-        status: user.status
+        status: user.status,
       },
-      token
+      token,
     });
 };
 
 module.exports = {
   generateToken,
   verifyToken,
-  sendTokenResponse
+  sendTokenResponse,
 };

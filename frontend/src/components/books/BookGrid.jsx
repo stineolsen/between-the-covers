@@ -1,4 +1,4 @@
-import BookCard from './BookCard';
+import BookCard from "./BookCard";
 
 const BookGrid = ({ books, loading, error }) => {
   if (loading) {
@@ -25,7 +25,9 @@ const BookGrid = ({ books, loading, error }) => {
     return (
       <div className="card text-center py-20">
         <div className="text-6xl mb-4">📚</div>
-        <p className="text-xl text-gray-700 font-semibold mb-2">Ingen bøker funnet</p>
+        <p className="text-xl text-gray-700 font-semibold mb-2">
+          Ingen bøker funnet
+        </p>
         <p className="text-gray-600">Prøv å justere søk eller filtere</p>
       </div>
     );

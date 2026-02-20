@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const {
   getReviews,
   getReview,
@@ -6,9 +6,9 @@ const {
   updateReview,
   deleteReview,
   toggleLike,
-  getUserReviewForBook
-} = require('../controllers/reviewController');
-const { protect } = require('../middleware/authMiddleware');
+  getUserReviewForBook,
+} = require("../controllers/reviewController");
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -16,16 +16,16 @@ const router = express.Router();
 router.use(protect);
 
 // Public routes (for logged-in users)
-router.get('/', getReviews);
-router.get('/:id', getReview);
-router.get('/book/:bookId/user', getUserReviewForBook);
+router.get("/", getReviews);
+router.get("/:id", getReview);
+router.get("/book/:bookId/user", getUserReviewForBook);
 
 // Create, update, delete (member routes)
-router.post('/', createReview);
-router.put('/:id', updateReview);
-router.delete('/:id', deleteReview);
+router.post("/", createReview);
+router.put("/:id", updateReview);
+router.delete("/:id", deleteReview);
 
 // Like functionality
-router.post('/:id/like', toggleLike);
+router.post("/:id/like", toggleLike);
 
 module.exports = router;

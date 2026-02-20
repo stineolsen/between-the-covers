@@ -1,40 +1,49 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { booksApi } from '../api/booksApi';
-import { useAuth } from '../contexts/AuthContext';
-import BookGrid from '../components/books/BookGrid';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { booksApi } from "../api/booksApi";
+import { useAuth } from "../contexts/AuthContext";
+import BookGrid from "../components/books/BookGrid";
 
 const Books = () => {
   const { isAdmin } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   // Filter states - restored from sessionStorage so filters persist when navigating back
-  const savedFilters = JSON.parse(sessionStorage.getItem('bookFilters') || '{}');
-  const [search, setSearch] = useState(savedFilters.search || '');
-  const [bookclubOnly, setBookclubOnly] = useState(savedFilters.bookclubOnly || false);
-  const [audiobookOnly, setAudiobookOnly] = useState(savedFilters.audiobookOnly || false);
-  const [genre, setGenre] = useState(savedFilters.genre || '');
-  const [sort, setSort] = useState(savedFilters.sort || 'newest');
+  const savedFilters = JSON.parse(
+    sessionStorage.getItem("bookFilters") || "{}",
+  );
+  const [search, setSearch] = useState(savedFilters.search || "");
+  const [bookclubOnly, setBookclubOnly] = useState(
+    savedFilters.bookclubOnly || false,
+  );
+  const [audiobookOnly, setAudiobookOnly] = useState(
+    savedFilters.audiobookOnly || false,
+  );
+  const [genre, setGenre] = useState(savedFilters.genre || "");
+  const [sort, setSort] = useState(savedFilters.sort || "newest");
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
-    sessionStorage.setItem('bookFilters', JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort }));
+    sessionStorage.setItem(
+      "bookFilters",
+      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort }),
+    );
   }, [search, bookclubOnly, audiobookOnly, genre, sort]);
 
   // Available genres (you can make this dynamic by fetching from books)
   const availableGenres = [
-    'Fiction',
-    'Non-Fiction',
-    'Mystery',
-    'Thriller',
-    'Romance',
-    'Science Fiction',
-    'Fantasy',
-    'Biography',
-    'History',
-    'Self-Help'
+    "Fiction",
+    "Non-Fiction",
+    "Mystery",
+    "Thriller",
+    "Romance",
+    "Science Fiction",
+    "Fantasy",
+    "Biography",
+    "History",
+    "Self-Help",
   ];
 
   useEffect(() => {
@@ -44,20 +53,20 @@ const Books = () => {
   const fetchBooks = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const params = {};
       if (search) params.search = search;
-      if (bookclubOnly) params.bookclubOnly = 'true';
-      if (audiobookOnly) params.audiobookOnly = 'true';
+      if (bookclubOnly) params.bookclubOnly = "true";
+      if (audiobookOnly) params.audiobookOnly = "true";
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
 
       const data = await booksApi.getBooks(params);
       setBooks(data.books);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load books');
-      console.error('Error fetching books:', err);
+      setError(err.response?.data?.message || "Failed to load books");
+      console.error("Error fetching books:", err);
     } finally {
       setLoading(false);
     }
@@ -68,12 +77,12 @@ const Books = () => {
   };
 
   const clearFilters = () => {
-    setSearch('');
+    setSearch("");
     setBookclubOnly(false);
     setAudiobookOnly(false);
-    setGenre('');
-    setSort('newest');
-    sessionStorage.removeItem('bookFilters');
+    setGenre("");
+    setSort("newest");
+    sessionStorage.removeItem("bookFilters");
   };
 
   return (
@@ -86,7 +95,8 @@ const Books = () => {
               📚 Bibilotek
             </h1>
             <p className="text-gray-700 text-lg">
-              {books.length} {books.length === 1 ? 'bok' : 'bøker'} i vårt bibilotek
+              {books.length} {books.length === 1 ? "bok" : "bøker"} i vårt
+              bibilotek
             </p>
           </div>
 
@@ -123,7 +133,10 @@ const Books = () => {
                 onChange={(e) => setBookclubOnly(e.target.checked)}
                 className="w-5 h-5 rounded cursor-pointer"
               />
-              <label htmlFor="bookclubOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+              <label
+                htmlFor="bookclubOnly"
+                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
+              >
                 📅 Klubbens bøker
               </label>
             </div>
@@ -137,7 +150,10 @@ const Books = () => {
                 onChange={(e) => setAudiobookOnly(e.target.checked)}
                 className="w-5 h-5 rounded cursor-pointer"
               />
-              <label htmlFor="audiobookOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
+              <label
+                htmlFor="audiobookOnly"
+                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
+              >
                 🎧 Lydbøker
               </label>
             </div>
@@ -166,11 +182,21 @@ const Books = () => {
               </label>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setGenre('')}
+                  onClick={() => setGenre("")}
                   className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
-                  style={genre === ''
-                    ? { background: 'var(--color-primary)', color: 'white', border: '1.5px solid var(--color-primary)' }
-                    : { background: 'white', color: '#6B5B95', border: '1.5px solid #6B5B95' }}
+                  style={
+                    genre === ""
+                      ? {
+                          background: "var(--color-primary)",
+                          color: "white",
+                          border: "1.5px solid var(--color-primary)",
+                        }
+                      : {
+                          background: "white",
+                          color: "#6B5B95",
+                          border: "1.5px solid #6B5B95",
+                        }
+                  }
                 >
                   Alle sjangere
                 </button>
@@ -179,9 +205,19 @@ const Books = () => {
                     key={g}
                     onClick={() => setGenre(g)}
                     className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
-                    style={genre === g
-                      ? { background: 'var(--color-primary)', color: 'white', border: '1.5px solid var(--color-primary)' }
-                      : { background: 'white', color: '#6B5B95', border: '1.5px solid #6B5B95' }}
+                    style={
+                      genre === g
+                        ? {
+                            background: "var(--color-primary)",
+                            color: "white",
+                            border: "1.5px solid var(--color-primary)",
+                          }
+                        : {
+                            background: "white",
+                            color: "#6B5B95",
+                            border: "1.5px solid #6B5B95",
+                          }
+                    }
                   >
                     {g}
                   </button>
@@ -194,7 +230,7 @@ const Books = () => {
               <button
                 onClick={clearFilters}
                 className="text-sm font-bold px-4 py-2 rounded-full bg-white hover:shadow-md transition-all transform hover:scale-105"
-                style={{ color: '#f5576c' }}
+                style={{ color: "#f5576c" }}
               >
                 ✖️ Fjern alt filtrering
               </button>

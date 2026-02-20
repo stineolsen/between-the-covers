@@ -1,9 +1,9 @@
-import api from './axiosConfig';
+import api from "./axiosConfig";
 
 export const reviewsApi = {
   // Get all reviews with optional filters
   getReviews: async (params = {}) => {
-    const response = await api.get('/api/reviews', { params });
+    const response = await api.get("/api/reviews", { params });
     return response.data;
   },
 
@@ -28,7 +28,7 @@ export const reviewsApi = {
 
   // Create review
   createReview: async (reviewData) => {
-    const response = await api.post('/api/reviews', reviewData);
+    const response = await api.post("/api/reviews", reviewData);
     return response.data;
   },
 
@@ -48,7 +48,7 @@ export const reviewsApi = {
   toggleLike: async (id) => {
     const response = await api.post(`/api/reviews/${id}/like`);
     return response.data;
-  }
+  },
 };
 
 export default reviewsApi;

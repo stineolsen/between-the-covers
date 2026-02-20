@@ -1,6 +1,6 @@
-const Book = require('../models/Book');
-const path = require('path');
-const fs = require('fs');
+const Book = require("../models/Book");
+const path = require("path");
+const fs = require("fs");
 
 // @desc    Get all books
 // @route   GET /api/books
@@ -18,13 +18,13 @@ exports.getBooks = async (req, res, next) => {
     }
 
     // Filter by bookclub books only (books with bookclubMonth set)
-    if (bookclubOnly === 'true') {
-      query.bookclubMonth = { $nin: [null, '', undefined] };
+    if (bookclubOnly === "true") {
+      query.bookclubMonth = { $nin: [null, "", undefined] };
     }
 
     // Filter by audiobook availability
-    if (audiobookOnly === 'true') {
-      query['libraryLinks.audiobook'] = { $nin: [null, '', undefined] };
+    if (audiobookOnly === "true") {
+      query["libraryLinks.audiobook"] = { $nin: [null, "", undefined] };
     }
 
     // Filter by genre
@@ -35,16 +35,16 @@ exports.getBooks = async (req, res, next) => {
     // Sort options
     let sortOptions = {};
     switch (sort) {
-      case 'title':
+      case "title":
         sortOptions = { title: 1 };
         break;
-      case 'author':
+      case "author":
         sortOptions = { author: 1 };
         break;
-      case 'rating':
+      case "rating":
         sortOptions = { averageRating: -1 };
         break;
-      case 'newest':
+      case "newest":
         sortOptions = { dateAdded: -1 };
         break;
       default:
@@ -53,12 +53,12 @@ exports.getBooks = async (req, res, next) => {
 
     const books = await Book.find(query)
       .sort(sortOptions)
-      .populate('addedBy', 'username displayName');
+      .populate("addedBy", "username displayName");
 
     res.status(200).json({
       success: true,
       count: books.length,
-      books
+      books,
     });
   } catch (error) {
     next(error);
@@ -70,19 +70,21 @@ exports.getBooks = async (req, res, next) => {
 // @access  Private
 exports.getBook = async (req, res, next) => {
   try {
-    const book = await Book.findById(req.params.id)
-      .populate('addedBy', 'username displayName');
+    const book = await Book.findById(req.params.id).populate(
+      "addedBy",
+      "username displayName",
+    );
 
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: 'Book not found'
+        message: "Book not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      book
+      book,
     });
   } catch (error) {
     next(error);
@@ -109,7 +111,7 @@ exports.createBook = async (req, res, next) => {
       bookclubMonth,
       libraryLinks,
       calibreId,
-      calibreDownloadLink
+      calibreDownloadLink,
     } = req.body;
 
     // Handle cover image upload
@@ -121,13 +123,13 @@ exports.createBook = async (req, res, next) => {
 
     // Parse genres if it's a string
     let parsedGenres = genres;
-    if (typeof genres === 'string') {
-      parsedGenres = genres.split(',').map(g => g.trim());
+    if (typeof genres === "string") {
+      parsedGenres = genres.split(",").map((g) => g.trim());
     }
 
     // Parse library links if it's a string
     let parsedLibraryLinks = libraryLinks;
-    if (typeof libraryLinks === 'string') {
+    if (typeof libraryLinks === "string") {
       try {
         parsedLibraryLinks = JSON.parse(libraryLinks);
       } catch (e) {
@@ -152,18 +154,22 @@ exports.createBook = async (req, res, next) => {
       libraryLinks: parsedLibraryLinks || {},
       calibreId: calibreId || null,
       calibreDownloadLink: calibreDownloadLink || null,
-      addedBy: req.user.id
+      addedBy: req.user.id,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Book created successfully',
-      book
+      message: "Book created successfully",
+      book,
     });
   } catch (error) {
     // If there was an error, delete uploaded file
     if (req.file) {
-      const filePath = path.join(__dirname, '../../uploads/books', req.file.filename);
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/books",
+        req.file.filename,
+      );
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -182,7 +188,7 @@ exports.updateBook = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: 'Book not found'
+        message: "Book not found",
       });
     }
 
@@ -201,14 +207,18 @@ exports.updateBook = async (req, res, next) => {
       bookclubMonth,
       libraryLinks,
       calibreId,
-      calibreDownloadLink
+      calibreDownloadLink,
     } = req.body;
 
     // Handle new cover image upload
     if (req.file) {
       // Delete old cover image if it exists
       if (book.coverImage) {
-        const oldImagePath = path.join(__dirname, '../../uploads/books', book.coverImage);
+        const oldImagePath = path.join(
+          __dirname,
+          "../../uploads/books",
+          book.coverImage,
+        );
         if (fs.existsSync(oldImagePath)) {
           fs.unlinkSync(oldImagePath);
         }
@@ -229,12 +239,13 @@ exports.updateBook = async (req, res, next) => {
     if (seriesNumber !== undefined) book.seriesNumber = seriesNumber || null;
     if (bookclubMonth !== undefined) book.bookclubMonth = bookclubMonth || null;
     if (calibreId !== undefined) book.calibreId = calibreId;
-    if (calibreDownloadLink !== undefined) book.calibreDownloadLink = calibreDownloadLink;
+    if (calibreDownloadLink !== undefined)
+      book.calibreDownloadLink = calibreDownloadLink;
 
     // Parse and update genres
     if (genres) {
-      if (typeof genres === 'string') {
-        book.genres = genres.split(',').map(g => g.trim());
+      if (typeof genres === "string") {
+        book.genres = genres.split(",").map((g) => g.trim());
       } else {
         book.genres = genres;
       }
@@ -242,7 +253,7 @@ exports.updateBook = async (req, res, next) => {
 
     // Parse and update library links
     if (libraryLinks) {
-      if (typeof libraryLinks === 'string') {
+      if (typeof libraryLinks === "string") {
         try {
           book.libraryLinks = JSON.parse(libraryLinks);
         } catch (e) {
@@ -257,13 +268,17 @@ exports.updateBook = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Book updated successfully',
-      book
+      message: "Book updated successfully",
+      book,
     });
   } catch (error) {
     // If there was an error, delete uploaded file
     if (req.file) {
-      const filePath = path.join(__dirname, '../../uploads/books', req.file.filename);
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/books",
+        req.file.filename,
+      );
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
@@ -282,13 +297,17 @@ exports.deleteBook = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: 'Book not found'
+        message: "Book not found",
       });
     }
 
     // Delete cover image if it exists
     if (book.coverImage) {
-      const imagePath = path.join(__dirname, '../../uploads/books', book.coverImage);
+      const imagePath = path.join(
+        __dirname,
+        "../../uploads/books",
+        book.coverImage,
+      );
       if (fs.existsSync(imagePath)) {
         fs.unlinkSync(imagePath);
       }
@@ -298,7 +317,7 @@ exports.deleteBook = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Book deleted successfully'
+      message: "Book deleted successfully",
     });
   } catch (error) {
     next(error);
@@ -312,21 +331,21 @@ exports.getBooksByStatus = async (req, res, next) => {
   try {
     const { status } = req.params;
 
-    if (!['to-read', 'currently-reading', 'read'].includes(status)) {
+    if (!["to-read", "currently-reading", "read"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status'
+        message: "Invalid status",
       });
     }
 
     const books = await Book.find({ status })
       .sort({ dateFinished: -1, dateAdded: -1 })
-      .populate('addedBy', 'username displayName');
+      .populate("addedBy", "username displayName");
 
     res.status(200).json({
       success: true,
       count: books.length,
-      books
+      books,
     });
   } catch (error) {
     next(error);
@@ -343,7 +362,11 @@ exports.uploadCover = async (req, res, next) => {
     if (!book) {
       // Delete uploaded file if book not found
       if (req.file) {
-        const filePath = path.join(__dirname, '../../uploads/books', req.file.filename);
+        const filePath = path.join(
+          __dirname,
+          "../../uploads/books",
+          req.file.filename,
+        );
         if (fs.existsSync(filePath)) {
           fs.unlinkSync(filePath);
         }
@@ -351,20 +374,24 @@ exports.uploadCover = async (req, res, next) => {
 
       return res.status(404).json({
         success: false,
-        message: 'Book not found'
+        message: "Book not found",
       });
     }
 
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'Please upload an image file'
+        message: "Please upload an image file",
       });
     }
 
     // Delete old cover image if it exists
     if (book.coverImage) {
-      const oldImagePath = path.join(__dirname, '../../uploads/books', book.coverImage);
+      const oldImagePath = path.join(
+        __dirname,
+        "../../uploads/books",
+        book.coverImage,
+      );
       if (fs.existsSync(oldImagePath)) {
         fs.unlinkSync(oldImagePath);
       }
@@ -375,13 +402,17 @@ exports.uploadCover = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: 'Cover image uploaded successfully',
-      coverImage: book.coverImage
+      message: "Cover image uploaded successfully",
+      coverImage: book.coverImage,
     });
   } catch (error) {
     // If there was an error, delete uploaded file
     if (req.file) {
-      const filePath = path.join(__dirname, '../../uploads/books', req.file.filename);
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/books",
+        req.file.filename,
+      );
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }

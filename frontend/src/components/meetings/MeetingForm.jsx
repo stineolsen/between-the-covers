@@ -1,40 +1,42 @@
-import { useState, useEffect } from 'react';
-import { meetingsApi } from '../../api/meetingsApi';
-import { booksApi } from '../../api/booksApi';
+import { useState, useEffect } from "react";
+import { meetingsApi } from "../../api/meetingsApi";
+import { booksApi } from "../../api/booksApi";
 
 const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
   const isEditing = !!meeting;
 
   const [formData, setFormData] = useState({
-    title: '',
-    date: '',
-    time: '',
-    location: '',
-    description: '',
-    bookId: '',
+    title: "",
+    date: "",
+    time: "",
+    location: "",
+    description: "",
+    bookId: "",
     maxAttendees: 0,
-    status: 'upcoming',
-    notes: ''
+    status: "upcoming",
+    notes: "",
   });
 
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchBooks();
 
     if (meeting) {
       setFormData({
-        title: meeting.title || '',
-        date: meeting.date ? new Date(meeting.date).toISOString().split('T')[0] : '',
-        time: meeting.time || '',
-        location: meeting.location || '',
-        description: meeting.description || '',
-        bookId: meeting.book?._id || '',
+        title: meeting.title || "",
+        date: meeting.date
+          ? new Date(meeting.date).toISOString().split("T")[0]
+          : "",
+        time: meeting.time || "",
+        location: meeting.location || "",
+        description: meeting.description || "",
+        bookId: meeting.book?._id || "",
         maxAttendees: meeting.maxAttendees || 0,
-        status: meeting.status || 'upcoming',
-        notes: meeting.notes || ''
+        status: meeting.status || "upcoming",
+        notes: meeting.notes || "",
       });
     }
   }, [meeting]);
@@ -42,25 +44,27 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
   const fetchBooks = async () => {
     try {
       const data = await booksApi.getBooks();
-      const sorted = (data.books || []).sort((a, b) => a.title.localeCompare(b.title, 'nb'));
+      const sorted = (data.books || []).sort((a, b) =>
+        a.title.localeCompare(b.title, "nb"),
+      );
       setBooks(sorted);
     } catch (err) {
-      console.error('Failed to fetch books:', err);
+      console.error("Failed to fetch books:", err);
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const meetingData = {
@@ -72,7 +76,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
         bookId: formData.bookId || null,
         maxAttendees: parseInt(formData.maxAttendees) || 0,
         status: formData.status,
-        notes: formData.notes
+        notes: formData.notes,
       };
 
       if (isEditing) {
@@ -83,8 +87,11 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
 
       onSuccess();
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} meeting`);
-      console.error('Error saving meeting:', err);
+      setError(
+        err.response?.data?.message ||
+          `Failed to ${isEditing ? "update" : "create"} meeting`,
+      );
+      console.error("Error saving meeting:", err);
     } finally {
       setLoading(false);
     }
@@ -93,11 +100,14 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
   return (
     <div className="container-gradient animate-fadeIn">
       <h2 className="text-3xl font-bold gradient-text mb-6">
-        {isEditing ? '✏️ Rediger møte' : '✨ Opprett nytt møte'}
+        {isEditing ? "✏️ Rediger møte" : "✨ Opprett nytt møte"}
       </h2>
 
       {error && (
-        <div className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+        <div
+          className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
+          style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+        >
           {error}
         </div>
       )}
@@ -238,7 +248,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
         )}
 
         {/* Notes (for past meetings) */}
-        {isEditing && formData.status === 'past' && (
+        {isEditing && formData.status === "past" && (
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
               Møtenotater / Sammendrag
@@ -261,13 +271,22 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
             disabled={loading}
             className="btn-primary flex-1 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? (isEditing ? '⏳ Oppdaterer...' : '⏳ Oppretter...') : (isEditing ? '✏️ Oppdater møte' : '✨ Opprett møte')}
+            {loading
+              ? isEditing
+                ? "⏳ Oppdaterer..."
+                : "⏳ Oppretter..."
+              : isEditing
+                ? "✏️ Oppdater møte"
+                : "✨ Opprett møte"}
           </button>
           <button
             type="button"
             onClick={onCancel}
             className="px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-lg"
-            style={{ background: 'linear-gradient(135deg, #9ca3af, #6b7280)', color: 'white' }}
+            style={{
+              background: "linear-gradient(135deg, #9ca3af, #6b7280)",
+              color: "white",
+            }}
           >
             Avbryt
           </button>

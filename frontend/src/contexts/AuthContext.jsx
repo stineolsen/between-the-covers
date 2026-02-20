@@ -1,12 +1,12 @@
-import { createContext, useState, useContext, useEffect } from 'react';
-import { authApi } from '../api/authApi';
+import { createContext, useState, useContext, useEffect } from "react";
+import { authApi } from "../api/authApi";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       // Check if token exists in localStorage
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
         setUser(null);
         setLoading(false);
@@ -35,7 +35,7 @@ export const AuthProvider = ({ children }) => {
       setUser(data.user);
     } catch (error) {
       setUser(null);
-      localStorage.removeItem('token'); // Clear invalid token
+      localStorage.removeItem("token"); // Clear invalid token
     } finally {
       setLoading(false);
     }
@@ -48,13 +48,13 @@ export const AuthProvider = ({ children }) => {
 
       // Store token in localStorage for mobile compatibility
       if (data.token) {
-        localStorage.setItem('token', data.token);
+        localStorage.setItem("token", data.token);
       }
 
       setUser(data.user);
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Greide ikke logge inn';
+      const message = error.response?.data?.message || "Greide ikke logge inn";
       setError(message);
       return { success: false, error: message };
     }
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       const data = await authApi.register(userData);
       return { success: true, message: data.message };
     } catch (error) {
-      const message = error.response?.data?.message || 'Greide ikke registrere';
+      const message = error.response?.data?.message || "Greide ikke registrere";
       setError(message);
       return { success: false, error: message };
     }
@@ -75,21 +75,21 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await authApi.logout();
-      localStorage.removeItem('token'); // Clear token
+      localStorage.removeItem("token"); // Clear token
       setUser(null);
       return { success: true };
     } catch (error) {
-      console.error('Logg ut error:', error);
+      console.error("Logg ut error:", error);
       // Clear user and token anyway
-      localStorage.removeItem('token');
+      localStorage.removeItem("token");
       setUser(null);
       return { success: true };
     }
   };
 
   const isAuthenticated = !!user;
-  const isAdmin = user?.role === 'admin';
-  const isApproved = user?.status === 'approved';
+  const isAdmin = user?.role === "admin";
+  const isApproved = user?.status === "approved";
 
   const value = {
     user,
@@ -102,7 +102,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin,
     isApproved,
-    checkAuth
+    checkAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-const AvatarFallback = ({ src, alt, className = '', name = '' }) => {
+const AvatarFallback = ({ src, alt, className = "", name = "" }) => {
   const [imageError, setImageError] = useState(false);
 
   // Get initials from name
   const getInitials = () => {
-    if (!name) return '?';
-    const parts = name.trim().split(' ');
+    if (!name) return "?";
+    const parts = name.trim().split(" ");
     if (parts.length >= 2) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
@@ -19,7 +19,7 @@ const AvatarFallback = ({ src, alt, className = '', name = '' }) => {
       <div
         className={`${className} flex items-center justify-center font-bold text-white`}
         style={{
-          background: 'linear-gradient(135deg, #667eea, #764ba2)'
+          background: "linear-gradient(135deg, #667eea, #764ba2)",
         }}
       >
         {getInitials()}

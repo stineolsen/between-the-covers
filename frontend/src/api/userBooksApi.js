@@ -1,9 +1,9 @@
-import api from './axiosConfig';
+import api from "./axiosConfig";
 
 export const userBooksApi = {
   // Get all user's books (optionally filtered by status)
   getUserBooks: async (params = {}) => {
-    const response = await api.get('/api/user-books', { params });
+    const response = await api.get("/api/user-books", { params });
     return response.data;
   },
 
@@ -21,11 +21,11 @@ export const userBooksApi = {
   },
 
   // Set/update reading status for a book
-  setBookStatus: async (bookId, status, notes = '') => {
-    const response = await api.post('/api/user-books', {
+  setBookStatus: async (bookId, status, notes = "") => {
+    const response = await api.post("/api/user-books", {
       bookId,
       status,
-      notes
+      notes,
     });
     return response.data;
   },
@@ -44,9 +44,9 @@ export const userBooksApi = {
 
   // Get reading statistics
   getReadingStats: async () => {
-    const response = await api.get('/api/user-books/stats');
+    const response = await api.get("/api/user-books/stats");
     return response.data;
-  }
+  },
 };
 
 export default userBooksApi;

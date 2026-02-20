@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
@@ -11,14 +11,13 @@ const connectDB = async () => {
     console.log(`MongoDB Connected: ${conn.connection.host}`);
 
     // Handle connection events
-    mongoose.connection.on('error', (err) => {
+    mongoose.connection.on("error", (err) => {
       console.error(`MongoDB connection error: ${err}`);
     });
 
-    mongoose.connection.on('disconnected', () => {
-      console.log('MongoDB disconnected');
+    mongoose.connection.on("disconnected", () => {
+      console.log("MongoDB disconnected");
     });
-
   } catch (error) {
     console.error(`Error: ${error.message}`);
     process.exit(1);

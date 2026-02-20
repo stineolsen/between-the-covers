@@ -1,5 +1,5 @@
-const Product = require('../models/Product');
-const Order = require('../models/Order');
+const Product = require("../models/Product");
+const Order = require("../models/Order");
 
 // @desc    Get all products (with optional filters)
 // @route   GET /api/products
@@ -14,20 +14,20 @@ exports.getProducts = async (req, res) => {
     if (category) query.category = category;
 
     // Filter by availability
-    if (available === 'true') query.isAvailable = true;
+    if (available === "true") query.isAvailable = true;
 
     const products = await Product.find(query).sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
       count: products.length,
-      products
+      products,
     });
   } catch (error) {
-    console.error('Get products error:', error);
+    console.error("Get products error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch products'
+      message: "Failed to fetch products",
     });
   }
 };
@@ -42,19 +42,19 @@ exports.getProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: "Product not found",
       });
     }
 
     res.status(200).json({
       success: true,
-      product
+      product,
     });
   } catch (error) {
-    console.error('Get product error:', error);
+    console.error("Get product error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch product'
+      message: "Failed to fetch product",
     });
   }
 };
@@ -64,38 +64,47 @@ exports.getProduct = async (req, res) => {
 // @access  Private (Admin only)
 exports.createProduct = async (req, res) => {
   try {
-    const { name, description, price, currency, category, stock, bookId, images } = req.body;
+    const {
+      name,
+      description,
+      price,
+      currency,
+      category,
+      stock,
+      bookId,
+      images,
+    } = req.body;
 
     const product = await Product.create({
       name,
       description,
       price,
-      currency: currency || 'NOK',
-      category: category || 'annet',
+      currency: currency || "NOK",
+      category: category || "annet",
       stock: stock || 0,
       book: bookId || null,
-      images: images || []
+      images: images || [],
     });
 
     res.status(201).json({
       success: true,
-      message: 'Product created successfully',
-      product
+      message: "Product created successfully",
+      product,
     });
   } catch (error) {
-    console.error('Create product error:', error);
+    console.error("Create product error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to create product'
+      message: "Failed to create product",
     });
   }
 };
@@ -105,14 +114,24 @@ exports.createProduct = async (req, res) => {
 // @access  Private (Admin only)
 exports.updateProduct = async (req, res) => {
   try {
-    const { name, description, price, currency, category, stock, isAvailable, bookId, images } = req.body;
+    const {
+      name,
+      description,
+      price,
+      currency,
+      category,
+      stock,
+      isAvailable,
+      bookId,
+      images,
+    } = req.body;
 
     const product = await Product.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: "Product not found",
       });
     }
 
@@ -131,23 +150,23 @@ exports.updateProduct = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Product updated successfully',
-      product
+      message: "Product updated successfully",
+      product,
     });
   } catch (error) {
-    console.error('Update product error:', error);
+    console.error("Update product error:", error);
 
-    if (error.name === 'ValidationError') {
-      const messages = Object.values(error.errors).map(err => err.message);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: messages.join(', ')
+        message: messages.join(", "),
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to update product'
+      message: "Failed to update product",
     });
   }
 };
@@ -162,7 +181,7 @@ exports.deleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({
         success: false,
-        message: 'Product not found'
+        message: "Product not found",
       });
     }
 
@@ -170,13 +189,13 @@ exports.deleteProduct = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Product deleted successfully'
+      message: "Product deleted successfully",
     });
   } catch (error) {
-    console.error('Delete product error:', error);
+    console.error("Delete product error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete product'
+      message: "Failed to delete product",
     });
   }
 };
@@ -192,7 +211,7 @@ exports.submitContactOrder = async (req, res) => {
     if (!name || !email || !items || items.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide name, email, and at least one item'
+        message: "Please provide name, email, and at least one item",
       });
     }
 
@@ -206,21 +225,21 @@ exports.submitContactOrder = async (req, res) => {
       if (!product) {
         return res.status(404).json({
           success: false,
-          message: `Product not found: ${item.productId}`
+          message: `Product not found: ${item.productId}`,
         });
       }
 
       if (!product.isAvailable) {
         return res.status(400).json({
           success: false,
-          message: `Product "${product.name}" is not available`
+          message: `Product "${product.name}" is not available`,
         });
       }
 
       if (product.stock < item.quantity) {
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for "${product.name}". Only ${product.stock} available.`
+          message: `Insufficient stock for "${product.name}". Only ${product.stock} available.`,
         });
       }
 
@@ -234,7 +253,7 @@ exports.submitContactOrder = async (req, res) => {
         productName: product.name,
         quantity: item.quantity,
         price: product.price,
-        currency: product.currency
+        currency: product.currency,
       });
 
       // Reduce stock
@@ -252,32 +271,33 @@ exports.submitContactOrder = async (req, res) => {
       totalAmount,
       deliveryAddress,
       notes,
-      status: 'pending'
+      status: "pending",
     });
 
-    console.log('New order created:', {
+    console.log("New order created:", {
       orderId: order._id,
       user: req.user.email,
       name,
       totalAmount,
-      itemCount: items.length
+      itemCount: items.length,
     });
 
     res.status(201).json({
       success: true,
-      message: 'Order received! We will contact you shortly via email to arrange payment and delivery.',
+      message:
+        "Order received! We will contact you shortly via email to arrange payment and delivery.",
       order: {
         _id: order._id,
         status: order.status,
         totalAmount: order.totalAmount,
-        createdAt: order.createdAt
-      }
+        createdAt: order.createdAt,
+      },
     });
   } catch (error) {
-    console.error('Submit contact order error:', error);
+    console.error("Submit contact order error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to submit order'
+      message: "Failed to submit order",
     });
   }
 };
@@ -299,13 +319,13 @@ exports.getOrders = async (req, res) => {
     res.status(200).json({
       success: true,
       count: orders.length,
-      orders
+      orders,
     });
   } catch (error) {
-    console.error('Get orders error:', error);
+    console.error("Get orders error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch orders'
+      message: "Failed to fetch orders",
     });
   }
 };
@@ -320,7 +340,7 @@ exports.updateOrderStatus = async (req, res) => {
     if (!status) {
       return res.status(400).json({
         success: false,
-        message: 'Status is required'
+        message: "Status is required",
       });
     }
 
@@ -329,7 +349,7 @@ exports.updateOrderStatus = async (req, res) => {
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: 'Order not found'
+        message: "Order not found",
       });
     }
 
@@ -342,14 +362,14 @@ exports.updateOrderStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Order status updated successfully',
-      order
+      message: "Order status updated successfully",
+      order,
     });
   } catch (error) {
-    console.error('Update order status error:', error);
+    console.error("Update order status error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update order status'
+      message: "Failed to update order status",
     });
   }
 };

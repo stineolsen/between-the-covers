@@ -1,55 +1,55 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { booksApi } from '../../api/booksApi';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { booksApi } from "../../api/booksApi";
 
 const BookForm = ({ bookId = null, initialData = null }) => {
   const navigate = useNavigate();
   const isEditing = !!bookId;
 
   const [formData, setFormData] = useState({
-    title: '',
-    author: '',
-    isbn: '',
-    description: '',
-    publishedYear: '',
+    title: "",
+    author: "",
+    isbn: "",
+    description: "",
+    publishedYear: "",
     genres: [],
-    pageCount: '',
-    publisher: '',
-    language: 'Engelsk',
-    series: '',
-    seriesNumber: '',
-    bookclubMonth: '',
-    audiobookLink: '',
-    ebookLink: '',
-    calibreId: '',
-    calibreDownloadLink: ''
+    pageCount: "",
+    publisher: "",
+    language: "Engelsk",
+    series: "",
+    seriesNumber: "",
+    bookclubMonth: "",
+    audiobookLink: "",
+    ebookLink: "",
+    calibreId: "",
+    calibreDownloadLink: "",
   });
 
   const [coverImage, setCoverImage] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
-  const [genreInput, setGenreInput] = useState('');
+  const [genreInput, setGenreInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (initialData) {
       setFormData({
-        title: initialData.title || '',
-        author: initialData.author || '',
-        isbn: initialData.isbn || '',
-        description: initialData.description || '',
-        publishedYear: initialData.publishedYear || '',
+        title: initialData.title || "",
+        author: initialData.author || "",
+        isbn: initialData.isbn || "",
+        description: initialData.description || "",
+        publishedYear: initialData.publishedYear || "",
         genres: initialData.genres || [],
-        pageCount: initialData.pageCount || '',
-        publisher: initialData.publisher || '',
-        language: initialData.language || 'English',
-        series: initialData.series || '',
-        seriesNumber: initialData.seriesNumber || '',
-        bookclubMonth: initialData.bookclubMonth || '',
-        audiobookLink: initialData.libraryLinks?.audiobook || '',
-        ebookLink: initialData.libraryLinks?.ebook || '',
-        calibreId: initialData.calibreId || '',
-        calibreDownloadLink: initialData.calibreDownloadLink || ''
+        pageCount: initialData.pageCount || "",
+        publisher: initialData.publisher || "",
+        language: initialData.language || "English",
+        series: initialData.series || "",
+        seriesNumber: initialData.seriesNumber || "",
+        bookclubMonth: initialData.bookclubMonth || "",
+        audiobookLink: initialData.libraryLinks?.audiobook || "",
+        ebookLink: initialData.libraryLinks?.ebook || "",
+        calibreId: initialData.calibreId || "",
+        calibreDownloadLink: initialData.calibreDownloadLink || "",
       });
 
       if (initialData.coverImage) {
@@ -60,21 +60,21 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert('Vennligst velg en bildefil');
+      if (!file.type.startsWith("image/")) {
+        alert("Vennligst velg en bildefil");
         return;
       }
 
       // Validate file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        alert('Bildestørrelse må være mindre enn 5MB');
+        alert("Bildestørrelse må være mindre enn 5MB");
         return;
       }
 
@@ -91,25 +91,25 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
   const handleAddGenre = () => {
     if (genreInput.trim() && !formData.genres.includes(genreInput.trim())) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        genres: [...prev.genres, genreInput.trim()]
+        genres: [...prev.genres, genreInput.trim()],
       }));
-      setGenreInput('');
+      setGenreInput("");
     }
   };
 
   const handleRemoveGenre = (genreToRemove) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      genres: prev.genres.filter(g => g !== genreToRemove)
+      genres: prev.genres.filter((g) => g !== genreToRemove),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const bookData = {
@@ -117,20 +117,26 @@ const BookForm = ({ bookId = null, initialData = null }) => {
         author: formData.author,
         isbn: formData.isbn || undefined,
         description: formData.description,
-        publishedYear: formData.publishedYear ? parseInt(formData.publishedYear) : undefined,
+        publishedYear: formData.publishedYear
+          ? parseInt(formData.publishedYear)
+          : undefined,
         genres: formData.genres,
-        pageCount: formData.pageCount ? parseInt(formData.pageCount) : undefined,
+        pageCount: formData.pageCount
+          ? parseInt(formData.pageCount)
+          : undefined,
         publisher: formData.publisher,
         language: formData.language,
         series: formData.series || null,
-        seriesNumber: formData.seriesNumber ? parseInt(formData.seriesNumber) : null,
+        seriesNumber: formData.seriesNumber
+          ? parseInt(formData.seriesNumber)
+          : null,
         bookclubMonth: formData.bookclubMonth || null,
         libraryLinks: {
           audiobook: formData.audiobookLink || null,
-          ebook: formData.ebookLink || null
+          ebook: formData.ebookLink || null,
         },
         calibreId: formData.calibreId || undefined,
-        calibreDownloadLink: formData.calibreDownloadLink || undefined
+        calibreDownloadLink: formData.calibreDownloadLink || undefined,
       };
 
       // Add cover image if selected
@@ -148,8 +154,11 @@ const BookForm = ({ bookId = null, initialData = null }) => {
       // Navigate to the book detail page
       navigate(`/books/${result.book._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || `Greide ikke ${isEditing ? 'oppdatere' : 'opprette'} bok`);
-      console.error('Lagre bok feilmelding:', err);
+      setError(
+        err.response?.data?.message ||
+          `Greide ikke ${isEditing ? "oppdatere" : "opprette"} bok`,
+      );
+      console.error("Lagre bok feilmelding:", err);
     } finally {
       setLoading(false);
     }
@@ -159,11 +168,14 @@ const BookForm = ({ bookId = null, initialData = null }) => {
     <div className="max-w-4xl mx-auto">
       <div className="container-gradient animate-fadeIn">
         <h2 className="text-4xl font-bold gradient-text mb-6">
-          {isEditing ? '✏️ Rediger bok' : '✨ Legg til ny bok'}
+          {isEditing ? "✏️ Rediger bok" : "✨ Legg til ny bok"}
         </h2>
 
         {error && (
-          <div className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+          <div
+            className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
+            style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+          >
             {error}
           </div>
         )}
@@ -177,7 +189,11 @@ const BookForm = ({ bookId = null, initialData = null }) => {
             <div className="flex items-start gap-4">
               {coverPreview && (
                 <div className="w-32 h-48 rounded-lg overflow-hidden shadow-md flex-shrink-0">
-                  <img src={coverPreview} alt="Omslagsbilde forhåndvisning" className="w-full h-full object-cover" />
+                  <img
+                    src={coverPreview}
+                    alt="Omslagsbilde forhåndvisning"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
               <div className="flex-1">
@@ -366,15 +382,31 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               <option value="">Ikke en bokklubb-bok</option>
               {(() => {
                 const options = [];
-                const months = ['Januar', 'Februar', 'Mars', 'April', 'Mai', 'Juni',
-                               'Juli', 'August', 'September', 'Oktober', 'November', 'Desember'];
+                const months = [
+                  "Januar",
+                  "Februar",
+                  "Mars",
+                  "April",
+                  "Mai",
+                  "Juni",
+                  "Juli",
+                  "August",
+                  "September",
+                  "Oktober",
+                  "November",
+                  "Desember",
+                ];
 
                 // Start from January 2025
                 const startDate = new Date(2025, 0, 1); // January 2025
 
                 // End 2 months from now
                 const now = new Date();
-                const endDate = new Date(now.getFullYear(), now.getMonth() + 2, 1);
+                const endDate = new Date(
+                  now.getFullYear(),
+                  now.getMonth() + 2,
+                  1,
+                );
 
                 // Generate all months from start to end
                 const current = new Date(startDate);
@@ -384,7 +416,11 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                   const monthName = months[monthIndex];
                   const value = `${monthName} ${year}`;
 
-                  options.push(<option key={value} value={value}>{value}</option>);
+                  options.push(
+                    <option key={value} value={value}>
+                      {value}
+                    </option>,
+                  );
 
                   // Move to next month
                   current.setMonth(current.getMonth() + 1);
@@ -394,7 +430,8 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               })()}
             </select>
             <p className="text-xs text-gray-500 mt-1">
-              Velg måned/år denne boken ble/vil bli lest av bokklubben, eller la være tom
+              Velg måned/år denne boken ble/vil bli lest av bokklubben, eller la
+              være tom
             </p>
           </div>
 
@@ -408,7 +445,9 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                 type="text"
                 value={genreInput}
                 onChange={(e) => setGenreInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Legg til' && (e.preventDefault(), handleAddGenre())}
+                onKeyPress={(e) =>
+                  e.key === "Legg til" && (e.preventDefault(), handleAddGenre())
+                }
                 className="input-field flex-1"
                 placeholder="Legg til en sjanger og trykk på legg til"
               />
@@ -425,7 +464,9 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                 <span
                   key={index}
                   className="text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg transition-all transform hover:scale-110"
-                  style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)' }}
+                  style={{
+                    background: "linear-gradient(135deg, #f093fb, #f5576c)",
+                  }}
                 >
                   {genre}
                   <button
@@ -441,8 +482,16 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           </div>
 
           {/* Library Links */}
-          <div className="p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}>
-            <h3 className="text-2xl font-bold gradient-text mb-4">📚 Library Links</h3>
+          <div
+            className="p-5 rounded-2xl"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
+            }}
+          >
+            <h3 className="text-2xl font-bold gradient-text mb-4">
+              📚 Library Links
+            </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -475,8 +524,16 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           </div>
 
           {/* Calibre-web Integration (Optional) */}
-          <div className="p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))' }}>
-            <h3 className="text-2xl font-bold gradient-text mb-4">📥 Calibre-web Integration (Optional)</h3>
+          <div
+            className="p-5 rounded-2xl"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))",
+            }}
+          >
+            <h3 className="text-2xl font-bold gradient-text mb-4">
+              📥 Calibre-web Integration (Optional)
+            </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -515,13 +572,22 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               disabled={loading}
               className="btn-primary flex-1 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (isEditing ? '⏳ Oppdaterer...' : '⏳ Oppretter...') : (isEditing ? '✏️ Oppdater bok' : '✨ Opprett bok')}
+              {loading
+                ? isEditing
+                  ? "⏳ Oppdaterer..."
+                  : "⏳ Oppretter..."
+                : isEditing
+                  ? "✏️ Oppdater bok"
+                  : "✨ Opprett bok"}
             </button>
             <button
               type="button"
-              onClick={() => navigate('/books')}
+              onClick={() => navigate("/books")}
               className="px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-lg"
-              style={{ background: 'linear-gradient(135deg, #9ca3af, #6b7280)', color: 'white' }}
+              style={{
+                background: "linear-gradient(135deg, #9ca3af, #6b7280)",
+                color: "white",
+              }}
             >
               Avbryt
             </button>

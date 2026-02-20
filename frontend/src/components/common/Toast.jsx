@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
 
-const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
+const Toast = ({ message, type = "success", onClose, duration = 3000 }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -11,30 +11,30 @@ const Toast = ({ message, type = 'success', onClose, duration = 3000 }) => {
 
   const getStyle = () => {
     switch (type) {
-      case 'success':
+      case "success":
         return {
-          background: 'linear-gradient(135deg, #10b981, #14b8a6)',
-          icon: '✅'
+          background: "linear-gradient(135deg, #10b981, #14b8a6)",
+          icon: "✅",
         };
-      case 'error':
+      case "error":
         return {
-          background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-          icon: '❌'
+          background: "linear-gradient(135deg, #ef4444, #dc2626)",
+          icon: "❌",
         };
-      case 'warning':
+      case "warning":
         return {
-          background: 'linear-gradient(135deg, #f59e0b, #f97316)',
-          icon: '⚠️'
+          background: "linear-gradient(135deg, #f59e0b, #f97316)",
+          icon: "⚠️",
         };
-      case 'info':
+      case "info":
         return {
-          background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-          icon: 'ℹ️'
+          background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+          icon: "ℹ️",
         };
       default:
         return {
-          background: 'linear-gradient(135deg, #667eea, #764ba2)',
-          icon: '📌'
+          background: "linear-gradient(135deg, #667eea, #764ba2)",
+          icon: "📌",
         };
     }
   };
