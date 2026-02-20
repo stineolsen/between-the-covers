@@ -85,6 +85,7 @@ const ReadingHistory = () => {
   const getFilteredBooks = () => {
     const currentYear = new Date().getFullYear();
     const lastYear = currentYear - 1;
+    const beforeYear = lastYear - 1;
 
     switch (filter) {
       case 'this-year':
@@ -96,6 +97,11 @@ const ReadingHistory = () => {
         return readBooks.filter(userBook => {
           const finishedDate = new Date(userBook.finishedAt);
           return finishedDate.getFullYear() === lastYear;
+        });
+      case "before": 
+      return readBooks.filter(userBook => {
+          const finishedDate = new Date(userBook.finishedAt);
+          return finishedDate.getFullYear() <= beforeYear;
         });
       default:
         return readBooks;
@@ -204,6 +210,16 @@ const ReadingHistory = () => {
             style={filter === 'last-year' ? { background: 'linear-gradient(135deg, #10b981, #14b8a6)' } : {}}
           >
             {new Date().getFullYear() - 1}
+          </button>
+
+        <button
+            onClick={() => setFilter('before')}
+            className={`px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              filter === 'before' ? 'text-white' : 'bg-white text-gray-700 hover:shadow-xl'
+            }`}
+            style={filter === 'before' ? { background: 'linear-gradient(135deg, #10b981, #14b8a6)' } : {}}
+          >
+            Før {new Date().getFullYear() - 1}
           </button>
         </div>
 
@@ -343,7 +359,7 @@ const ReadingHistory = () => {
           >
             <h3 className="text-2xl font-bold gradient-text mb-3">🎉 Fortsett lesing!</h3>
             <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed text-lg">
-              Du har lest {readBooks.length} {readBooks.length === 1 ? 'book' : 'books'}! Hver bok er et nytt eventyr!
+              Du har lest {readBooks.length} {readBooks.length === 1 ? 'bok' : 'bøker'}! Hver bok er et nytt eventyr!
               Fortsett det gode arbeidet og fortsett å utforske nye bøker og sjangere! 
             </p>
           </div>

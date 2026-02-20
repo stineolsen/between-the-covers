@@ -11,7 +11,7 @@ const ReviewCard = ({ review, onLike, onEdit, onDelete, showSpoilers = false }) 
   const isLiked = review.likes && review.likes.some(id => id === user?._id);
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    return new Date(date).toLocaleDateString('nb-NO', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'

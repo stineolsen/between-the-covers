@@ -45,7 +45,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <Link to="/history" className="text-white/90 hover:text-white transition-colors font-medium">
-                    📊 Din lesehistorie
+                    📊 Din lesehistorikk
                   </Link>
                 </li>
                 <li>
@@ -91,7 +91,7 @@ const Footer = () => {
             style={{ borderColor: 'rgba(255, 255, 255, 0.2)' }}
           >
             <p className="text-white/90 font-medium">
-              © {currentYear} Between The Covers. Lager med ❤️ for bokklubben.
+              © {currentYear} Between The Covers. Laget med ❤️ for bokklubben.
             </p>
           </div>
         </div>

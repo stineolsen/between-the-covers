@@ -83,10 +83,10 @@ const Books = () => {
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
             <h1 className="text-5xl font-bold gradient-text mb-3">
-              📚 Boksamling
+              📚 Bibilotek
             </h1>
             <p className="text-gray-700 text-lg">
-              {books.length} {books.length === 1 ? 'bok' : 'bøker'} i vår samling
+              {books.length} {books.length === 1 ? 'bok' : 'bøker'} i vårt bibilotek
             </p>
           </div>
 
@@ -124,7 +124,7 @@ const Books = () => {
                 className="w-5 h-5 rounded cursor-pointer"
               />
               <label htmlFor="bookclubOnly" className="text-sm font-bold text-gray-700 cursor-pointer select-none">
-                📅 Bare bokklubb bøker
+                📅 Klubbens bøker
               </label>
             </div>
 

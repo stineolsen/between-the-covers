@@ -43,7 +43,7 @@ const Navbar = () => {
                   Møter
                 </Link>
                 <Link to="/history" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
-                  Din lesehistorie
+                  Din lesehistorikk
                 </Link>
                 <Link to="/shop" className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110">
                   Butikk

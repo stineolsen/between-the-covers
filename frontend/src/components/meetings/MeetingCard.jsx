@@ -9,14 +9,14 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
 
   // Format date and time
   const meetingDate = new Date(meeting.date);
-  const formattedDate = meetingDate.toLocaleDateString('en-US', {
+  const formattedDate = meetingDate.toLocaleDateString('nb-NO', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
 
-  const formattedTime = meeting.time || meetingDate.toLocaleTimeString('en-US', {
+  const formattedTime = meeting.time || meetingDate.toLocaleTimeString('nb-NO', {
     hour: '2-digit',
     minute: '2-digit'
   });

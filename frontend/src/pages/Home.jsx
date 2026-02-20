@@ -9,8 +9,8 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h1 className="text-6xl font-bold gradient-text mb-4">
-            ✨ Velkommen til Between The Covers! 📚
+          <h1 className="text-5xl font-bold gradient-text mb-4">
+            ✨ VELKOMMEN TIL BETWEEN THE COVERS! 📚
           </h1>
           <p className="text-xl text-gray-700 max-w-2xl mx-auto">
             {user ? `Heisann ${user.displayName || user.username}! 👋` : 'Utforsk, diskuter og nyt en god bok i godt selskap!'}
@@ -39,13 +39,13 @@ const Home = () => {
             <div className="text-6xl mb-4 animate-bounce">🛒</div>
             <h3 className="text-2xl font-bold text-white mb-3">Bibilotek og butikk</h3>
             <p className="text-white/90 font-medium">
-              Ta en titt på vår boksamling og butikk.
+              Ta en titt på vårt bibilotek og butikk.
             </p>
           </div>
         </div>
 
         {/* Next Meeting */}
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <NextMeeting />
         </div>
       </div>

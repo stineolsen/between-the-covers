@@ -149,7 +149,7 @@ const Profile = () => {
                         : 'linear-gradient(135deg, #6b7280, #4b5563)',
                       color: 'white'
                     }}>
-                {user?.status}
+                {user.status === 'approved' ? 'godkjent' : 'venter'}
               </span>
             </div>
           </div>

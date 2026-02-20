@@ -41,7 +41,8 @@ export const usersApi = {
   // Helper to get avatar URL
   getAvatarUrl: (avatarPath) => {
     if (!avatarPath) return null;
-    return `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/uploads/avatars/${avatarPath}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    return `${apiUrl}/uploads/avatar/${avatarPath}`;
   },
 
   // Get list of default avatars

@@ -74,14 +74,14 @@ const NextMeeting = () => {
 
   // Format date and time
   const meetingDate = new Date(meeting.date);
-  const formattedDate = meetingDate.toLocaleDateString('en-US', {
+  const formattedDate = meetingDate.toLocaleDateString('nb-NO', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   });
 
-  const formattedTime = meeting.time || meetingDate.toLocaleTimeString('en-US', {
+  const formattedTime = meeting.time || meetingDate.toLocaleTimeString('nb-NO', {
     hour: '2-digit',
     minute: '2-digit'
   });
@@ -142,7 +142,7 @@ const NextMeeting = () => {
             >
               <h3 className="text-3xl font-bold mb-2">{meeting.title}</h3>
               <div className="flex items-center gap-2 text-lg mb-2">
-                <span>📅</span>
+                <span>📅</span>                                  
                 <span>{formattedDate}</span>
               </div>
               <div className="flex items-center gap-2 text-lg mb-2">
