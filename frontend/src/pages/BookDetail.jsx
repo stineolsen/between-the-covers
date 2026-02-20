@@ -214,15 +214,15 @@ const BookDetail = () => {
     <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Back Button */}
-        <Link to="/books" className="inline-flex items-center text-gray-600 hover:text-purple-700 mb-6 font-semibold transition-colors">
-          <span className="mr-2 btn-primary">←</span> Tilbake til bøker
+        <Link to="/books" className="inline-flex items-center text-gray-600 hover:text-purple-700 mb-3 font-semibold transition-colors">
+          <span className="mr-2 md:btn-primary">←</span> Tilbake til bøker
         </Link>
 
         {/* Light purple header card — cover + title/author/rating */}
-        <div className="rounded-2xl p-6 mb-6 animate-fadeIn flex flex-col md:flex-row gap-6 items-start"
+        <div className="rounded-2xl p-6 mb-6 animate-fadeIn flex flex-col grid grid-cols-3 md:flex-row gap-6 items-start"
           style={{ background: 'rgba(107, 91, 149, 0.08)', border: '1px solid rgba(107, 91, 149, 0.15)' }}>
           {/* Cover */}
-          <div className="w-36 flex-shrink-0">
+          <div className="col-span-1 w-36 flex-shrink-0">
             <img
               src={coverUrl || placeholderImage}
               alt={book.title}
@@ -230,7 +230,7 @@ const BookDetail = () => {
             />
           </div>
           {/* Title / Author / Rating / Status */}
-          <div className="flex-1 min-w-0">
+          <div className="col-span-2 flex-1 min-w-0 px-4">
             {book.bookclubMonth && (
               <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3"
                 style={{ border: '1.5px solid #6B5B95', color: '#6B5B95' }}>
@@ -261,7 +261,7 @@ const BookDetail = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 animate-fadeIn">
+        <div className="grid md:grid-cols-3 gap-4 animate-fadeIn">
           {/* Sidebar */}
           <div className="md:col-span-1">
             <div className="container-gradient sticky top-8">
@@ -270,14 +270,15 @@ const BookDetail = () => {
               {(book.libraryLinks?.audiobook || book.libraryLinks?.ebook) && (
                 <div className="space-y-3 mb-4">
                   <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide">Biblioteklenker</h3>
+                  <div className="grid grid-cols-2 gap-3 ">
                   {book.libraryLinks.audiobook && (
                     <a
                       href={book.libraryLinks.audiobook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full btn-primary text-center"
+                      className="md:w-full btn-primary text-center"
                     >
-                      🎧 Lydbok
+                      🎧 Lytt
                     </a>
                   )}
                   {book.libraryLinks.ebook && (
@@ -285,24 +286,13 @@ const BookDetail = () => {
                       href={book.libraryLinks.ebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full btn-primary text-center"
+                      className="md:w-full btn-primary text-center"
                     >
-                      📱 E-bok
+                      📱 Les
                     </a>
                   )}
                 </div>
-              )}
-
-              {/* Calibre Download Link (if available) */}
-              {book.calibreDownloadLink && (
-                <a
-                  href={book.calibreDownloadLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full btn-accent text-center mb-4"
-                >
-                  📥 Last ned fra Calibre
-                </a>
+                </div>
               )}
 
               {/* Admin Actions */}
@@ -352,7 +342,7 @@ const BookDetail = () => {
               )}
 
               {/* Book Details Grid */}
-              <div className="grid sm:grid-cols-2 gap-3 mb-6 p-4 rounded-xl bg-gray-50">
+              <div className="grid grid-cols-2 gap-3 mb-6 p-4 rounded-xl bg-gray-50">
                 {book.series && (
                   <div className="p-3 bg-white rounded-xl">
                     <h3 className="font-bold text-gray-900 text-sm mb-1">📚 Serie</h3>
@@ -362,7 +352,7 @@ const BookDetail = () => {
                   </div>
                 )}
                 {book.isbn && (
-                  <div className="p-3 bg-white rounded-xl">
+                  <div className="hidden sm:p-3 bg-white rounded-xl">
                     <h3 className="font-bold text-gray-900 text-sm mb-1">📖 ISBN</h3>
                     <p className="text-gray-700 font-medium">{book.isbn}</p>
                   </div>
@@ -380,7 +370,7 @@ const BookDetail = () => {
                   </div>
                 )}
                 {book.publisher && (
-                  <div className="p-3 bg-white rounded-xl">
+                  <div className="hidden sm:p-3 bg-white rounded-xl">
                     <h3 className="font-bold text-gray-900 text-sm mb-1">🏢 Utgiver</h3>
                     <p className="text-gray-700 font-medium">{book.publisher}</p>
                   </div>
@@ -392,7 +382,7 @@ const BookDetail = () => {
                   </div>
                 )}
                 {book.dateAdded && (
-                  <div className="p-3 bg-white rounded-xl">
+                  <div className="hidden sm:p-3 bg-white rounded-xl">
                     <h3 className="font-bold text-gray-900 text-sm mb-1">➕ Lagt til samling</h3>
                     <p className="text-gray-700 font-medium">{new Date(book.dateAdded).toLocaleDateString()}</p>
                   </div>

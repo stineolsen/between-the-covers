@@ -40,9 +40,9 @@ const BookCard = ({ book }) => {
         </h3>
         <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2 line-clamp-1">{book.author}</p>
 
-        {/* Series — hidden on mobile */}
+        {/* Series*/}
         {book.series && (
-          <p className="hidden sm:block text-xs text-purple-600 font-medium mb-2">
+          <p className="block text-xs text-purple-600 font-medium mb-2">
             {book.series}{book.seriesNumber ? ` #${book.seriesNumber}` : ''}
           </p>
         )}

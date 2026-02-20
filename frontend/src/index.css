@@ -12,7 +12,7 @@
 
   /* Minimal gradient for special elements only */
   --gradient-primary: linear-gradient(135deg, #6B5B95 0%, #544179 100%);
-  --gradient-secondary: linear-gradient(135deg, #ce4419 0%, #b33915 100%);
+  --gradient-secondary: linear-gradient(135deg, #d44aa87d 0%, #6B5B957d 100%);
 }
 
 /* Keyframe animations */
@@ -142,13 +142,14 @@
 
   /* Primary colored card variant */
   .card-gradient {
-    background: var(--color-primary);
+    background: var(--gradient-secondary);
     color: white;
     border-radius: 12px;
     padding: 2rem;
     box-shadow: 0 2px 8px rgba(107, 91, 149, 0.2);
     transition: box-shadow 0.2s ease;
   }
+  
 
   .card-gradient:hover {
     box-shadow: 0 4px 16px rgba(107, 91, 149, 0.3);
@@ -200,7 +201,8 @@
 body {
   background: var(--color-background);
   color: var(--color-text);
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif;
+  /*'Segoe UI', Tahoma, Geneva, Verdana, sans-serif*/;
   margin: 0;
   min-height: 100vh;
 }
@@ -208,6 +210,10 @@ body {
 /* Utility animation classes */
 .animate-fadeIn {
   animation: fadeIn 0.6s ease-out;
+}
+
+.animate-fadeInSlow {
+  animation: fadeIn 2s ease-out;
 }
 
 .animate-slideIn {
@@ -220,4 +226,12 @@ body {
 
 .animate-pulse {
   animation: pulse 2s infinite;
+}
+
+.animate-pulseSlow {
+  animation: pulse 4s infinite;
+}
+
+.react-icons {
+  vertical-align: middle;
 }

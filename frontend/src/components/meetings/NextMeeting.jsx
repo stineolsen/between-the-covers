@@ -113,7 +113,7 @@ const NextMeeting = () => {
       <div className="relative z-10">
         {/* Header */}
         <div className="text-center mb-6">
-          <div className="text-6xl mb-3 animate-bounce">🎉</div>
+          <div className="text-6xl mb-3 animate-pulse">👥</div>
           <h2 className="text-4xl font-bold gradient-text mb-2">Neste bokklubbmøte!</h2>
           {isToday && (
             <p className="text-2xl font-bold" style={{ color: '#f5576c' }}>

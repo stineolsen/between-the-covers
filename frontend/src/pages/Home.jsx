@@ -1,5 +1,8 @@
 import { useAuth } from '../contexts/AuthContext';
 import NextMeeting from '../components/meetings/NextMeeting';
+import { Link } from 'react-router-dom';
+import { LuCalendar } from 'react-icons/lu';
+
 
 const Home = () => {
   const { user } = useAuth();
@@ -10,7 +13,7 @@ const Home = () => {
         {/* Hero Section */}
         <div className="text-center mb-16 animate-fadeIn">
           <h1 className="text-5xl font-bold gradient-text mb-4">
-            ✨ VELKOMMEN TIL BETWEEN THE COVERS! 📚
+            Velkommen til between the covers!
           </h1>
           <p className="text-xl text-gray-700 max-w-2xl mx-auto">
             {user ? `Heisann ${user.displayName || user.username}! 👋` : 'Utforsk, diskuter og nyt en god bok i godt selskap!'}
@@ -18,29 +21,39 @@ const Home = () => {
         </div>
 
         {/* Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          <div className="card-gradient text-center">
-            <div className="text-6xl mb-4 animate-bounce">📖</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Bokanmeldelser</h3>
-            <p className="text-white/90 font-medium">
-              Del dine tanker og les hva andre syntes om bøkene som leses for tiden.
-            </p>
+        <div className="grid grid-cols-3 gap-8 mb-8">
+          <div className="card-gradient text-center px-4 py-4" style={{
+            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(251, 113, 133, 0.5))'
+          }}>
+            <Link to="/books">
+              <div className="text-4xl mb-4 animate-pulseSlow">📖</div>
+              <h3 className="text-xl font-bold text-white mb-3">Bøker</h3>
+              <p className="hidden sm:text-white/90 font-medium">
+                Bibilotek og anmeldelser.
+              </p>
+            </Link>
           </div>
 
-          <div className="card-gradient text-center">
-            <div className="text-6xl mb-4 animate-bounce">🗓️</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Møter</h3>
-            <p className="text-white/90 font-medium">
-              Bli med på våre gjevnlige møter for en god dose bokprat, yapping og gossip.
-            </p>
+          <div className="card-gradient text-center px-4 py-4" style={{
+            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(251, 113, 133, 0.5))'
+          }}>            <div className="text-4xl mb-4 animate-pulseSlow">🗓️</div>
+            <Link to="/meetings">
+              <h3 className="text-xl font-bold text-white mb-3">Møter</h3>
+              <p className="hidden sm:text-white/90 font-medium">
+                Hva skjer framover.
+              </p>
+            </Link>
           </div>
 
-          <div className="card-gradient text-center">
-            <div className="text-6xl mb-4 animate-bounce">🛒</div>
-            <h3 className="text-2xl font-bold text-white mb-3">Bibilotek og butikk</h3>
-            <p className="text-white/90 font-medium">
-              Ta en titt på vårt bibilotek og butikk.
-            </p>
+          <div className="card-gradient text-center px-4 py-4" style={{
+            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(251, 113, 133, 0.5))'
+          }}>            <Link to="/shop">
+              <div className="text-4xl mb-4 animate-pulseSlow">🛒</div>
+              <h3 className="text-xl font-bold text-white mb-3">Butikk</h3>
+              <p className="hidden sm:text-white/90 font-medium">
+                Ta en titt innom butikken.
+              </p>
+            </Link>
           </div>
         </div>
 

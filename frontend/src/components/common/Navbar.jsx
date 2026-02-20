@@ -116,7 +116,7 @@ const Navbar = () => {
                   className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
                   style={{ background: 'rgba(255, 255, 255, 0.1)' }}
                 >
-                  📊 Din lesehistorie
+                  📊 Historikk
                 </Link>
                 <Link
                   to="/shop"

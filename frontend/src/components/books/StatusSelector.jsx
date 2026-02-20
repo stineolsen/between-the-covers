@@ -11,14 +11,14 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
   const statuses = [
     {
       value: 'to-read',
-      label: '📚 Ønsker å lese',
+      label: '📚 TBR',
       icon: '📚',
       gradient: 'linear-gradient(135deg, #3b82f6, #6366f1)',
       description: 'Legg til på din leseliste'
     },
     {
       value: 'currently-reading',
-      label: '📖 Leser nå',
+      label: '📖 Leser',
       icon: '📖',
       gradient: 'linear-gradient(135deg, #f093fb, #f5576c)',
       description: 'Du leser denne nå'
@@ -50,9 +50,9 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-bold text-gray-900">📚 Din lesestatus</h3>
+      <h3 className="hidden sm:text-lg font-bold text-gray-900">📚 Din lesestatus</h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
         {statuses.map((status) => {
           const isSelected = selectedStatus === status.value;
 
@@ -82,15 +82,16 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
                 {status.label.replace(status.icon + ' ', '')}
               </div>
 
+
               {/* Description */}
-              <div className={`text-xs ${isSelected ? 'text-white/90' : 'text-gray-600'}`}>
+              <div className={`hidden sm:block text-xs ${isSelected ? 'text-white/90' : 'text-gray-600'}`}>
                 {status.description}
               </div>
 
               {/* Selected Indicator */}
               {isSelected && (
                 <div className="absolute top-2 right-2">
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
                     <span className="text-sm">✓</span>
                   </div>
                 </div>
@@ -102,7 +103,7 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
 
       {/* Current Status Display */}
       {selectedStatus && (
-        <div className="p-4 rounded-2xl text-center animate-fadeIn" style={{ background: 'rgba(102, 126, 234, 0.1)' }}>
+        <div className="hidden sm:p-4 rounded-2xl text-center animate-fadeIn" style={{ background: 'rgba(102, 126, 234, 0.1)' }}>
           <p className="text-sm font-bold text-gray-700">
             {selectedStatus === 'to-read' && '📚 Lagt til på din TBR-liste'}
             {selectedStatus === 'currently-reading' && '📖 Du leser denne boken for øyeblikket'}

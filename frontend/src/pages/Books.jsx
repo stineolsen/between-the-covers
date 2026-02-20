@@ -99,7 +99,7 @@ const Books = () => {
 
         {/* Filters */}
         <div className="container-gradient mb-8">
-          <div className="grid md:grid-cols-5 gap-4">
+          <div className="grid md:grid-cols-5 gap-1">
             {/* Search */}
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -162,7 +162,7 @@ const Books = () => {
             {/* Genre Filter */}
             <div className="md:col-span-4">
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                🎨 Sjanger
+                🎭 Sjanger
               </label>
               <div className="flex flex-wrap gap-2">
                 <button

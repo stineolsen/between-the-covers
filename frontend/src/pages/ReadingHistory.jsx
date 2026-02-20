@@ -137,15 +137,15 @@ const ReadingHistory = () => {
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8 animate-fadeIn">
-          <h1 className="text-5xl font-bold gradient-text mb-3 drop-shadow-lg">📚 Min lesehistorikk</h1>
-          <p className="text-xl text-gray font-medium max-w-2xl mx-auto">
+          <h1 className="text-5xl font-bold gradient-text mb-3 drop-shadow-lg">📚 Historikk</h1>
+          <p className="hidden sm:text-xl text-gray font-medium max-w-2xl mx-auto">
             Her kan du holde styr på bøker du har lest, både i bokklubben og ellers. 
           </p>
         </div>
 
         {/* Reading Statistics */}
         {stats && (
-          <div className="grid md:grid-cols-3 gap-6 mb-8 animate-fadeIn">
+          <div className="grid grid-cols-3 flex justify-center gap-4 py-5 gap-6 mb-8 animate-fadeIn">
             <div
               className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105"
               style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
@@ -161,7 +161,7 @@ const ReadingHistory = () => {
             >
               <div className="text-5xl mb-2">📖</div>
               <div className="text-4xl font-bold mb-1">{stats['currently-reading'] || 0}</div>
-              <div className="text-lg font-medium">Leser for øyeblikket</div>
+              <div className="text-lg font-medium">Leser nå</div>
             </div>
 
             <div
@@ -186,7 +186,7 @@ const ReadingHistory = () => {
         <div className="flex justify-center gap-4 mb-8 animate-fadeIn">
           <button
             onClick={() => setFilter('all')}
-            className={`px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+            className={`px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
               filter === 'all' ? 'text-white' : 'bg-white text-gray-700 hover:shadow-xl'
             }`}
             style={filter === 'all' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
@@ -195,29 +195,29 @@ const ReadingHistory = () => {
           </button>
           <button
             onClick={() => setFilter('this-year')}
-            className={`px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+            className={`px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
               filter === 'this-year' ? 'text-white' : 'bg-white text-gray-700 hover:shadow-xl'
             }`}
-            style={filter === 'this-year' ? { background: 'linear-gradient(135deg, #f093fb, #f5576c)' } : {}}
+            style={filter === 'this-year' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
           >
             {new Date().getFullYear()}
           </button>
           <button
             onClick={() => setFilter('last-year')}
-            className={`px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+            className={`px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
               filter === 'last-year' ? 'text-white' : 'bg-white text-gray-700 hover:shadow-xl'
             }`}
-            style={filter === 'last-year' ? { background: 'linear-gradient(135deg, #10b981, #14b8a6)' } : {}}
+            style={filter === 'last-year' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
           >
             {new Date().getFullYear() - 1}
           </button>
 
         <button
             onClick={() => setFilter('before')}
-            className={`px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+            className={`px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
               filter === 'before' ? 'text-white' : 'bg-white text-gray-700 hover:shadow-xl'
             }`}
-            style={filter === 'before' ? { background: 'linear-gradient(135deg, #10b981, #14b8a6)' } : {}}
+            style={filter === 'before' ? { background: 'linear-gradient(135deg, #667eea, #764ba2)' } : {}}
           >
             Før {new Date().getFullYear() - 1}
           </button>
@@ -245,19 +245,19 @@ const ReadingHistory = () => {
                 {/* Year Header */}
                 <div className="flex items-center gap-4 mb-6">
                   <div
-                    className="text-white px-6 py-3 rounded-full font-bold text-2xl shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}
+                    className="text-white px-6 py-1 rounded-full font-bold text-2xl shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)' }}
                   >
                     {year}
                   </div>
                   <div className="flex-1 h-1 rounded" style={{ background: 'linear-gradient(90deg, #667eea, transparent)' }}></div>
-                  <div className="text-white font-bold text-lg bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
-                    {booksByYear[year].length} {booksByYear[year].length === 1 ? 'book' : 'books'}
+                  <div className="text-gray-300 font-bold text-lg bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
+                    {booksByYear[year].length} {booksByYear[year].length === 1 ? 'bok' : 'bøker'}
                   </div>
                 </div>
 
                 {/* Books Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {booksByYear[year].map(userBook => {
                     const book = userBook.book;
                     if (!book) return null;
@@ -268,7 +268,7 @@ const ReadingHistory = () => {
                     return (
                       <div
                         key={userBook._id}
-                        className="container-gradient group transform transition-all hover:scale-105"
+                        className="container-gradient group transform transition-all hover:scale-105 px-5 py-5"
                       >
                         <Link to={`/books/${book._id}`} className="block">
                           {/* Book Cover */}

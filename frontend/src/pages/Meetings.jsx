@@ -101,10 +101,7 @@ const Meetings = () => {
           <>
             {/* Header */}
             <div className="text-center mb-8 animate-fadeIn">
-              <h1 className="text-5xl font-bold gradient-text mb-3">📅 Between the covers møter</h1>
-              <p className="text-xl text-gray-700 max-w-2xl mx-auto mb-6">
-                Bli med på bokdiskusjoner i godt selskap!
-              </p>
+              <h1 className="text-5xl font-bold gradient-text mb-3">📅 Hva skjer framover?</h1>
 
               {/* Admin: Create Meeting Button */}
               {isAdmin && (
@@ -128,7 +125,7 @@ const Meetings = () => {
             }`}
             style={activeTab === 'upcoming' ? { background: 'var(--color-primary)' } : {}}
           >
-            📅 Kommende
+            🗓️ Kommende
           </button>
           <button
             onClick={() => setActiveTab('past')}
@@ -139,7 +136,7 @@ const Meetings = () => {
             }`}
             style={activeTab === 'past' ? { background: 'var(--color-secondary)' } : {}}
           >
-            📚 Arkiverte møter
+            🗂️ Arkiverte møter
           </button>
         </div>
 
