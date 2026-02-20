@@ -54,7 +54,7 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
         📚 Din lesestatus
       </h3>
 
-      <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 sm:grid-cols-3 gap-2">
         {statuses.map((status) => {
           const isSelected = selectedStatus === status.value;
 
@@ -76,11 +76,11 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
               style={isSelected ? { background: status.gradient } : {}}
             >
               {/* Icon */}
-              <div className="text-3xl mb-2">{status.icon}</div>
+              <div className="text-xl sm:text-3xl mb-2">{status.icon}</div>
 
               {/* Label */}
               <div
-                className={`text-sm font-bold mb-1 ${isSelected ? "text-white" : "text-gray-900"}`}
+                className={`text-xs sm:text-sm font-bold mb-1 ${isSelected ? "text-white" : "text-gray-900"}`}
               >
                 {status.label.replace(status.icon + " ", "")}
               </div>

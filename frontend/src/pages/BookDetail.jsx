@@ -250,14 +250,14 @@ const BookDetail = () => {
 
         {/* Light purple header card — cover + title/author/rating */}
         <div
-          className="rounded-2xl p-6 mb-6 animate-fadeIn flex flex-col grid grid-cols-3 md:flex-row gap-6 items-start"
+          className="rounded-2xl p-2 sm:p-4 mb-6 animate-fadeIn flex flex-col grid grid-cols-3 md:flex-row gap-6 items-start"
           style={{
             background: "rgba(107, 91, 149, 0.08)",
             border: "1px solid rgba(107, 91, 149, 0.15)",
           }}
         >
           {/* Cover */}
-          <div className="col-span-1 w-36 flex-shrink-0">
+          <div className="col-span-1 w-30 sm:w-36 flex-shrink-0 p-1">
             <img
               src={coverUrl || placeholderImage}
               alt={book.title}
@@ -265,7 +265,7 @@ const BookDetail = () => {
             />
           </div>
           {/* Title / Author / Rating / Status */}
-          <div className="col-span-2 flex-1 min-w-0 px-4">
+          <div className="col-span-2 flex-1 px-3">
             {book.bookclubMonth && (
               <span
                 className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3"
@@ -274,10 +274,10 @@ const BookDetail = () => {
                 📅 {book.bookclubMonth}
               </span>
             )}
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
               {book.title}
             </h1>
-            <p className="text-lg text-gray-500 mb-4">av {book.author}</p>
+            <p className="text-md md:text-lg text-gray-500 mb-4">av {book.author}</p>
 
             {book.averageRating > 0 && (
               <div className="flex items-center gap-2 mb-4">
@@ -295,7 +295,7 @@ const BookDetail = () => {
             )}
 
             {/* User reading status */}
-            <div className="mb-2">
+            <div className="mb-1">
               <StatusSelector
                 currentStatus={userBookStatus}
                 onStatusChange={handleStatusChange}
@@ -388,7 +388,7 @@ const BookDetail = () => {
               )}
 
               {/* Book Details Grid */}
-              <div className="grid grid-cols-2 gap-3 mb-6 p-4 rounded-xl bg-gray-50">
+              <div className="grid grid-cols-2 gap-1 mb-6 p-2 rounded-xl bg-gray-50">
                 {book.series && (
                   <div className="p-3 bg-white rounded-xl">
                     <h3 className="font-bold text-gray-900 text-sm mb-1">

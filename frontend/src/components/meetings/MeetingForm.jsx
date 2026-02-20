@@ -49,7 +49,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
       );
       setBooks(sorted);
     } catch (err) {
-      console.error("Failed to fetch books:", err);
+      console.error("Greide ikke hente bøker:", err);
     }
   };
 
