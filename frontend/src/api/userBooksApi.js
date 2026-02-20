@@ -30,6 +30,12 @@ export const userBooksApi = {
     return response.data;
   },
 
+  // Update finished reading date
+  updateFinishedDate: async (id, finishedAt) => {
+    const response = await api.patch(`/api/user-books/${id}`, { finishedAt });
+    return response.data;
+  },
+
   // Remove book from user's list
   removeUserBook: async (id) => {
     const response = await api.delete(`/api/user-books/${id}`);

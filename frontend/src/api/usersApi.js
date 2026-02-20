@@ -47,11 +47,14 @@ export const usersApi = {
   // Get list of default avatars
   getDefaultAvatars: () => {
     return [
-      { name: 'default-purple.svg', label: 'Purple Book 📚' },
-      { name: 'default-pink.svg', label: 'Pink Flower 🌸' },
-      { name: 'default-teal.svg', label: 'Teal Art 🎨' },
-      { name: 'default-orange.svg', label: 'Orange Coffee ☕' },
-      { name: 'default-green.svg', label: 'Green Nature 🌿' }
+      { name: 'woman-1.png', label: 'Woman' },
+      { name: 'woman-2.png', label: 'Woman' },
+      { name: 'woman-3.png', label: 'Woman' },
+      { name: 'woman-4.png', label: 'Woman' },
+      { name: 'woman-old.png', label: 'Woman' },
+      { name: 'girl-1.png', label: 'Girl' },
+      { name: 'girl-2.png', label: 'Girl' },
+      { name: 'woman-reading.png', label: 'Woman' }
     ];
   }
 };

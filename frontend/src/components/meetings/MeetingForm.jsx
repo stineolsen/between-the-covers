@@ -42,7 +42,8 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
   const fetchBooks = async () => {
     try {
       const data = await booksApi.getBooks();
-      setBooks(data.books || []);
+      const sorted = (data.books || []).sort((a, b) => a.title.localeCompare(b.title, 'nb'));
+      setBooks(sorted);
     } catch (err) {
       console.error('Failed to fetch books:', err);
     }

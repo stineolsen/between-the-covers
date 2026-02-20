@@ -18,6 +18,7 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const [descExpanded, setDescExpanded] = useState(false);
 
   // Review states
   const [reviews, setReviews] = useState([]);
@@ -213,40 +214,68 @@ const BookDetail = () => {
     <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4">
         {/* Back Button */}
-        <Link to="/books" className="inline-flex items-center text-white hover:text-white/80 mb-6 font-bold text-lg transform transition-all hover:scale-105">
-          <span className="mr-2">←</span> Tilbake til bøker
+        <Link to="/books" className="inline-flex items-center text-gray-600 hover:text-purple-700 mb-6 font-semibold transition-colors">
+          <span className="mr-2 btn-primary">←</span> Tilbake til bøker
         </Link>
 
-        <div className="grid md:grid-cols-3 gap-8 animate-fadeIn">
-          {/* Book Cover */}
+        {/* Light purple header card — cover + title/author/rating */}
+        <div className="rounded-2xl p-6 mb-6 animate-fadeIn flex flex-col md:flex-row gap-6 items-start"
+          style={{ background: 'rgba(107, 91, 149, 0.08)', border: '1px solid rgba(107, 91, 149, 0.15)' }}>
+          {/* Cover */}
+          <div className="w-36 flex-shrink-0">
+            <img
+              src={coverUrl || placeholderImage}
+              alt={book.title}
+              className="w-full rounded-xl shadow-lg"
+            />
+          </div>
+          {/* Title / Author / Rating / Status */}
+          <div className="flex-1 min-w-0">
+            {book.bookclubMonth && (
+              <span className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3"
+                style={{ border: '1.5px solid #6B5B95', color: '#6B5B95' }}>
+                📅 {book.bookclubMonth}
+              </span>
+            )}
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">{book.title}</h1>
+            <p className="text-lg text-gray-500 mb-4">av {book.author}</p>
+
+            {book.averageRating > 0 && (
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-yellow-400 text-xl tracking-tight">
+                  {'★'.repeat(Math.round(book.averageRating))}
+                  <span className="text-gray-300">{'★'.repeat(5 - Math.round(book.averageRating))}</span>
+                </span>
+                <span className="text-gray-500 text-sm">{book.averageRating.toFixed(1)} ({book.reviewCount} {book.reviewCount === 1 ? 'anmeldelse' : 'anmeldelser'})</span>
+              </div>
+            )}
+
+            {/* User reading status */}
+            <div className="mb-2">
+              <StatusSelector
+                currentStatus={userBookStatus}
+                onStatusChange={handleStatusChange}
+                loading={statusLoading}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6 animate-fadeIn">
+          {/* Sidebar */}
           <div className="md:col-span-1">
             <div className="container-gradient sticky top-8">
-              <img
-                src={coverUrl || placeholderImage}
-                alt={book.title}
-                className="w-full rounded-2xl shadow-2xl mb-4 transform transition-transform hover:scale-105"
-              />
-
-              {/* Bokklubb Month Badge (if applicable) */}
-              {book.bookclubMonth && (
-                <div
-                  className="text-white text-center py-3 rounded-2xl font-bold mb-4 text-lg shadow-lg"
-                  style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}
-                >
-                  📅 {book.bookclubMonth}
-                </div>
-              )}
 
               {/* Library Links */}
               {(book.libraryLinks?.audiobook || book.libraryLinks?.ebook) && (
                 <div className="space-y-3 mb-4">
-                  <h3 className="font-bold text-gray-900 mb-3 text-lg">📚 Bibiloteklenker</h3>
+                  <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide">Biblioteklenker</h3>
                   {book.libraryLinks.audiobook && (
                     <a
                       href={book.libraryLinks.audiobook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full btn-secondary text-center"
+                      className="block w-full btn-primary text-center"
                     >
                       🎧 Lydbok
                     </a>
@@ -281,16 +310,14 @@ const BookDetail = () => {
                 <div className="mt-4 space-y-3">
                   <Link
                     to={`/books/${book._id}/edit`}
-                    className="block w-full text-white text-center py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
-                    style={{ background: 'linear-gradient(135deg, #3b82f6, #6366f1)' }}
+                    className="block w-full btn-primary text-center"
                   >
                     ✏️ Rediger bok
                   </Link>
                   <button
                     onClick={handleDelete}
                     disabled={deleting}
-                    className="w-full text-white py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
-                    style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}
+                    className="w-full btn-secondary disabled:opacity-50"
                   >
                     {deleting ? 'Sletter...' : '🗑️ Slett bok'}
                   </button>
@@ -302,42 +329,30 @@ const BookDetail = () => {
           {/* Book Details */}
           <div className="md:col-span-2">
             <div className="container-gradient">
-              {/* Title and Author */}
-              <h1 className="text-5xl font-bold gradient-text mb-3">{book.title}</h1>
-              <p className="text-2xl text-gray-600 font-semibold mb-6">av {book.author}</p>
-
-              {/* Rating */}
-              {book.averageRating > 0 && (
-                <div className="flex items-center gap-3 mb-6 p-4 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.1))' }}>
-                  <div className="flex text-yellow-400 text-3xl">
-                    {'★'.repeat(Math.round(book.averageRating))}
-                    {'☆'.repeat(5 - Math.round(book.averageRating))}
-                  </div>
-                  <span className="text-xl text-gray-700 font-bold">
-                    {book.averageRating.toFixed(1)} <span className="text-gray-500">({book.reviewCount} {book.reviewCount === 1 ? 'review' : 'reviews'})</span>
-                  </span>
-                </div>
-              )}
-
-              {/* User's Reading Status */}
-              <div className="mb-6 p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}>
-                <StatusSelector
-                  currentStatus={userBookStatus}
-                  onStatusChange={handleStatusChange}
-                  loading={statusLoading}
-                />
-              </div>
 
               {/* Description */}
               {book.description && (
-                <div className="mb-6 p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))' }}>
-                  <h2 className="text-2xl font-bold gradient-text mb-3">📖 Beskrivelse</h2>
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-line text-lg">{book.description}</p>
+                <div className="mb-6">
+                  <h2 className="text-lg font-bold text-gray-700 mb-2 uppercase tracking-wide text-sm">Beskrivelse</h2>
+                  <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                    {descExpanded || book.description.length <= 300
+                      ? book.description
+                      : book.description.slice(0, 300).trimEnd() + '…'}
+                  </p>
+                  {book.description.length > 300 && (
+                    <button
+                      onClick={() => setDescExpanded(v => !v)}
+                      className="mt-2 text-sm font-semibold"
+                      style={{ color: 'var(--color-primary)' }}
+                    >
+                      {descExpanded ? 'Vis mindre' : 'Les mer'}
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Book Details Grid */}
-              <div className="grid sm:grid-cols-2 gap-4 mb-6 p-5 rounded-2xl" style={{ background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' }}>
+              <div className="grid sm:grid-cols-2 gap-3 mb-6 p-4 rounded-xl bg-gray-50">
                 {book.series && (
                   <div className="p-3 bg-white rounded-xl">
                     <h3 className="font-bold text-gray-900 text-sm mb-1">📚 Serie</h3>
@@ -393,13 +408,13 @@ const BookDetail = () => {
               {/* Genres */}
               {book.genres && book.genres.length > 0 && (
                 <div className="mb-6">
-                  <h3 className="font-bold text-gray-900 mb-3 text-xl">🎨 Sjanger</h3>
-                  <div className="flex flex-wrap gap-3">
+                  <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">Sjangere</h3>
+                  <div className="flex flex-wrap gap-2">
                     {book.genres.map((genre, index) => (
                       <span
                         key={index}
-                        className="text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg transition-all transform hover:scale-110"
-                        style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)' }}
+                        className="px-3 py-0.75 rounded-full text-sm font-semibold"
+                        style={{ border: '1.5px solid #6B5B95', color: '#6B5B95' }}
                       >
                         {genre}
                       </span>
@@ -409,8 +424,8 @@ const BookDetail = () => {
               )}
 
               {/* Reviews Section */}
-              <div className="pt-6 mt-6">
-                <h2 className="text-3xl font-bold gradient-text mb-6">💬 Anmeldelser</h2>
+              <div className="pt-6 mt-6 border-t border-gray-100">
+                <h2 className="text-xl font-bold text-gray-800 mb-6">Anmeldelser</h2>
 
                 {/* Write/Edit Review Button */}
                 {!showReviewForm && (

@@ -167,12 +167,10 @@ const Books = () => {
               <div className="flex flex-wrap gap-2">
                 <button
                   onClick={() => setGenre('')}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                    genre === ''
-                      ? 'text-white shadow-md'
-                      : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
-                  }`}
-                  style={genre === '' ? { background: 'var(--color-primary)' } : {}}
+                  className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
+                  style={genre === ''
+                    ? { background: 'var(--color-primary)', color: 'white', border: '1.5px solid var(--color-primary)' }
+                    : { background: 'white', color: '#6B5B95', border: '1.5px solid #6B5B95' }}
                 >
                   Alle sjangere
                 </button>
@@ -180,12 +178,10 @@ const Books = () => {
                   <button
                     key={g}
                     onClick={() => setGenre(g)}
-                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                      genre === g
-                        ? 'text-white shadow-md'
-                        : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
-                    }`}
-                    style={genre === g ? { background: 'var(--color-primary)' } : {}}
+                    className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
+                    style={genre === g
+                      ? { background: 'var(--color-primary)', color: 'white', border: '1.5px solid var(--color-primary)' }
+                      : { background: 'white', color: '#6B5B95', border: '1.5px solid #6B5B95' }}
                   >
                     {g}
                   </button>

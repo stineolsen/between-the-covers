@@ -8,74 +8,71 @@ const BookCard = ({ book }) => {
   return (
     <Link
       to={`/books/${book._id}`}
-      className="group block bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2 hover:scale-105 animate-fadeIn"
+      className="group block bg-white rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
+      style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 28px rgba(107, 91, 149, 0.18)'}
+      onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.07)'}
     >
       {/* Book Cover */}
-      <div className="relative aspect-[2/3] overflow-hidden" style={{ background: 'linear-gradient(135deg, #667eea, #764ba2)' }}>
+      <div className="relative aspect-[2/3] overflow-hidden bg-primary-25">
         <BookCoverFallback
           src={coverUrl}
           alt={book.title}
           category="book"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 group-hover:rotate-2"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
 
         {/* Bokklubb Month Badge */}
         {book.bookclubMonth && (
-          <div className="absolute top-3 right-3 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-            📅 {book.bookclubMonth}
+          <div
+            className="absolute top-2 right-2 text-white text-xs font-semibold px-2 py-0.5 rounded-full hidden sm:block"
+            style={{ background: 'var(--color-primary)', opacity: 0.92 }}
+          >
+            {book.bookclubMonth}
           </div>
         )}
-
-        {/* Hover Overlay with Gradient */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-5" style={{ background: 'linear-gradient(to top, rgba(102, 126, 234, 0.95), rgba(118, 75, 162, 0.8) 50%, transparent)' }}>
-          <p className="text-white text-sm font-medium leading-relaxed animate-slideIn">
-            {book.description || 'No description available'}
-          </p>
-        </div>
       </div>
 
       {/* Book Info */}
-      <div className="p-5">
-        <h3 className="font-bold text-lg text-gray-900 line-clamp-2 mb-2 group-hover:gradient-text transition-all">
+      <div className="p-2 sm:p-4">
+        <h3 className="font-bold text-xs sm:text-base text-gray-900 line-clamp-2 mb-0.5 sm:mb-1 group-hover:text-purple-700 transition-colors">
           {book.title}
         </h3>
-        <p className="text-sm text-gray-600 font-medium mb-3">by {book.author}</p>
+        <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2 line-clamp-1">{book.author}</p>
 
-        {/* Series */}
+        {/* Series — hidden on mobile */}
         {book.series && (
-          <p className="text-sm text-purple-600 font-semibold mb-3">
-            📚 {book.series}{book.seriesNumber ? ` #${book.seriesNumber}` : ''}
+          <p className="hidden sm:block text-xs text-purple-600 font-medium mb-2">
+            {book.series}{book.seriesNumber ? ` #${book.seriesNumber}` : ''}
           </p>
         )}
 
-        {/* Rating */}
+        {/* Rating — hidden on mobile */}
         {book.averageRating > 0 && (
-          <div className="flex items-center gap-2 text-sm mb-3">
-            <div className="flex text-yellow-400 text-lg">
+          <div className="hidden sm:flex items-center gap-1.5 text-sm mb-3">
+            <span className="text-yellow-400 tracking-tight">
               {'★'.repeat(Math.round(book.averageRating))}
-              {'☆'.repeat(5 - Math.round(book.averageRating))}
-            </div>
-            <span className="text-gray-600 font-semibold">
-              {book.averageRating.toFixed(1)} <span className="text-gray-400">({book.reviewCount})</span>
+              <span className="text-gray-300">{'★'.repeat(5 - Math.round(book.averageRating))}</span>
             </span>
+            <span className="text-gray-500 text-xs">{book.averageRating.toFixed(1)} ({book.reviewCount})</span>
           </div>
         )}
 
-        {/* Genres */}
+        {/* Genres — hidden on mobile */}
         {book.genres && book.genres.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="hidden sm:flex flex-wrap gap-1.5">
             {book.genres.slice(0, 2).map((genre, index) => (
               <span
                 key={index}
-                className="text-xs font-semibold px-3 py-1.5 rounded-full transition-all hover:scale-110"
-                style={{ background: 'linear-gradient(135deg, #f093fb, #f5576c)', color: 'white' }}
+                className="text-xs px-2.5 py-1 rounded-full font-medium transition-colors"
+                style={{ border: '1.5px solid #6B5B95', color: '#6B5B95' }}
               >
                 {genre}
               </span>
             ))}
             {book.genres.length > 2 && (
-              <span className="text-xs text-white font-bold px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-400 to-pink-400">
-                +{book.genres.length - 2} mer
+              <span className="text-xs px-2.5 py-1 rounded-full font-medium text-gray-400 border border-gray-200">
+                +{book.genres.length - 2}
               </span>
             )}
           </div>

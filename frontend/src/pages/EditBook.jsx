@@ -55,7 +55,7 @@ const EditBook = () => {
     <div className="min-h-screen bg-background py-8">
       <div className="max-w-7xl mx-auto px-4">
         <Link to={`/books/${id}`} className="inline-flex items-center text-gray-600 hover:text-primary mb-6">
-          <span className="mr-2">←</span> Tilbake til bøker
+          <span className="mr-2 btn-primary">←</span> Tilbake til bøker
         </Link>
 
         <BookForm bookId={id} initialData={book} />

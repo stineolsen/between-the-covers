@@ -10,7 +10,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
     description: '',
     price: '',
     currency: 'NOK',
-    category: 'annet',
+    category: 'other',
     stock: '',
     isAvailable: true,
     bookId: ''

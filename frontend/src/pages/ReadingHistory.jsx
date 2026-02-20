@@ -1,13 +1,50 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { userBooksApi } from '../api/userBooksApi';
 import { booksApi } from '../api/booksApi';
+
+const toInputDate = (dateStr) => {
+  if (!dateStr) return '';
+  return new Date(dateStr).toISOString().split('T')[0];
+};
+
+const DateEditor = ({ initialDate, onSave, onCancel }) => {
+  const inputRef = useRef(null);
+  const handleSave = () => {
+    const val = inputRef.current?.value;
+    if (val) onSave(val);
+  };
+  return (
+    <div className="flex items-center gap-1.5">
+      <input
+        ref={inputRef}
+        type="date"
+        defaultValue={toInputDate(initialDate)}
+        max={new Date().toISOString().split('T')[0]}
+        className="border border-purple-300 rounded px-2 py-0.5 text-sm focus:outline-none focus:border-purple-500"
+        autoFocus
+      />
+      <button
+        onClick={handleSave}
+        className="text-green-500 hover:text-green-700 font-bold text-lg leading-none"
+        title="Lagre"
+      >✓</button>
+      <button
+        onClick={onCancel}
+        className="text-gray-400 hover:text-red-500 font-bold text-lg leading-none"
+        title="Avbryt"
+      >✕</button>
+    </div>
+  );
+};
 
 const ReadingHistory = () => {
   const [readBooks, setReadBooks] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, this-year, last-year
+  const [editingDateId, setEditingDateId] = useState(null);
+  const [dateError, setDateError] = useState('');
 
   useEffect(() => {
     fetchReadingData();
@@ -17,7 +54,7 @@ const ReadingHistory = () => {
     try {
       setLoading(true);
       // Fetch books with status='read'
-      const booksData = await userBooksApi.getUserBooks({ status: 'Lest' });
+      const booksData = await userBooksApi.getUserBooks({ status: 'read' });
       setReadBooks(booksData.userBooks || []);
 
       // Fetch reading statistics
@@ -27,6 +64,20 @@ const ReadingHistory = () => {
       console.error('Greide ikke hente lesedata:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+
+  const handleDateChange = async (userBookId, newDate) => {
+    setDateError('');
+    try {
+      await userBooksApi.updateFinishedDate(userBookId, newDate);
+      setReadBooks(prev =>
+        prev.map(ub => ub._id === userBookId ? { ...ub, finishedAt: newDate } : ub)
+      );
+    } catch (err) {
+      console.error('Greide ikke oppdatere dato:', err);
+      setDateError('Greide ikke lagre dato. Prøv igjen.');
     }
   };
 
@@ -118,6 +169,13 @@ const ReadingHistory = () => {
           </div>
         )}
 
+        {/* Date save error */}
+        {dateError && (
+          <div className="mb-4 p-3 rounded-xl text-white text-center font-bold animate-fadeIn" style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)' }}>
+            {dateError}
+          </div>
+        )}
+
         {/* Filter Buttons */}
         <div className="flex justify-center gap-4 mb-8 animate-fadeIn">
           <button
@@ -192,40 +250,62 @@ const ReadingHistory = () => {
                     const placeholderImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"%3E%3Crect fill="%23e5e7eb" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" font-size="24" text-anchor="middle" alignment-baseline="middle" font-family="monospace, sans-serif" fill="%239ca3af"%3ENo Cover%3C/text%3E%3C/svg%3E';
 
                     return (
-                      <Link
+                      <div
                         key={userBook._id}
-                        to={`/books/${book._id}`}
                         className="container-gradient group transform transition-all hover:scale-105"
                       >
-                        {/* Book Cover */}
-                        <div className="relative mb-4 overflow-hidden rounded-2xl">
-                          <img
-                            src={coverUrl || placeholderImage}
-                            alt={book.title}
-                            className="w-full h-64 object-cover transform transition-transform group-hover:scale-110"
-                          />
-                          {/* Finished Badge */}
-                          <div
-                            className="absolute top-2 right-2 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
-                            style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
-                          >
-                            ✓ Finished
+                        <Link to={`/books/${book._id}`} className="block">
+                          {/* Book Cover */}
+                          <div className="relative mb-4 overflow-hidden rounded-2xl">
+                            <img
+                              src={coverUrl || placeholderImage}
+                              alt={book.title}
+                              className="w-full h-64 object-cover transform transition-transform group-hover:scale-110"
+                            />
+                            <div
+                              className="absolute top-2 right-2 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
+                              style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
+                            >
+                              ✓ Lest
+                            </div>
                           </div>
+
+                          {/* Book Info */}
+                          <h3 className="text-lg font-bold gradient-text mb-1 line-clamp-2 group-hover:underline">
+                            {book.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm mb-3">{book.author}</p>
+                        </Link>
+
+                        {/* Finished Date — editable */}
+                        <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                          <span>📅</span>
+                          {editingDateId === userBook._id ? (
+                            <DateEditor
+                              initialDate={userBook.finishedAt}
+                              onSave={(date) => {
+                                handleDateChange(userBook._id, date);
+                                setEditingDateId(null);
+                              }}
+                              onCancel={() => setEditingDateId(null)}
+                            />
+                          ) : (
+                            <>
+                              <span>
+                                {userBook.finishedAt
+                                  ? new Date(userBook.finishedAt).toLocaleDateString('nb-NO', { year: 'numeric', month: 'long', day: 'numeric' })
+                                  : '–'}
+                              </span>
+                              <button
+                                onClick={() => setEditingDateId(userBook._id)}
+                                className="text-gray-400 hover:text-purple-600 transition-colors"
+                                title="Endre dato"
+                              >
+                                ✏️
+                              </button>
+                            </>
+                          )}
                         </div>
-
-                        {/* Book Info */}
-                        <h3 className="text-lg font-bold gradient-text mb-1 line-clamp-2 group-hover:underline">
-                          {book.title}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-3">{book.author}</p>
-
-                        {/* Finished Date */}
-                        {userBook.finishedAt && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                            <span>📅</span>
-                            <span>Fullført {new Date(userBook.finishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
-                          </div>
-                        )}
 
                         {/* Rating */}
                         {book.averageRating > 0 && (
@@ -246,7 +326,7 @@ const ReadingHistory = () => {
                             </p>
                           </div>
                         )}
-                      </Link>
+                      </div>
                     );
                   })}
                 </div>

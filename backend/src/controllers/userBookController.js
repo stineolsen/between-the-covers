@@ -1,5 +1,6 @@
 const UserBook = require('../models/UserBook');
 const Book = require('../models/Book');
+const Review = require('../models/Review');
 
 // @desc    Get user's books (optionally filtered by status)
 // @route   GET /api/user-books
@@ -117,6 +118,38 @@ exports.setBookStatus = async (req, res) => {
       success: false,
       message: 'Failed to update reading status'
     });
+  }
+};
+
+// @desc    Update finished reading date
+// @route   PATCH /api/user-books/:id
+// @access  Private
+exports.updateFinishedDate = async (req, res) => {
+  try {
+    const { finishedAt } = req.body;
+
+    const userBook = await UserBook.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
+      { $set: { finishedAt: finishedAt ? new Date(finishedAt) : null } },
+      { new: true }
+    );
+
+    if (!userBook) {
+      return res.status(404).json({ success: false, message: 'Book not found in your list' });
+    }
+
+    // Sync readingDate on the user's review for this book (if one exists)
+    if (finishedAt && userBook.book) {
+      await Review.findOneAndUpdate(
+        { book: userBook.book, user: req.user._id },
+        { $set: { readingDate: new Date(finishedAt) } }
+      );
+    }
+
+    res.status(200).json({ success: true, message: 'Reading date updated', userBook });
+  } catch (error) {
+    console.error('Update finished date error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update reading date' });
   }
 };
 

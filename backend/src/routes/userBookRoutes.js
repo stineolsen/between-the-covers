@@ -4,7 +4,8 @@ const {
   getUserBookStatus,
   setBookStatus,
   removeUserBook,
-  getReadingStats
+  getReadingStats,
+  updateFinishedDate
 } = require('../controllers/userBookController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -20,6 +21,9 @@ router.get('/book/:bookId', getUserBookStatus);
 
 // Set/update status
 router.post('/', setBookStatus);
+
+// Update finished date
+router.patch('/:id', updateFinishedDate);
 
 // Remove book
 router.delete('/:id', removeUserBook);
