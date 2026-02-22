@@ -6,6 +6,7 @@ const {
   updateBook,
   deleteBook,
   getBooksByStatus,
+  getGenres,
   uploadCover,
 } = require("../controllers/bookController");
 const { protect, authorize } = require("../middleware/authMiddleware");
@@ -15,6 +16,7 @@ const router = express.Router();
 
 // Public/Member routes
 router.get("/", protect, getBooks);
+router.get("/genres", protect, getGenres);
 router.get("/status/:status", protect, getBooksByStatus);
 router.get("/:id", protect, getBook);
 

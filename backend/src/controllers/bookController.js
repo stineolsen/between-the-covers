@@ -12,9 +12,14 @@ exports.getBooks = async (req, res, next) => {
     // Build query
     let query = {};
 
-    // Search by title, author, or description
+    // Search by title, author, or series only
     if (search) {
-      query.$text = { $search: search };
+      const regex = new RegExp(search, 'i');
+      query.$or = [
+        { title: regex },
+        { author: regex },
+        { series: regex },
+      ];
     }
 
     // Filter by bookclub books only (books with bookclubMonth set)
@@ -60,6 +65,18 @@ exports.getBooks = async (req, res, next) => {
       count: books.length,
       books,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all distinct genres used across books
+// @route   GET /api/books/genres
+// @access  Private
+exports.getGenres = async (req, res, next) => {
+  try {
+    const genres = await Book.distinct('genres');
+    res.status(200).json({ success: true, genres: genres.filter(Boolean).sort() });
   } catch (error) {
     next(error);
   }

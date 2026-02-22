@@ -84,6 +84,12 @@ export const booksApi = {
     return response.data;
   },
 
+  // Get all distinct genres from the library
+  getGenres: async () => {
+    const response = await api.get('/api/books/genres');
+    return response.data;
+  },
+
   // Helper: Get cover image URL
   getCoverUrl: (coverImage) => {
     if (!coverImage) return null;

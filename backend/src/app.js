@@ -13,6 +13,9 @@ const userBookRoutes = require("./routes/userBookRoutes");
 const meetingRoutes = require("./routes/meetingRoutes");
 const productRoutes = require("./routes/productRoutes");
 const shopRoutes = require("./routes/shopRoutes");
+const activityRoutes = require("./routes/activityRoutes");
+const recommendationRoutes = require("./routes/recommendationRoutes");
+const bookRequestRoutes = require("./routes/bookRequestRoutes");
 
 const app = express();
 
@@ -43,6 +46,9 @@ app.use("/api/user-books", userBookRoutes);
 app.use("/api/meetings", meetingRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/shop", shopRoutes);
+app.use("/api/activity", activityRoutes);
+app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/book-requests", bookRequestRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

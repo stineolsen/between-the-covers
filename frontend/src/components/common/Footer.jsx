@@ -69,6 +69,14 @@ const Footer = () => {
                     🎧 How to lydbokbibiloteket
                   </Link>
                 </li>
+                 <li>
+                  <Link
+                    to="https://github.com/users/stineolsen/projects/1/views/1"
+                    className="text-white/90 hover:text-white transition-colors font-medium"
+                  >
+                    🎢Roadmap
+                  </Link>
+                </li>
               </ul>
             </div>
 

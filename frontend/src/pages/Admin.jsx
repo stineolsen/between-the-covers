@@ -1,13 +1,17 @@
 import { useState, useEffect } from "react";
 import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
+import bookRequestApi from "../api/bookRequestApi";
 import ProductForm from "../components/shop/ProductForm";
+
+const FORMAT_LABELS = { ebook: '📱 E-bok', audiobook: '🎧 Lydbok' };
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("users");
   const [pendingUsers, setPendingUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -21,8 +25,36 @@ const Admin = () => {
       fetchProducts();
     } else if (activeTab === "orders") {
       fetchOrders();
+    } else if (activeTab === "requests") {
+      fetchRequests();
     }
   }, [activeTab]);
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const data = await bookRequestApi.getAll();
+      setRequests(data.requests || []);
+      setError("");
+    } catch (err) {
+      setError("Greide ikke laste forespørsler");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMarkAsAdded = async (id) => {
+    try {
+      await bookRequestApi.markAsAdded(id);
+      setRequests(prev => prev.map(r => r._id === id ? { ...r, status: 'added', addedAt: new Date().toISOString() } : r));
+      setSuccessMessage("Markert som lagt til!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke oppdatere forespørsel");
+      console.error(err);
+    }
+  };
 
   const fetchPendingUsers = async () => {
     try {
@@ -207,6 +239,19 @@ const Admin = () => {
             }
           >
             📦 Bestillinger
+          </button>
+          <button
+            onClick={() => setActiveTab("requests")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "requests" ? "text-white" : "bg-white text-gray-700"
+            }`}
+            style={
+              activeTab === "requests"
+                ? { background: "linear-gradient(135deg, #7c3aed, #db2777)" }
+                : {}
+            }
+          >
+            📋 Forespørsler
           </button>
         </div>
 
@@ -592,6 +637,73 @@ const Admin = () => {
                         <option value="delivered">Levert</option>
                         <option value="cancelled">Kansellert</option>
                       </select>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+        {/* Requests Tab */}
+        {activeTab === "requests" && (
+          <>
+            {loading ? (
+              <div className="container-gradient text-center py-12 animate-fadeIn">
+                <div
+                  className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
+                  style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "#7c3aed" }}
+                ></div>
+                <p className="text-gray-700 font-bold">Laster forespørsler...</p>
+              </div>
+            ) : requests.length === 0 ? (
+              <div className="container-gradient text-center py-12 animate-fadeIn">
+                <p className="text-gray-700 text-lg font-bold">📋 Ingen bokforespørsler enda.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 animate-fadeIn">
+                {requests.map((req) => (
+                  <div key={req._id} className="container-gradient hover:shadow-2xl transition-all">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold gradient-text mb-0.5 truncate">{req.title}</h3>
+                        <p className="text-gray-600 font-semibold mb-2">{req.author}</p>
+
+                        {req.formats && req.formats.length > 0 && (
+                          <div className="flex gap-2 mb-2 flex-wrap">
+                            {req.formats.map(f => (
+                              <span key={f} className="px-2.5 py-0.5 rounded-full text-xs font-bold text-white"
+                                style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}>
+                                {FORMAT_LABELS[f] || f}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                          <span>Fra: <strong>{req.requestedBy?.displayName || req.requestedBy?.username || 'Ukjent'}</strong></span>
+                          <span>·</span>
+                          <span>{new Date(req.createdAt).toLocaleDateString('no-NO')}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex-shrink-0 flex flex-col items-end gap-2">
+                        {req.status === 'added' ? (
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                            ✅ Lagt til
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleMarkAsAdded(req._id)}
+                            className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
+                            style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
+                          >
+                            ✓ Marker som lagt til
+                          </button>
+                        )}
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${req.status === 'added' ? 'bg-green-50 text-green-600' : 'bg-yellow-100 text-yellow-700'}`}>
+                          {req.status === 'added' ? 'Lagt til' : 'Venter'}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -3,12 +3,16 @@ const router = express.Router();
 const { protect } = require("../middleware/authMiddleware");
 const { uploadSingle } = require("../middleware/uploadMiddleware");
 const {
+  getMembers,
   getProfile,
   updateProfile,
   uploadAvatar,
   selectDefaultAvatar,
   deleteAvatar,
 } = require("../controllers/userController");
+
+// Members list (for recommendation recipient selection)
+router.get("/members", protect, getMembers);
 
 // Profile routes
 router.get("/profile", protect, getProfile);

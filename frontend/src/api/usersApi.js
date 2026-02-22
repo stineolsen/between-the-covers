@@ -1,6 +1,12 @@
 import api from "./axiosConfig";
 
 export const usersApi = {
+  // Get all approved members (for recommendation recipient selection)
+  getMembers: async () => {
+    const response = await api.get('/api/users/members');
+    return response.data;
+  },
+
   // Get user profile
   getProfile: async () => {
     const response = await api.get("/api/users/profile");

@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { booksApi } from "../api/booksApi";
 import { useAuth } from "../contexts/AuthContext";
 import BookGrid from "../components/books/BookGrid";
+import RequestBookModal from "../components/books/RequestBookModal";
 
 const Books = () => {
   const { isAdmin } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showRequestModal, setShowRequestModal] = useState(false);
 
   // Filter states - restored from sessionStorage so filters persist when navigating back
   const savedFilters = JSON.parse(
@@ -32,19 +34,13 @@ const Books = () => {
     );
   }, [search, bookclubOnly, audiobookOnly, genre, sort]);
 
-  // Available genres (you can make this dynamic by fetching from books)
-  const availableGenres = [
-    "Fiction",
-    "Non-Fiction",
-    "Mystery",
-    "Thriller",
-    "Romance",
-    "Science Fiction",
-    "Fantasy",
-    "Biography",
-    "History",
-    "Self-Help",
-  ];
+  const [availableGenres, setAvailableGenres] = useState([]);
+
+  useEffect(() => {
+    booksApi.getGenres()
+      .then(data => setAvailableGenres(data.genres || []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetchBooks();
@@ -100,11 +96,20 @@ const Books = () => {
             </p>
           </div>
 
-          {isAdmin && (
-            <Link to="/books/new" className="btn-accent">
-              ✨ Legg til ny bok
-            </Link>
-          )}
+          <div className="flex gap-3 flex-wrap justify-end">
+            <button
+              onClick={() => setShowRequestModal(true)}
+              className="px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-md text-white"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+            >
+              📬 Be om en bok
+            </button>
+            {isAdmin && (
+              <Link to="/books/new" className="btn-accent">
+                ✨ Legg til ny bok
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Filters */}
@@ -241,6 +246,10 @@ const Books = () => {
         {/* Books Grid */}
         <BookGrid books={books} loading={loading} error={error} />
       </div>
+
+      {showRequestModal && (
+        <RequestBookModal onClose={() => setShowRequestModal(false)} />
+      )}
     </div>
   );
 };

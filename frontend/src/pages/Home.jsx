@@ -1,5 +1,8 @@
 import { useAuth } from "../contexts/AuthContext";
 import NextMeeting from "../components/meetings/NextMeeting";
+import ActivityFeed from "../components/common/ActivityFeed";
+import RecommendationFeed from "../components/common/RecommendationFeed";
+import MyRequestsFeed from "../components/common/MyRequestsFeed";
 import { Link } from "react-router-dom";
 
 const Home = () => {
@@ -10,8 +13,11 @@ const Home = () => {
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16 animate-fadeIn">
-          <h1 className="text-5xl font-bold gradient-text mb-4">
-            Velkommen til between the covers!
+          <h1 className="text-2xl md:text-4xl font-bold gradient-text">
+            Velkommen til
+          </h1>
+           <h1 className="text-4xl font-bold gradient-text mb-4">
+            Between the Covers!
           </h1>
           <p className="text-xl text-gray-700 max-w-2xl mx-auto">
             {user
@@ -77,6 +83,15 @@ const Home = () => {
         <div className="max-w-4xl mx-auto">
           <NextMeeting />
         </div>
+
+        {/* Recommendations for this user */}
+        <RecommendationFeed />
+
+        {/* My book requests */}
+        <MyRequestsFeed />
+
+        {/* Activity Feed */}
+        <ActivityFeed />
       </div>
     </div>
   );

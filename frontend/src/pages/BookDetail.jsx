@@ -8,6 +8,7 @@ import { useToast } from "../contexts/ToastContext";
 import ReviewList from "../components/reviews/ReviewList";
 import ReviewForm from "../components/reviews/ReviewForm";
 import StatusSelector from "../components/books/StatusSelector";
+import RecommendModal from "../components/books/RecommendModal";
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -26,6 +27,7 @@ const BookDetail = () => {
   const [userReview, setUserReview] = useState(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [editingReview, setEditingReview] = useState(null);
+  const [showRecommendModal, setShowRecommendModal] = useState(false);
 
   // User book status states
   const [userBookStatus, setUserBookStatus] = useState(null);
@@ -358,6 +360,23 @@ const BookDetail = () => {
                   </button>
                 </div>
               )}
+
+              {/* Recommend button */}
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowRecommendModal(v => !v)}
+                  className="w-full py-2 rounded-xl text-white font-semibold text-sm transition-all"
+                  style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+                >
+                  📤 Anbefal denne boken
+                </button>
+                {showRecommendModal && (
+                  <RecommendModal
+                    book={book}
+                    onClose={() => setShowRecommendModal(false)}
+                  />
+                )}
+              </div>
             </div>
           </div>
 

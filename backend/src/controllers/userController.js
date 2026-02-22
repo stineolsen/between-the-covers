@@ -2,6 +2,20 @@ const User = require("../models/User");
 const path = require("path");
 const fs = require("fs");
 
+// @desc    Get all approved club members (for recipient selection)
+// @route   GET /api/users/members
+// @access  Private
+exports.getMembers = async (req, res, next) => {
+  try {
+    const members = await User.find({ status: 'approved' })
+      .select('_id displayName username avatar')
+      .sort({ displayName: 1 });
+    res.status(200).json({ success: true, members });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
