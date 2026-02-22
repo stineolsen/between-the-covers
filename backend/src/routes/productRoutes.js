@@ -10,6 +10,7 @@ const {
   updateOrderStatus,
 } = require("../controllers/productController");
 const { protect, authorize } = require("../middleware/authMiddleware");
+const { uploadSingle } = require("../middleware/uploadMiddleware");
 
 const router = express.Router();
 
@@ -26,8 +27,8 @@ router.get("/", getProducts);
 router.get("/:id", getProduct);
 
 // Admin only routes
-router.post("/", authorize("admin"), createProduct);
-router.put("/:id", authorize("admin"), updateProduct);
+router.post("/", authorize("admin"), uploadSingle("image"), createProduct);
+router.put("/:id", authorize("admin"), uploadSingle("image"), updateProduct);
 router.delete("/:id", authorize("admin"), deleteProduct);
 
 module.exports = router;

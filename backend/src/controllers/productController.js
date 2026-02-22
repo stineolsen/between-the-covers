@@ -75,15 +75,19 @@ exports.createProduct = async (req, res) => {
       images,
     } = req.body;
 
+    const imageFilename = req.file ? req.file.filename : null;
+    const sizes = req.body.sizes ? JSON.parse(req.body.sizes) : [];
+
     const product = await Product.create({
       name,
       description,
       price,
       currency: currency || "NOK",
-      category: category || "annet",
+      category: category || "other",
       stock: stock || 0,
       book: bookId || null,
-      images: images || [],
+      images: imageFilename ? [imageFilename] : (images || []),
+      sizes,
     });
 
     res.status(201).json({
@@ -144,7 +148,11 @@ exports.updateProduct = async (req, res) => {
     if (stock !== undefined) product.stock = stock;
     if (isAvailable !== undefined) product.isAvailable = isAvailable;
     if (bookId !== undefined) product.book = bookId || null;
-    if (images !== undefined) product.images = images;
+    if (req.file) product.images = [req.file.filename];
+    else if (images !== undefined) product.images = images;
+    if (req.body.sizes !== undefined) {
+      try { product.sizes = JSON.parse(req.body.sizes); } catch { product.sizes = []; }
+    }
 
     await product.save();
 

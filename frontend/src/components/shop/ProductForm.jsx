@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { productsApi } from "../../api/productsApi";
 import { booksApi } from "../../api/booksApi";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const ProductForm = ({ product = null, onSuccess, onCancel }) => {
   const isEditing = !!product;
@@ -19,6 +21,11 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [sizes, setSizes] = useState([]);
+  const [sizeInput, setSizeInput] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchBooks();
@@ -35,8 +42,33 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
           product.isAvailable !== undefined ? product.isAvailable : true,
         bookId: product.book?._id || "",
       });
+      if (product.images && product.images[0]) {
+        setImagePreview(`${API_URL}/uploads/products/${product.images[0]}`);
+      }
+      setSizes(product.sizes || []);
     }
   }, [product]);
+
+  const addSize = () => {
+    const trimmed = sizeInput.trim().toUpperCase();
+    if (trimmed && !sizes.includes(trimmed)) {
+      setSizes(prev => [...prev, trimmed]);
+    }
+    setSizeInput('');
+  };
+
+  const removeSize = (size) => setSizes(prev => prev.filter(s => s !== size));
+
+  const handleSizeKeyDown = (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addSize(); }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
 
   const fetchBooks = async () => {
     try {
@@ -73,12 +105,13 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         stock: parseInt(formData.stock) || 0,
         isAvailable: formData.isAvailable,
         bookId: formData.bookId || null,
+        sizes,
       };
 
       if (isEditing) {
-        await productsApi.updateProduct(product._id, productData);
+        await productsApi.updateProduct(product._id, productData, imageFile);
       } else {
-        await productsApi.createProduct(productData);
+        await productsApi.createProduct(productData, imageFile);
       }
 
       onSuccess();
@@ -234,6 +267,88 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             Link varer til en bok dersom de henger sammen (e.g., merch til en
             bok i bibiloteket)
           </p>
+        </div>
+
+        {/* Size Variations */}
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            📐 Varianter (valgfritt)
+          </label>
+          <div className="flex gap-2 mb-2 flex-wrap">
+            {sizes.map(size => (
+              <span
+                key={size}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold text-white"
+                style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+              >
+                {size}
+                <button
+                  type="button"
+                  onClick={() => removeSize(size)}
+                  className="leading-none hover:opacity-70 font-bold"
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={sizeInput}
+              onChange={e => setSizeInput(e.target.value)}
+              onKeyDown={handleSizeKeyDown}
+              placeholder="F.eks. XS, S, M, L, XL eller 38, 39..."
+              className="input-field flex-1"
+              maxLength={10}
+            />
+            <button
+              type="button"
+              onClick={addSize}
+              className="px-4 py-2 rounded-xl text-white font-bold text-sm"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+            >
+              + Legg til
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-1">Trykk Enter eller klikk "+ Legg til" for å legge til en størrelse</p>
+        </div>
+
+        {/* Product Image */}
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            🖼️ Produktbilde
+          </label>
+          <div
+            className="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer border-2 border-dashed border-purple-300 hover:border-purple-500 transition-all flex items-center justify-center bg-purple-50"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imagePreview ? (
+              <>
+                <img
+                  src={imagePreview}
+                  alt="Forhåndsvisning"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/30 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">Klikk for å endre</span>
+                </div>
+              </>
+            ) : (
+              <div className="text-center text-purple-400">
+                <div className="text-4xl mb-2">📷</div>
+                <p className="text-sm font-semibold">Klikk for å laste opp bilde</p>
+                <p className="text-xs mt-1">PNG, JPG, WEBP — maks 5MB</p>
+              </div>
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+          />
         </div>
 
         {/* Availability */}

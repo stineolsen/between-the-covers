@@ -14,14 +14,30 @@ export const productsApi = {
   },
 
   // Create product (admin only)
-  createProduct: async (productData) => {
-    const response = await api.post("/api/products", productData);
+  createProduct: async (productData, imageFile) => {
+    const formData = new FormData();
+    Object.entries(productData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined)
+        formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
+    });
+    if (imageFile) formData.append("image", imageFile);
+    const response = await api.post("/api/products", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 
   // Update product (admin only)
-  updateProduct: async (id, productData) => {
-    const response = await api.put(`/api/products/${id}`, productData);
+  updateProduct: async (id, productData, imageFile) => {
+    const formData = new FormData();
+    Object.entries(productData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined)
+        formData.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
+    });
+    if (imageFile) formData.append("image", imageFile);
+    const response = await api.put(`/api/products/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   },
 
@@ -53,6 +69,11 @@ export const productsApi = {
   },
 
   // Helper to get product image URL
+  getImageUrl: (imagePath) => {
+    if (!imagePath) return null;
+    return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/uploads/products/${imagePath}`;
+  },
+
   getProductImageUrl: (imagePath) => {
     if (!imagePath) return null;
     return `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/uploads/products/${imagePath}`;

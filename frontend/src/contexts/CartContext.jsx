@@ -33,42 +33,44 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem("bookclubCart", JSON.stringify(cart));
   }, [cart]);
 
-  // Add item to cart
-  const addToCart = (product, quantity = 1) => {
+  // Add item to cart (size is optional; same product + different size = separate line)
+  const addToCart = (product, quantity = 1, size = null) => {
     setCart((currentCart) => {
       const existingItem = currentCart.find(
-        (item) => item.product._id === product._id,
+        (item) => item.product._id === product._id && item.size === size,
       );
 
       if (existingItem) {
-        // Update quantity if item already in cart
         return currentCart.map((item) =>
-          item.product._id === product._id
+          item.product._id === product._id && item.size === size
             ? { ...item, quantity: item.quantity + quantity }
             : item,
         );
       } else {
-        // Add new item to cart
-        return [...currentCart, { product, quantity }];
+        return [...currentCart, { product, quantity, size }];
       }
     });
   };
 
   // Remove item from cart
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId, size = null) => {
     setCart((currentCart) =>
-      currentCart.filter((item) => item.product._id !== productId),
+      currentCart.filter(
+        (item) => !(item.product._id === productId && item.size === size),
+      ),
     );
   };
 
   // Update item quantity
-  const updateQuantity = (productId, quantity) => {
+  const updateQuantity = (productId, quantity, size = null) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, size);
     } else {
       setCart((currentCart) =>
         currentCart.map((item) =>
-          item.product._id === productId ? { ...item, quantity } : item,
+          item.product._id === productId && item.size === size
+            ? { ...item, quantity }
+            : item,
         ),
       );
     }

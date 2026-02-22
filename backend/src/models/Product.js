@@ -60,6 +60,12 @@ const productSchema = new mongoose.Schema(
       default: true,
     },
 
+    // Size variations (optional, e.g. ["XS","S","M","L","XL"])
+    sizes: {
+      type: [String],
+      default: [],
+    },
+
     // Related book (optional)
     book: {
       type: mongoose.Schema.Types.ObjectId,

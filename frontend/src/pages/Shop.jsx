@@ -29,6 +29,8 @@ const Shop = () => {
     notes: "",
   });
   const [submitting, setSubmitting] = useState(false);
+  // Tracks selected size per product: { [productId]: size }
+  const [selectedSizes, setSelectedSizes] = useState({});
 
   useEffect(() => {
     fetchProducts();
@@ -47,8 +49,14 @@ const Shop = () => {
   };
 
   const handleAddToCart = (product) => {
-    addToCart(product, 1);
-    toast.success(`${product.name} lagt til i handlekurven!`);
+    const hasSizes = product.sizes && product.sizes.length > 0;
+    const selectedSize = selectedSizes[product._id] || null;
+    if (hasSizes && !selectedSize) {
+      toast.error('Velg en størrelse først');
+      return;
+    }
+    addToCart(product, 1, selectedSize);
+    toast.success(`${product.name}${selectedSize ? ` (${selectedSize})` : ''} lagt til i handlekurven!`);
   };
 
   const handleCheckout = async (e) => {
@@ -65,7 +73,7 @@ const Shop = () => {
       // Prepare order items
       const items = cart.map((item) => ({
         productId: item.product._id,
-        productName: item.product.name,
+        productName: item.size ? `${item.product.name} (${item.size})` : item.product.name,
         price: item.product.price,
         quantity: item.quantity,
       }));
@@ -174,25 +182,26 @@ const Shop = () => {
                   <div className="space-y-4 mb-6">
                     {cart.map((item) => (
                       <div
-                        key={item.product._id}
+                        key={`${item.product._id}-${item.size}`}
                         className="flex gap-4 p-4 rounded-xl bg-gray-50"
                       >
                         <div className="flex-1">
-                          <h3 className="font-bold text-gray-900 mb-1">
+                          <h3 className="font-bold text-gray-900 mb-0.5">
                             {item.product.name}
                           </h3>
+                          {item.size && (
+                            <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-1 text-white"
+                              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}>
+                              {item.size}
+                            </span>
+                          )}
                           <p className="text-gray-600">
                             kr {item.product.price.toFixed(2)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() =>
-                              updateQuantity(
-                                item.product._id,
-                                item.quantity - 1,
-                              )
-                            }
+                            onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.size)}
                             className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 font-bold"
                           >
                             -
@@ -201,18 +210,13 @@ const Shop = () => {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() =>
-                              updateQuantity(
-                                item.product._id,
-                                item.quantity + 1,
-                              )
-                            }
+                            onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.size)}
                             className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 font-bold"
                           >
                             +
                           </button>
                           <button
-                            onClick={() => removeFromCart(item.product._id)}
+                            onClick={() => removeFromCart(item.product._id, item.size)}
                             className="ml-2 text-red-500 hover:text-red-700 font-bold"
                           >
                             🗑️
@@ -351,11 +355,11 @@ const Shop = () => {
                   </h3>
                   {cart.map((item) => (
                     <div
-                      key={item.product._id}
+                      key={`${item.product._id}-${item.size}`}
                       className="flex justify-between mb-2"
                     >
                       <span>
-                        {item.product.name} × {item.quantity}
+                        {item.product.name}{item.size ? ` (${item.size})` : ''} × {item.quantity}
                       </span>
                       <span className="font-bold">
                         kr {(item.product.price * item.quantity).toFixed(2)}
@@ -434,6 +438,35 @@ const Shop = () => {
                   <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                     {product.description}
                   </p>
+                )}
+
+                {/* Size selector */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div className="mb-3">
+                    <p className="text-xs font-bold text-gray-600 mb-1.5">Størrelse</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {product.sizes.map(size => {
+                        const isSelected = selectedSizes[product._id] === size;
+                        return (
+                          <button
+                            key={size}
+                            type="button"
+                            onClick={() => setSelectedSizes(prev => ({
+                              ...prev,
+                              [product._id]: isSelected ? null : size,
+                            }))}
+                            className="px-3 py-1 rounded-lg text-xs font-bold border-2 transition-all"
+                            style={isSelected
+                              ? { background: 'linear-gradient(135deg, #7c3aed, #db2777)', color: 'white', borderColor: 'transparent' }
+                              : { background: 'white', color: '#7c3aed', borderColor: '#7c3aed' }
+                            }
+                          >
+                            {size}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
 
                 {/* Price and Stock */}

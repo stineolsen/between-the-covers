@@ -19,7 +19,7 @@ const storage = multer.diskStorage({
       uploadPath = "uploads/books";
     } else if (req.path.includes("avatar")) {
       uploadPath = "uploads/avatars";
-    } else if (req.path.includes("product")) {
+    } else if (req.path.includes("product") || req.baseUrl.includes("products")) {
       uploadPath = "uploads/products";
     } else {
       uploadPath = "uploads/misc";

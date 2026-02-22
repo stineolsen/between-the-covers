@@ -80,9 +80,6 @@ const Home = () => {
         </div>
 
         {/* Next Meeting */}
-        <div className="max-w-4xl mx-auto">
-          <NextMeeting />
-        </div>
 
         {/* Recommendations for this user */}
         <RecommendationFeed />
@@ -90,8 +87,14 @@ const Home = () => {
         {/* My book requests */}
         <MyRequestsFeed />
 
+        <div className="flex grid grid-cols-1 md:grid-cols-2 py-4">
+        <div className="max-w-3xl mx-auto">
+          <NextMeeting />
+        </div>
+
         {/* Activity Feed */}
         <ActivityFeed />
+        </div>
       </div>
     </div>
   );

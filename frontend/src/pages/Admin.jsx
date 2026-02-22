@@ -4,6 +4,8 @@ import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
 import ProductForm from "../components/shop/ProductForm";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const FORMAT_LABELS = { ebook: '📱 E-bok', audiobook: '🎧 Lydbok' };
 
 const Admin = () => {
@@ -399,6 +401,18 @@ const Admin = () => {
                         key={product._id}
                         className="container-gradient hover:shadow-2xl transition-all transform hover:scale-105"
                       >
+                        {/* Product image */}
+                        {product.images && product.images[0] ? (
+                          <img
+                            src={`${API_URL}/uploads/products/${product.images[0]}`}
+                            alt={product.name}
+                            className="w-full h-40 object-cover rounded-xl mb-3"
+                          />
+                        ) : (
+                          <div className="w-full h-40 rounded-xl mb-3 bg-purple-50 flex items-center justify-center text-4xl">
+                            🛍️
+                          </div>
+                        )}
                         <h3 className="text-xl font-bold gradient-text mb-2">
                           {product.name}
                         </h3>
