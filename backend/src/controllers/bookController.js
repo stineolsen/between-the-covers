@@ -7,7 +7,7 @@ const fs = require("fs");
 // @access  Private
 exports.getBooks = async (req, res, next) => {
   try {
-    const { search, bookclubOnly, audiobookOnly, genre, sort } = req.query;
+    const { search, bookclubOnly, audiobookOnly, genre, sort, readFilter } = req.query;
 
     // Build query
     let query = {};
@@ -35,6 +35,21 @@ exports.getBooks = async (req, res, next) => {
     // Filter by genre
     if (genre) {
       query.genres = genre;
+    }
+
+    // Filter by reading status (uses UserBook model)
+    if (readFilter === 'read' || readFilter === 'unread') {
+      const UserBook = require('../models/UserBook');
+      const readEntries = await UserBook.aggregate([
+        { $match: { user: req.user._id, status: 'read' } },
+        { $project: { book: 1 } },
+      ]);
+      const readBookIds = readEntries.map(e => e.book);
+      if (readFilter === 'read') {
+        query._id = { $in: readBookIds };
+      } else {
+        query._id = { $nin: readBookIds };
+      }
     }
 
     // Sort options
@@ -75,8 +90,16 @@ exports.getBooks = async (req, res, next) => {
 // @access  Private
 exports.getGenres = async (req, res, next) => {
   try {
-    const genres = await Book.distinct('genres');
-    res.status(200).json({ success: true, genres: genres.filter(Boolean).sort() });
+    const genreCounts = await Book.aggregate([
+      { $unwind: '$genres' },
+      { $match: { genres: { $nin: [null, ''] } } },
+      { $group: { _id: '$genres', count: { $sum: 1 } } },
+      { $sort: { count: -1, _id: 1 } },
+    ]);
+    res.status(200).json({
+      success: true,
+      genres: genreCounts.map(g => ({ name: g._id, count: g.count })),
+    });
   } catch (error) {
     next(error);
   }

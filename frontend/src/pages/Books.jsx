@@ -25,16 +25,19 @@ const Books = () => {
   );
   const [genre, setGenre] = useState(savedFilters.genre || "");
   const [sort, setSort] = useState(savedFilters.sort || "newest");
+  const [readFilter, setReadFilter] = useState(savedFilters.readFilter || "all");
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
     sessionStorage.setItem(
       "bookFilters",
-      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort }),
+      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort, readFilter }),
     );
-  }, [search, bookclubOnly, audiobookOnly, genre, sort]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter]);
 
   const [availableGenres, setAvailableGenres] = useState([]);
+  const [showAllGenres, setShowAllGenres] = useState(false);
+  const GENRES_VISIBLE = 10;
 
   useEffect(() => {
     booksApi.getGenres()
@@ -44,7 +47,7 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [search, bookclubOnly, audiobookOnly, genre, sort]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter]);
 
   const fetchBooks = async () => {
     try {
@@ -57,6 +60,7 @@ const Books = () => {
       if (audiobookOnly) params.audiobookOnly = "true";
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
+      if (readFilter !== "all") params.readFilter = readFilter;
 
       const data = await booksApi.getBooks(params);
       setBooks(data.books);
@@ -78,6 +82,7 @@ const Books = () => {
     setAudiobookOnly(false);
     setGenre("");
     setSort("newest");
+    setReadFilter("all");
     sessionStorage.removeItem("bookFilters");
   };
 
@@ -180,6 +185,33 @@ const Books = () => {
               </select>
             </div>
 
+            {/* Read/Unread Filter */}
+            <div className="md:col-span-5">
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                👁️ Lesestatus
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { value: "all", label: "Alle bøker" },
+                  { value: "read", label: "✅ Lest" },
+                  { value: "unread", label: "📚 Ulest" },
+                ].map(({ value, label }) => (
+                  <button
+                    key={value}
+                    onClick={() => setReadFilter(value)}
+                    className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+                    style={
+                      readFilter === value
+                        ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                        : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Genre Filter */}
             <div className="md:col-span-4">
               <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -191,42 +223,38 @@ const Books = () => {
                   className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
                   style={
                     genre === ""
-                      ? {
-                          background: "var(--color-primary)",
-                          color: "white",
-                          border: "1.5px solid var(--color-primary)",
-                        }
-                      : {
-                          background: "white",
-                          color: "#6B5B95",
-                          border: "1.5px solid #6B5B95",
-                        }
+                      ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                      : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
                   }
                 >
                   Alle sjangere
                 </button>
-                {availableGenres.map((g) => (
+                {(showAllGenres ? availableGenres : availableGenres.slice(0, GENRES_VISIBLE)).map((g) => (
                   <button
-                    key={g}
-                    onClick={() => setGenre(g)}
+                    key={g.name}
+                    onClick={() => setGenre(g.name)}
                     className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
                     style={
-                      genre === g
-                        ? {
-                            background: "var(--color-primary)",
-                            color: "white",
-                            border: "1.5px solid var(--color-primary)",
-                          }
-                        : {
-                            background: "white",
-                            color: "#6B5B95",
-                            border: "1.5px solid #6B5B95",
-                          }
+                      genre === g.name
+                        ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                        : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
                     }
                   >
-                    {g}
+                    {g.name}
+                    <span className="ml-1 opacity-60 text-xs">({g.count})</span>
                   </button>
                 ))}
+                {availableGenres.length > GENRES_VISIBLE && (
+                  <button
+                    onClick={() => setShowAllGenres(v => !v)}
+                    className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
+                    style={{ background: "white", color: "#9ca3af", border: "1.5px dashed #9ca3af" }}
+                  >
+                    {showAllGenres
+                      ? "Vis færre"
+                      : `+${availableGenres.length - GENRES_VISIBLE} flere`}
+                  </button>
+                )}
               </div>
             </div>
 
