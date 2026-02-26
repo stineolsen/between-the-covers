@@ -33,12 +33,25 @@ const BookDetail = () => {
   const [userBookStatus, setUserBookStatus] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
+  // Readers state
+  const [readers, setReaders] = useState([]);
+
   useEffect(() => {
     fetchBook();
     fetchReviews();
     fetchUserReview();
     fetchUserBookStatus();
+    fetchReaders();
   }, [id]);
+
+  const fetchReaders = async () => {
+    try {
+      const data = await userBooksApi.getBookReaders(id);
+      setReaders(data.readers || []);
+    } catch {
+      setReaders([]);
+    }
+  };
 
   const fetchBook = async () => {
     try {
@@ -505,6 +518,34 @@ const BookDetail = () => {
                       >
                         {genre}
                       </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Read by section */}
+              {readers.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">
+                    ✅ Lest av ({readers.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {readers.map(({ user: u, finishedAt }) => (
+                      <div
+                        key={u._id}
+                        title={finishedAt ? new Date(finishedAt).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" }) : undefined}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700"
+                      >
+                        {u.avatar ? (
+                          <img src={u.avatar} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
+                        ) : (
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                            {(u.displayName || u.username || "?")[0].toUpperCase()}
+                          </span>
+                        )}
+                        {u.displayName || u.username}
+                      </div>
                     ))}
                   </div>
                 </div>

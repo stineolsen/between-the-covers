@@ -1,6 +1,7 @@
 const UserBook = require("../models/UserBook");
 const Book = require("../models/Book");
 const Review = require("../models/Review");
+const User = require("../models/User");
 
 // @desc    Get user's books (optionally filtered by status)
 // @route   GET /api/user-books
@@ -196,6 +197,32 @@ exports.removeUserBook = async (req, res) => {
       success: false,
       message: "Failed to remove book",
     });
+  }
+};
+
+// @desc    Get all users who have read a specific book
+// @route   GET /api/user-books/readers/:bookId
+// @access  Private
+exports.getBookReaders = async (req, res) => {
+  try {
+    const readers = await UserBook.find({
+      book: req.params.bookId,
+      status: "read",
+    })
+      .populate("user", "username displayName avatar")
+      .sort({ finishedAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      readers: readers.map((r) => ({
+        user: r.user,
+        finishedAt: r.finishedAt,
+      })),
+    });
+  } catch (error) {
+    console.error("Get book readers error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch readers" });
   }
 };
 

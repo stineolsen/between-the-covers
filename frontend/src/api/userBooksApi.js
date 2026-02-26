@@ -47,6 +47,12 @@ export const userBooksApi = {
     const response = await api.get("/api/user-books/stats");
     return response.data;
   },
+
+  // Get all members who have read a specific book
+  getBookReaders: async (bookId) => {
+    const response = await api.get(`/api/user-books/readers/${bookId}`);
+    return response.data;
+  },
 };
 
 export default userBooksApi;
