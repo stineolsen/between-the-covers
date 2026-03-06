@@ -35,12 +35,12 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       setError("Vennligst velg en rating");
       return;
     }
-
+/*
     if (formData.content.trim().length < 10) {
       setError("Anmeldelse må være minst 10 tegn");
       return;
     }
-
+*/
     setLoading(true);
 
     try {
@@ -100,21 +100,19 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       {/* Review Content */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-2">
-          💭 Din anmeldelse <span className="text-red-500">*</span>
+          💭 Din anmeldelse (valgfritt)
         </label>
         <textarea
           name="content"
           value={formData.content}
           onChange={handleChange}
-          required
-          minLength={10}
           maxLength={5000}
           rows={6}
           className="input-field resize-vertical"
           placeholder="Share your thoughts about this book... What did you love? What could have been better?"
         />
         <p className="text-xs text-gray-500 mt-1">
-          {formData.content.length}/5000 tegn (min 10)
+          {formData.content.length}/5000 tegn
         </p>
       </div>
 
