@@ -204,17 +204,17 @@ const Admin = () => {
         {/* Tabs */}
         <div className="flex gap-4 mb-8 flex-wrap">
           <button
-            onClick={() => setActiveTab("users")}
+            onClick={() => setActiveTab("requests")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "users" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "requests" ? "text-white" : "bg-white text-gray-700"
             }`}
             style={
-              activeTab === "users"
-                ? { background: "linear-gradient(135deg, #667eea, #764ba2)" }
+              activeTab === "requests"
+                ? { background: "linear-gradient(135deg, #7c3aed, #db2777)" }
                 : {}
             }
           >
-            👥 Brukere til godkjenning
+            📋 Forespørsler
           </button>
           <button
             onClick={() => setActiveTab("products")}
@@ -243,17 +243,17 @@ const Admin = () => {
             📦 Bestillinger
           </button>
           <button
-            onClick={() => setActiveTab("requests")}
+            onClick={() => setActiveTab("users")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "requests" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "users" ? "text-white" : "bg-white text-gray-700"
             }`}
             style={
-              activeTab === "requests"
-                ? { background: "linear-gradient(135deg, #7c3aed, #db2777)" }
+              activeTab === "users"
+                ? { background: "linear-gradient(135deg, #667eea, #764ba2)" }
                 : {}
             }
           >
-            📋 Forespørsler
+            👥 Brukere til godkjenning
           </button>
         </div>
 
