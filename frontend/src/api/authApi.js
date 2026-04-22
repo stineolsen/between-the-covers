@@ -36,6 +36,21 @@ export const authApi = {
     const response = await api.put(`/api/auth/approve/${userId}`, { status });
     return response.data;
   },
+
+  // Change own password
+  changePassword: async (currentPassword, newPassword) => {
+    const response = await api.put("/api/auth/change-password", {
+      currentPassword,
+      newPassword,
+    });
+    return response.data;
+  },
+
+  // Admin: reset a user's password to a generated one
+  adminResetPassword: async (userId) => {
+    const response = await api.post(`/api/auth/admin/reset-password/${userId}`);
+    return response.data;
+  },
 };
 
 export default authApi;

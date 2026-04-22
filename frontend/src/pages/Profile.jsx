@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { usersApi } from "../api/usersApi";
+import { authApi } from "../api/authApi";
 
 const Profile = () => {
   const { user, setUser } = useAuth();
@@ -11,6 +12,9 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordData, setPasswordData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const [formData, setFormData] = useState({
     displayName: user?.displayName || "",
@@ -99,6 +103,24 @@ const Profile = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Greide ikke fjerne avatar");
     }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error("Passordene stemmer ikke overens");
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      await authApi.changePassword(passwordData.currentPassword, passwordData.newPassword);
+      toast.success("Passord oppdatert!");
+      setShowPasswordForm(false);
+      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Greide ikke oppdatere passord");
+    }
+    setPasswordLoading(false);
   };
 
   const getDisplayAvatar = () => {
@@ -295,6 +317,80 @@ const Profile = () => {
                 ✏️ Rediger profil
               </button>
             </div>
+          )}
+        </div>
+        {/* Change Password Section */}
+        <div className="container-gradient mt-6">
+          <button
+            onClick={() => {
+              setShowPasswordForm(!showPasswordForm);
+              setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+            }}
+            className="w-full flex items-center justify-between font-bold text-gray-700"
+          >
+            <span>🔒 Bytt passord</span>
+            <span>{showPasswordForm ? "▲" : "▼"}</span>
+          </button>
+
+          {showPasswordForm && (
+            <form onSubmit={handlePasswordChange} className="mt-6 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Nåværende passord
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.currentPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                  className="input-field"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Nytt passord
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.newPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                  className="input-field"
+                  placeholder="Minst 6 tegn"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  Bekreft nytt passord
+                </label>
+                <input
+                  type="password"
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                  className="input-field"
+                  placeholder="Gjenta passordet"
+                  required
+                />
+              </div>
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {passwordLoading ? "⏳ Lagrer..." : "💾 Lagre nytt passord"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordForm(false)}
+                  className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
+                  style={{ background: "linear-gradient(135deg, #9ca3af, #6b7280)", color: "white" }}
+                >
+                  Avbryt
+                </button>
+              </div>
+            </form>
           )}
         </div>
       </div>

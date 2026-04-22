@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
+import { usersApi } from "../api/usersApi";
 import ProductForm from "../components/shop/ProductForm";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -14,6 +15,8 @@ const Admin = () => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [requests, setRequests] = useState([]);
+  const [allMembers, setAllMembers] = useState([]);
+  const [generatedPassword, setGeneratedPassword] = useState(null); // { username, password }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -29,8 +32,35 @@ const Admin = () => {
       fetchOrders();
     } else if (activeTab === "requests") {
       fetchRequests();
+    } else if (activeTab === "passwords") {
+      fetchAllMembers();
     }
   }, [activeTab]);
+
+  const fetchAllMembers = async () => {
+    try {
+      setLoading(true);
+      const data = await usersApi.getMembers();
+      setAllMembers(data.members || []);
+      setError("");
+    } catch (err) {
+      setError("Greide ikke laste brukere");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdminResetPassword = async (userId, username) => {
+    if (!window.confirm(`Tilbakestille passordet til ${username}?`)) return;
+    try {
+      const data = await authApi.adminResetPassword(userId);
+      setGeneratedPassword({ username, password: data.generatedPassword });
+    } catch (err) {
+      setError("Greide ikke tilbakestille passord");
+      console.error(err);
+    }
+  };
 
   const fetchRequests = async () => {
     try {
@@ -254,6 +284,19 @@ const Admin = () => {
             }
           >
             👥 Brukere til godkjenning
+          </button>
+          <button
+            onClick={() => setActiveTab("passwords")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "passwords" ? "text-white" : "bg-white text-gray-700"
+            }`}
+            style={
+              activeTab === "passwords"
+                ? { background: "linear-gradient(135deg, #f59e0b, #ef4444)" }
+                : {}
+            }
+          >
+            🔑 Tilbakestill passord
           </button>
         </div>
 
@@ -658,6 +701,51 @@ const Admin = () => {
             )}
           </>
         )}
+        {/* Passwords Tab */}
+        {activeTab === "passwords" && (
+          <>
+            {loading ? (
+              <div className="container-gradient text-center py-12 animate-fadeIn">
+                <div
+                  className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
+                  style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "#f59e0b" }}
+                ></div>
+                <p className="text-gray-700 font-bold">Laster brukere...</p>
+              </div>
+            ) : allMembers.length === 0 ? (
+              <div className="container-gradient text-center py-12 animate-fadeIn">
+                <p className="text-gray-700 text-lg font-bold">Ingen godkjente brukere funnet.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 animate-fadeIn">
+                {allMembers.map((member) => (
+                  <div
+                    key={member._id}
+                    className="container-gradient hover:shadow-2xl transition-all transform hover:scale-[1.01]"
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="text-xl font-bold gradient-text mb-0.5">
+                          {member.displayName || member.username}
+                        </h3>
+                        <p className="text-gray-600 font-semibold text-sm">@{member.username}</p>
+                        <p className="text-gray-500 text-sm">{member.email}</p>
+                      </div>
+                      <button
+                        onClick={() => handleAdminResetPassword(member._id, member.displayName || member.username)}
+                        className="px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-white"
+                        style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)" }}
+                      >
+                        🔑 Tilbakestill passord
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
         {/* Requests Tab */}
         {activeTab === "requests" && (
           <>
@@ -726,6 +814,52 @@ const Admin = () => {
           </>
         )}
       </div>
+
+      {/* Generated Password Modal */}
+      {generatedPassword && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => setGeneratedPassword(null)}
+        >
+          <div
+            className="bg-white rounded-3xl p-8 max-w-md w-full animate-fadeIn shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-2xl font-bold gradient-text mb-2">
+              🔑 Passord tilbakestilt
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Nytt passord for <strong>{generatedPassword.username}</strong>:
+            </p>
+            <div
+              className="p-4 rounded-2xl text-center font-mono text-2xl font-bold tracking-widest mb-6 select-all"
+              style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1))", border: "2px dashed #f59e0b" }}
+            >
+              {generatedPassword.password}
+            </div>
+            <p className="text-sm text-gray-500 mb-6 text-center">
+              Kopier passordet og del det med brukeren. Det vises bare én gang.
+            </p>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(generatedPassword.password);
+                setSuccessMessage("Passord kopiert!");
+                setTimeout(() => setSuccessMessage(""), 3000);
+              }}
+              className="w-full btn-primary mb-3"
+            >
+              📋 Kopier passord
+            </button>
+            <button
+              onClick={() => setGeneratedPassword(null)}
+              className="w-full py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
+              style={{ background: "linear-gradient(135deg, #9ca3af, #6b7280)", color: "white" }}
+            >
+              Lukk
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

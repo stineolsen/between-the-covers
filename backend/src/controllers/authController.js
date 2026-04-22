@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const User = require("../models/User");
 const { sendTokenResponse } = require("../utils/tokens");
 
@@ -181,6 +182,79 @@ exports.approveUser = async (req, res, next) => {
       success: true,
       message: `User ${status} successfully`,
       user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change own password (requires current password)
+// @route   PUT /api/auth/change-password
+// @access  Private
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide current and new password",
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "New password must be at least 6 characters",
+      });
+    }
+
+    const user = await User.findById(req.user.id).select("+password");
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin resets a user's password to a generated one
+// @route   POST /api/auth/admin/reset-password/:id
+// @access  Private/Admin
+exports.adminResetPassword = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Generate a random 12-character password
+    const newPassword = crypto.randomBytes(6).toString("hex"); // 12 hex chars
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+      generatedPassword: newPassword,
     });
   } catch (error) {
     next(error);
