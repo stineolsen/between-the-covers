@@ -16,12 +16,16 @@ const reviewSchema = new mongoose.Schema(
       required: [true, "User is required"],
     },
 
-    // Rating (1-5 stars)
+    // Rating (0.25–5 stars in 0.25 increments)
     rating: {
       type: Number,
       required: [true, "Rating is required"],
-      min: [1, "Rating must be at least 1"],
+      min: [0.25, "Rating must be at least 0.25"],
       max: [5, "Rating must be at most 5"],
+      validate: {
+        validator: (v) => Number.isInteger(Math.round(v * 4)),
+        message: "Rating must be a multiple of 0.25",
+      },
     },
 
     // Review title
