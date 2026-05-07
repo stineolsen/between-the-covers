@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { booksApi } from "../api/booksApi";
 import { reviewsApi } from "../api/reviewsApi";
 import { userBooksApi } from "../api/userBooksApi";
+import { usersApi } from "../api/usersApi";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import ReviewList from "../components/reviews/ReviewList";
@@ -537,7 +538,7 @@ const BookDetail = () => {
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700"
                       >
                         {u.avatar ? (
-                          <img src={u.avatar} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
+                          <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
                         ) : (
                           <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
                             style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>

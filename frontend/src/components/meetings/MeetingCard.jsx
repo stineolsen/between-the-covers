@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
+import { usersApi } from "../../api/usersApi";
 import { useAuth } from "../../contexts/AuthContext";
 
 const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
@@ -180,7 +181,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
                 >
                   {attendee.avatar ? (
                     <img
-                      src={`http://localhost:5000/uploads/avatars/${attendee.avatar}`}
+                      src={usersApi.getAvatarUrl(attendee.avatar)}
                       alt={displayName}
                       className="w-full h-full rounded-full object-cover"
                     />
