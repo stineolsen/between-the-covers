@@ -4,6 +4,7 @@ import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
 import { usersApi } from "../api/usersApi";
 import ProductForm from "../components/shop/ProductForm";
+import AdminBookForm from "../components/admin/AdminBookForm";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -23,6 +24,7 @@ const Admin = () => {
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showArchive, setShowArchive] = useState(false);
+  const [showBookForm, setShowBookForm] = useState(false);
 
   useEffect(() => {
     if (activeTab === "users") {
@@ -37,6 +39,12 @@ const Admin = () => {
       fetchAllMembers();
     }
   }, [activeTab]);
+
+  const handleBookFormSuccess = (book) => {
+    setShowBookForm(false);
+    setSuccessMessage("Bok lagt til!");
+    setTimeout(() => setSuccessMessage(""), 3000);
+  };
 
   const fetchAllMembers = async () => {
     try {
@@ -240,7 +248,7 @@ const Admin = () => {
             Admin Dashboard
           </h1>
           <p className="text-gray text-lg drop-shadow-lg">
-            Rediger brukere, varer og bestillinger
+            Rediger brukere, varer, bestillinger og mer
           </p>
         </div>
 
@@ -257,7 +265,7 @@ const Admin = () => {
                 : {}
             }
           >
-            📋 Forespørsler
+            📋 Bokforespørsler
           </button>
           <button
             onClick={() => setActiveTab("products")}
@@ -270,7 +278,7 @@ const Admin = () => {
                 : {}
             }
           >
-            🛍️ Rediger varer
+            🛍️ Varer
           </button>
           <button
             onClick={() => setActiveTab("orders")}
@@ -296,7 +304,7 @@ const Admin = () => {
                 : {}
             }
           >
-            👥 Brukere til godkjenning
+            👥 Brukere
           </button>
           <button
             onClick={() => setActiveTab("passwords")}
@@ -310,6 +318,19 @@ const Admin = () => {
             }
           >
             🔑 Tilbakestill passord
+          </button>
+          <button
+            onClick={() => setActiveTab("books")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "books" ? "text-white" : "bg-white text-gray-700"
+            }`}
+            style={
+              activeTab === "books"
+                ? { background: "linear-gradient(135deg, #10b981, #059669)" }
+                : {}
+            }
+          >
+            📚 Legg til bok
           </button>
         </div>
 
@@ -861,6 +882,36 @@ const Admin = () => {
               </>
               );
             })()}
+          </>
+        )}
+        {/* Books Tab */}
+        {activeTab === "books" && (
+          <>
+            {showBookForm ? (
+              <div className="container-gradient animate-fadeIn">
+                <AdminBookForm
+                  book={null}
+                  onSuccess={handleBookFormSuccess}
+                  onCancel={() => setShowBookForm(false)}
+                />
+              </div>
+            ) : (
+              <div className="container-gradient text-center py-12 animate-fadeIn">
+                <div className="text-6xl mb-4">📚</div>
+                <h3 className="text-2xl font-bold gradient-text mb-3">Legg til bok manuelt</h3>
+                <p className="text-gray-600 mb-6">
+                  Fyll inn all informasjon selv — inkludert cover, lenker og bokklubbmåned.
+                  <br />
+                  For å redigere eller slette, gå inn på boken i biblioteket.
+                </p>
+                <button
+                  onClick={() => setShowBookForm(true)}
+                  className="btn-primary px-8 py-4 text-lg"
+                >
+                  ✨ Legg til bok
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>
