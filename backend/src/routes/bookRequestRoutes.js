@@ -3,7 +3,9 @@ const {
   createRequest,
   getMyRequests,
   getAllRequests,
-  markAsAdded
+  markAsAdded,
+  dismissRequest,
+  markAsIrrelevant
 } = require('../controllers/bookRequestController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 
@@ -15,5 +17,7 @@ router.post('/', createRequest);
 router.get('/mine', getMyRequests);
 router.get('/', authorize('admin'), getAllRequests);
 router.patch('/:id/added', authorize('admin'), markAsAdded);
+router.patch('/:id/dismiss', dismissRequest);
+router.patch('/:id/irrelevant', authorize('admin'), markAsIrrelevant);
 
 module.exports = router;

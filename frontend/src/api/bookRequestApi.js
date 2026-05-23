@@ -19,6 +19,16 @@ const bookRequestApi = {
   markAsAdded: async (id) => {
     const response = await api.patch(`/api/book-requests/${id}/added`);
     return response.data;
+  },
+
+  dismiss: async (id) => {
+    const response = await api.patch(`/api/book-requests/${id}/dismiss`);
+    return response.data;
+  },
+
+  markAsIrrelevant: async (id) => {
+    const response = await api.patch(`/api/book-requests/${id}/irrelevant`);
+    return response.data;
   }
 };
 

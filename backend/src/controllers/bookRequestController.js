@@ -43,6 +43,7 @@ exports.getMyRequests = async (req, res) => {
       ]
     }).sort({ createdAt: -1 });
 
+
     res.status(200).json({ success: true, requests });
   } catch (error) {
     console.error('Get my requests error:', error);
@@ -63,6 +64,52 @@ exports.getAllRequests = async (req, res) => {
   } catch (error) {
     console.error('Get all requests error:', error);
     res.status(500).json({ success: false, message: 'Klarte ikke hente forespørsler' });
+  }
+};
+
+// @desc    User dismisses their own pending request
+// @route   PATCH /api/book-requests/:id/dismiss
+// @access  Private
+exports.dismissRequest = async (req, res) => {
+  try {
+    const request = await BookRequest.findOne({ _id: req.params.id, requestedBy: req.user._id });
+
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Forespørsel ikke funnet' });
+    }
+    if (request.status !== 'pending') {
+      return res.status(400).json({ success: false, message: 'Kan bare trekke tilbake ventende forespørsler' });
+    }
+
+    request.status = 'dismissed';
+    await request.save();
+
+    res.status(200).json({ success: true, message: 'Forespørsel trukket tilbake' });
+  } catch (error) {
+    console.error('Dismiss request error:', error);
+    res.status(500).json({ success: false, message: 'Klarte ikke trekke tilbake forespørsel' });
+  }
+};
+
+// @desc    Admin marks a request as irrelevant
+// @route   PATCH /api/book-requests/:id/irrelevant
+// @access  Admin
+exports.markAsIrrelevant = async (req, res) => {
+  try {
+    const request = await BookRequest.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: 'irrelevant' } },
+      { new: true }
+    ).populate('requestedBy', 'displayName username');
+
+    if (!request) {
+      return res.status(404).json({ success: false, message: 'Forespørsel ikke funnet' });
+    }
+
+    res.status(200).json({ success: true, message: 'Merket som ikke relevant', request });
+  } catch (error) {
+    console.error('Mark as irrelevant error:', error);
+    res.status(500).json({ success: false, message: 'Klarte ikke oppdatere forespørsel' });
   }
 };
 

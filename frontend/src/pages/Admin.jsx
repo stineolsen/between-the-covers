@@ -10,7 +10,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 const FORMAT_LABELS = { ebook: '📱 E-bok', audiobook: '🎧 Lydbok' };
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState("users");
+  const [activeTab, setActiveTab] = useState("requests");
   const [pendingUsers, setPendingUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -22,6 +22,7 @@ const Admin = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [showProductForm, setShowProductForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showArchive, setShowArchive] = useState(false);
 
   useEffect(() => {
     if (activeTab === "users") {
@@ -81,6 +82,18 @@ const Admin = () => {
       await bookRequestApi.markAsAdded(id);
       setRequests(prev => prev.map(r => r._id === id ? { ...r, status: 'added', addedAt: new Date().toISOString() } : r));
       setSuccessMessage("Markert som lagt til!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke oppdatere forespørsel");
+      console.error(err);
+    }
+  };
+
+  const handleMarkAsIrrelevant = async (id) => {
+    try {
+      await bookRequestApi.markAsIrrelevant(id);
+      setRequests(prev => prev.map(r => r._id === id ? { ...r, status: 'irrelevant' } : r));
+      setSuccessMessage("Markert som ikke relevant!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError("Greide ikke oppdatere forespørsel");
@@ -761,9 +774,32 @@ const Admin = () => {
               <div className="container-gradient text-center py-12 animate-fadeIn">
                 <p className="text-gray-700 text-lg font-bold">📋 Ingen bokforespørsler enda.</p>
               </div>
-            ) : (
+            ) : (() => {
+              const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
+              const isArchived = (req) =>
+                (req.status === 'added' || req.status === 'irrelevant' || req.status === 'dismissed') &&
+                new Date(req.createdAt).getTime() < cutoff;
+              const visible = requests.filter(req => showArchive ? isArchived(req) : !isArchived(req));
+              const archivedCount = requests.filter(isArchived).length;
+              return (
+              <>
+                <div className="flex justify-end mb-2">
+                  <button
+                    onClick={() => setShowArchive(prev => !prev)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80 bg-gray-100 text-gray-600"
+                  >
+                    {showArchive ? '← Vis aktive' : `🗄 Arkiv${archivedCount > 0 ? ` (${archivedCount})` : ''}`}
+                  </button>
+                </div>
+                {visible.length === 0 ? (
+                  <div className="container-gradient text-center py-12 animate-fadeIn">
+                    <p className="text-gray-700 text-lg font-bold">
+                      {showArchive ? '📦 Ingen arkiverte forespørsler.' : '📋 Ingen aktive forespørsler.'}
+                    </p>
+                  </div>
+                ) : (
               <div className="grid gap-4 animate-fadeIn">
-                {requests.map((req) => (
+                {visible.map((req) => (
                   <div key={req._id} className="container-gradient hover:shadow-2xl transition-all">
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1 min-w-0">
@@ -789,28 +825,42 @@ const Admin = () => {
                       </div>
 
                       <div className="flex-shrink-0 flex flex-col items-end gap-2">
-                        {req.status === 'added' ? (
-                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
-                            ✅ Lagt til
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleMarkAsAdded(req._id)}
-                            className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
-                            style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
-                          >
-                            ✓ Marker som lagt til
-                          </button>
+                        {req.status === 'added' && (
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Lagt til</span>
                         )}
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${req.status === 'added' ? 'bg-green-50 text-green-600' : 'bg-yellow-100 text-yellow-700'}`}>
-                          {req.status === 'added' ? 'Lagt til' : 'Venter'}
-                        </span>
+                        {req.status === 'dismissed' && (
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">↩ Trukket tilbake</span>
+                        )}
+                        {req.status === 'irrelevant' && (
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-400">✕ Ikke relevant</span>
+                        )}
+                        {req.status === 'pending' && (
+                          <>
+                            <button
+                              onClick={() => handleMarkAsAdded(req._id)}
+                              className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
+                              style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
+                            >
+                              ✓ Marker som lagt til
+                            </button>
+                            <button
+                              onClick={() => handleMarkAsIrrelevant(req._id)}
+                              className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500"
+                            >
+                              ✕ Ikke relevant
+                            </button>
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Venter</span>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+                )}
+              </>
+              );
+            })()}
           </>
         )}
       </div>

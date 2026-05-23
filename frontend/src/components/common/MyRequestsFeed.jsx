@@ -14,6 +14,15 @@ const MyRequestsFeed = () => {
       .finally(() => setLoading(false));
   }, []);
 
+  const handleDismiss = async (id) => {
+    try {
+      await bookRequestApi.dismiss(id);
+      setRequests(prev => prev.filter(r => r._id !== id));
+    } catch (err) {
+      console.error('Klarte ikke trekke tilbake forespørsel:', err);
+    }
+  };
+
   if (loading || requests.length === 0) return null;
 
   return (
@@ -40,15 +49,24 @@ const MyRequestsFeed = () => {
               )}
             </div>
 
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 flex items-center gap-2">
               {req.status === 'added' ? (
                 <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
                   ✅ Lagt til i biblioteket
                 </span>
               ) : (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
-                  ⏳ Venter på svar
-                </span>
+                <>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
+                    ⏳ Venter på svar
+                  </span>
+                  <button
+                    onClick={() => handleDismiss(req._id)}
+                    title="Trekk tilbake forespørsel"
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </>
               )}
             </div>
           </div>
