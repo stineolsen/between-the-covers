@@ -23,6 +23,7 @@ import Meetings from "./pages/Meetings";
 import ReadingHistory from "./pages/ReadingHistory";
 import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
+import PublicProfile from "./pages/PublicProfile";
 import Admin from "./pages/Admin";
 import Howto from "./pages/Howto";
 
@@ -109,6 +110,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/members/:userId"
+                  element={
+                    <ProtectedRoute>
+                      <PublicProfile />
                     </ProtectedRoute>
                   }
                 />

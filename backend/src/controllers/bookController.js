@@ -154,11 +154,12 @@ exports.createBook = async (req, res, next) => {
       calibreDownloadLink,
     } = req.body;
 
-    // Handle cover image upload
+    // Handle cover image: uploaded file takes priority, then external URL
     let coverImage = null;
     if (req.file) {
-      // Store relative path from uploads directory
       coverImage = req.file.filename;
+    } else if (req.body.coverImageUrl) {
+      coverImage = req.body.coverImageUrl;
     }
 
     // Parse genres if it's a string

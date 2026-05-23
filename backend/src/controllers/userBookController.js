@@ -8,10 +8,11 @@ const User = require("../models/User");
 // @access  Private
 exports.getUserBooks = async (req, res) => {
   try {
-    const { status } = req.query;
+    const { status, owned } = req.query;
 
     const query = { user: req.user._id };
     if (status) query.status = status;
+    if (owned === "true") query.owned = true;
 
     const userBooks = await UserBook.find(query).sort({ updatedAt: -1 });
 
@@ -223,6 +224,81 @@ exports.getBookReaders = async (req, res) => {
   } catch (error) {
     console.error("Get book readers error:", error);
     res.status(500).json({ success: false, message: "Failed to fetch readers" });
+  }
+};
+
+// @desc    Toggle owned flag for a book
+// @route   PATCH /api/user-books/:bookId/owned
+// @access  Private
+exports.toggleOwned = async (req, res) => {
+  try {
+    let userBook = await UserBook.findOne({
+      user: req.user._id,
+      book: req.params.bookId,
+    });
+
+    if (userBook) {
+      userBook.owned = !userBook.owned;
+      await userBook.save();
+    } else {
+      userBook = await UserBook.create({
+        user: req.user._id,
+        book: req.params.bookId,
+        owned: true,
+        status: null,
+      });
+    }
+
+    res.status(200).json({ success: true, owned: userBook.owned });
+  } catch (error) {
+    console.error("Toggle owned error:", error);
+    res.status(500).json({ success: false, message: "Failed to update ownership" });
+  }
+};
+
+// @desc    Get users who own a specific book
+// @route   GET /api/user-books/owners/:bookId
+// @access  Private
+exports.getBookOwners = async (req, res) => {
+  try {
+    const owners = await UserBook.find({
+      book: req.params.bookId,
+      owned: true,
+    })
+      .populate("user", "username displayName avatar")
+      .sort({ updatedAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      owners: owners.map((r) => ({ user: r.user })),
+    });
+  } catch (error) {
+    console.error("Get book owners error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch owners" });
+  }
+};
+
+// @desc    Get users who have a book on their TBR
+// @route   GET /api/user-books/tbr/:bookId
+// @access  Private
+exports.getBookTBR = async (req, res) => {
+  try {
+    const tbr = await UserBook.find({
+      book: req.params.bookId,
+      status: "to-read",
+    })
+      .populate("user", "username displayName avatar")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.status(200).json({
+      success: true,
+      tbr: tbr.map((r) => ({ user: r.user })),
+    });
+  } catch (error) {
+    console.error("Get book TBR error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch TBR list" });
   }
 };
 

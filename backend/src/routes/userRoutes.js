@@ -9,6 +9,7 @@ const {
   uploadAvatar,
   selectDefaultAvatar,
   deleteAvatar,
+  getPublicProfile,
 } = require("../controllers/userController");
 
 // Members list (for recommendation recipient selection)
@@ -22,5 +23,8 @@ router.put("/profile", protect, updateProfile);
 router.post("/avatar", protect, uploadSingle("avatar"), uploadAvatar);
 router.put("/avatar/default", protect, selectDefaultAvatar);
 router.delete("/avatar", protect, deleteAvatar);
+
+// Public profile route
+router.get("/:userId/profile", protect, getPublicProfile);
 
 module.exports = router;

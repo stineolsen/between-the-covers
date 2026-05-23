@@ -7,6 +7,9 @@ const {
   getReadingStats,
   updateFinishedDate,
   getBookReaders,
+  getBookTBR,
+  toggleOwned,
+  getBookOwners,
 } = require("../controllers/userBookController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -20,6 +23,9 @@ router.get("/", getUserBooks);
 router.get("/stats", getReadingStats);
 router.get("/book/:bookId", getUserBookStatus);
 router.get("/readers/:bookId", getBookReaders);
+router.get("/tbr/:bookId", getBookTBR);
+router.get("/owners/:bookId", getBookOwners);
+router.patch("/:bookId/owned", toggleOwned);
 
 // Set/update status
 router.post("/", setBookStatus);

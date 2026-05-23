@@ -20,14 +20,10 @@ router.get("/genres", protect, getGenres);
 router.get("/status/:status", protect, getBooksByStatus);
 router.get("/:id", protect, getBook);
 
+// All members can add books
+router.post("/", protect, uploadSingle("coverImage"), createBook);
+
 // Admin only routes
-router.post(
-  "/",
-  protect,
-  authorize("admin"),
-  uploadSingle("coverImage"),
-  createBook,
-);
 router.put(
   "/:id",
   protect,

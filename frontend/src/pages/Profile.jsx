@@ -1,8 +1,11 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import { usersApi } from "../api/usersApi";
 import { authApi } from "../api/authApi";
+import { userBooksApi } from "../api/userBooksApi";
+import { booksApi } from "../api/booksApi";
 
 const Profile = () => {
   const { user, setUser } = useAuth();
@@ -23,6 +26,16 @@ const Profile = () => {
   });
 
   const defaultAvatars = usersApi.getDefaultAvatars();
+
+  const [ownedBooks, setOwnedBooks] = useState([]);
+  const [ownedLoading, setOwnedLoading] = useState(true);
+
+  useEffect(() => {
+    userBooksApi.getUserBooks({ owned: true })
+      .then(data => setOwnedBooks(data.userBooks || []))
+      .catch(() => setOwnedBooks([]))
+      .finally(() => setOwnedLoading(false));
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -391,6 +404,52 @@ const Profile = () => {
                 </button>
               </div>
             </form>
+          )}
+        </div>
+
+        {/* Bookshelf */}
+        <div className="container-gradient mt-6">
+          <h2 className="text-xl font-bold gradient-text mb-4">
+            📖 Min bokhylle ({ownedBooks.length})
+          </h2>
+
+          {ownedLoading ? (
+            <div className="flex justify-center py-6">
+              <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : ownedBooks.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-6">
+              Du har ikke lagt til noen bøker i bokhyllen din enda.<br />
+              Åpne en bok og trykk «Legg til bokhyllen».
+            </p>
+          ) : (
+            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
+              {ownedBooks.map(({ book }) => {
+                if (!book) return null;
+                const cover = booksApi.getCoverUrl(book.coverImage);
+                return (
+                  <Link
+                    key={book._id}
+                    to={`/books/${book._id}`}
+                    title={`${book.title} — ${book.author}`}
+                    className="group block"
+                  >
+                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md bg-gray-100 group-hover:shadow-xl transition-shadow">
+                      {cover ? (
+                        <img src={cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center p-2"
+                          style={{ background: "linear-gradient(135deg, #667eea22, #764ba222)" }}>
+                          <span className="text-xs text-center text-gray-500 font-medium line-clamp-3 leading-tight">
+                            {book.title}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

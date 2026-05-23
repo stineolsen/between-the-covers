@@ -171,9 +171,10 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
               const attendeeId = attendee._id || attendee.toString?.() || index;
 
               return (
-                <div
+                <Link
                   key={`attendee-${attendeeId}-${index}`}
-                  className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-lg flex items-center justify-center text-xl"
+                  to={`/members/${attendeeId}`}
+                  className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-lg flex items-center justify-center text-xl hover:opacity-80 transition-opacity"
                   style={{
                     background: "linear-gradient(135deg, #667eea, #764ba2)",
                   }}
@@ -190,7 +191,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
                       {displayName.charAt(0).toUpperCase()}
                     </span>
                   )}
-                </div>
+                </Link>
               );
             })}
             {attendeeCount > 5 && (

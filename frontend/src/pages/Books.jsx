@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { booksApi } from "../api/booksApi";
-import { useAuth } from "../contexts/AuthContext";
+import { userBooksApi } from "../api/userBooksApi";
 import BookGrid from "../components/books/BookGrid";
 import RequestBookModal from "../components/books/RequestBookModal";
+import AddBookModal from "../components/books/AddBookModal";
 
 const Books = () => {
-  const { isAdmin } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showRequestModal, setShowRequestModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   // Filter states - restored from sessionStorage so filters persist when navigating back
   const savedFilters = JSON.parse(
@@ -35,6 +35,7 @@ const Books = () => {
     );
   }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter]);
 
+  const [userBookMap, setUserBookMap] = useState({});
   const [availableGenres, setAvailableGenres] = useState([]);
   const [showAllGenres, setShowAllGenres] = useState(false);
   const GENRES_VISIBLE = 10;
@@ -44,6 +45,31 @@ const Books = () => {
       .then(data => setAvailableGenres(data.genres || []))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    userBooksApi.getUserBooks()
+      .then(data => {
+        const map = {};
+        (data.userBooks || []).forEach(ub => {
+          const id = ub.book?._id || ub.book;
+          if (id) map[id] = { status: ub.status, _id: ub._id };
+        });
+        setUserBookMap(map);
+      })
+      .catch(() => {});
+  }, []);
+
+  const handleStatusChange = (bookId, status, userBookId) => {
+    setUserBookMap(prev => {
+      const next = { ...prev };
+      if (status) {
+        next[bookId] = { status, _id: userBookId };
+      } else {
+        delete next[bookId];
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     fetchBooks();
@@ -109,11 +135,12 @@ const Books = () => {
             >
               📬 Be om en bok
             </button>
-            {isAdmin && (
-              <Link to="/books/new" className="btn-accent">
-                ✨ Legg til ny bok
-              </Link>
-            )}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="btn-accent"
+            >
+              ✨ Legg til bok
+            </button>
           </div>
         </div>
 
@@ -272,11 +299,14 @@ const Books = () => {
         </div>
 
         {/* Books Grid */}
-        <BookGrid books={books} loading={loading} error={error} />
+        <BookGrid books={books} loading={loading} error={error} userBookMap={userBookMap} onStatusChange={handleStatusChange} />
       </div>
 
       {showRequestModal && (
         <RequestBookModal onClose={() => setShowRequestModal(false)} />
+      )}
+      {showAddModal && (
+        <AddBookModal onClose={() => setShowAddModal(false)} />
       )}
     </div>
   );

@@ -53,6 +53,24 @@ export const userBooksApi = {
     const response = await api.get(`/api/user-books/readers/${bookId}`);
     return response.data;
   },
+
+  // Get all members who have a book on their TBR
+  getBookTBR: async (bookId) => {
+    const response = await api.get(`/api/user-books/tbr/${bookId}`);
+    return response.data;
+  },
+
+  // Get all members who own a specific book
+  getBookOwners: async (bookId) => {
+    const response = await api.get(`/api/user-books/owners/${bookId}`);
+    return response.data;
+  },
+
+  // Toggle owned status for a book
+  toggleOwned: async (bookId) => {
+    const response = await api.patch(`/api/user-books/${bookId}/owned`);
+    return response.data;
+  },
 };
 
 export default userBooksApi;

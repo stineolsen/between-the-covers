@@ -213,9 +213,10 @@ const NextMeeting = () => {
                       attendee._id || attendee.toString?.() || index;
 
                     return (
-                      <div
+                      <Link
                         key={`attendee-${attendeeId}-${index}`}
-                        className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm"
+                        to={`/members/${attendeeId}`}
+                        className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm hover:opacity-80 transition-opacity"
                       >
                         <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm">
                           {attendee.avatar ? (
@@ -233,7 +234,7 @@ const NextMeeting = () => {
                         <span className="text-sm font-medium">
                           {displayName}
                         </span>
-                      </div>
+                      </Link>
                     );
                   })}
                   {attendeeCount > 8 && (

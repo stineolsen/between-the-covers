@@ -1,6 +1,6 @@
 import BookCard from "./BookCard";
 
-const BookGrid = ({ books, loading, error }) => {
+const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -36,7 +36,7 @@ const BookGrid = ({ books, loading, error }) => {
   return (
     <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
       {books.map((book) => (
-        <BookCard key={book._id} book={book} />
+        <BookCard key={book._id} book={book} userBookEntry={userBookMap[book._id]} onStatusChange={onStatusChange} />
       ))}
     </div>
   );

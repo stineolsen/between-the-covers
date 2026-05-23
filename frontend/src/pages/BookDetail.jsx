@@ -36,6 +36,10 @@ const BookDetail = () => {
 
   // Readers state
   const [readers, setReaders] = useState([]);
+  const [tbrList, setTbrList] = useState([]);
+  const [owners, setOwners] = useState([]);
+  const [userOwned, setUserOwned] = useState(false);
+  const [ownedLoading, setOwnedLoading] = useState(false);
 
   useEffect(() => {
     fetchBook();
@@ -43,6 +47,8 @@ const BookDetail = () => {
     fetchUserReview();
     fetchUserBookStatus();
     fetchReaders();
+    fetchTBR();
+    fetchOwners();
   }, [id]);
 
   const fetchReaders = async () => {
@@ -51,6 +57,15 @@ const BookDetail = () => {
       setReaders(data.readers || []);
     } catch {
       setReaders([]);
+    }
+  };
+
+  const fetchTBR = async () => {
+    try {
+      const data = await userBooksApi.getBookTBR(id);
+      setTbrList(data.tbr || []);
+    } catch {
+      setTbrList([]);
     }
   };
 
@@ -175,12 +190,36 @@ const BookDetail = () => {
       const data = await userBooksApi.getUserBookStatus(id);
       if (data.userBook) {
         setUserBookStatus(data.userBook.status);
+        setUserOwned(data.userBook.owned || false);
       } else {
         setUserBookStatus(null);
+        setUserOwned(false);
       }
     } catch (err) {
-      // No status found, that's ok
       setUserBookStatus(null);
+      setUserOwned(false);
+    }
+  };
+
+  const fetchOwners = async () => {
+    try {
+      const data = await userBooksApi.getBookOwners(id);
+      setOwners(data.owners || []);
+    } catch {
+      setOwners([]);
+    }
+  };
+
+  const handleToggleOwned = async () => {
+    setOwnedLoading(true);
+    try {
+      const data = await userBooksApi.toggleOwned(id);
+      setUserOwned(data.owned);
+      setOwners(await userBooksApi.getBookOwners(id).then(d => d.owners || []));
+    } catch {
+      toast.error("Greide ikke oppdatere bokhylle");
+    } finally {
+      setOwnedLoading(false);
     }
   };
 
@@ -317,6 +356,21 @@ const BookDetail = () => {
                 onStatusChange={handleStatusChange}
                 loading={statusLoading}
               />
+            </div>
+
+            {/* Own this book toggle */}
+            <div className="mt-3">
+              <button
+                onClick={handleToggleOwned}
+                disabled={ownedLoading}
+                className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all disabled:opacity-50"
+                style={userOwned
+                  ? { background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "white" }
+                  : { background: "rgba(245,158,11,0.1)", color: "#d97706", border: "1.5px solid #f59e0b" }
+                }
+              >
+                {ownedLoading ? "⏳" : userOwned ? "📖 Jeg eier denne boken" : "📖 Legg til bokhyllen"}
+              </button>
             </div>
           </div>
         </div>
@@ -532,10 +586,11 @@ const BookDetail = () => {
                   </h3>
                   <div className="flex flex-wrap gap-2">
                     {readers.map(({ user: u, finishedAt }) => (
-                      <div
+                      <Link
                         key={u._id}
+                        to={`/members/${u._id}`}
                         title={finishedAt ? new Date(finishedAt).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" }) : undefined}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
                       >
                         {u.avatar ? (
                           <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
@@ -546,7 +601,63 @@ const BookDetail = () => {
                           </span>
                         )}
                         {u.displayName || u.username}
-                      </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Owned by section */}
+              {owners.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">
+                    📖 Eies av ({owners.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {owners.map(({ user: u }) => (
+                      <Link
+                        key={u._id}
+                        to={`/members/${u._id}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
+                      >
+                        {u.avatar ? (
+                          <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
+                        ) : (
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                            style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
+                            {(u.displayName || u.username || "?")[0].toUpperCase()}
+                          </span>
+                        )}
+                        {u.displayName || u.username}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* TBR section */}
+              {tbrList.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide mb-3">
+                    📚 Ønsker å lese ({tbrList.length})
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {tbrList.map(({ user: u }) => (
+                      <Link
+                        key={u._id}
+                        to={`/members/${u._id}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
+                      >
+                        {u.avatar ? (
+                          <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
+                        ) : (
+                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+                            {(u.displayName || u.username || "?")[0].toUpperCase()}
+                          </span>
+                        )}
+                        {u.displayName || u.username}
+                      </Link>
                     ))}
                   </div>
                 </div>

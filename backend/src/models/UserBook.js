@@ -20,7 +20,13 @@ const userBookSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["to-read", "currently-reading", "read"],
-      default: "to-read",
+      default: null,
+    },
+
+    // Whether the user physically owns this book
+    owned: {
+      type: Boolean,
+      default: false,
     },
 
     // When user started reading

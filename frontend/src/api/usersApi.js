@@ -44,6 +44,12 @@ export const usersApi = {
     return response.data;
   },
 
+  // Get public profile for a member
+  getPublicProfile: async (userId) => {
+    const response = await api.get(`/api/users/${userId}/profile`);
+    return response.data;
+  },
+
   // Helper to get avatar URL
   getAvatarUrl: (avatarPath) => {
     if (!avatarPath) return null;

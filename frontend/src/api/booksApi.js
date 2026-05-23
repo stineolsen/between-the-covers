@@ -29,7 +29,7 @@ export const booksApi = {
         formData.append(key, bookData[key].join(","));
       } else if (key === "libraryLinks") {
         formData.append(key, JSON.stringify(bookData[key]));
-      } else if (bookData[key] !== null && bookData[key] !== undefined) {
+      } else if (bookData[key] !== null && bookData[key] !== undefined && bookData[key] !== "") {
         formData.append(key, bookData[key]);
       }
     });
@@ -90,9 +90,10 @@ export const booksApi = {
     return response.data;
   },
 
-  // Helper: Get cover image URL
+  // Helper: Get cover image URL (handles both local filenames and external URLs)
   getCoverUrl: (coverImage) => {
     if (!coverImage) return null;
+    if (coverImage.startsWith("http")) return coverImage;
     const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
     return `${apiUrl}/uploads/books/${coverImage}`;
   },

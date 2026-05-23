@@ -195,6 +195,68 @@ exports.selectDefaultAvatar = async (req, res, next) => {
   }
 };
 
+// @desc    Get public profile for a member
+// @route   GET /api/users/:userId/profile
+// @access  Private
+exports.getPublicProfile = async (req, res, next) => {
+  try {
+    const UserBook = require('../models/UserBook');
+    const Review = require('../models/Review');
+
+    const user = await User.findById(req.params.userId)
+      .select('displayName username avatar bio favoriteGenres role status');
+    if (!user) return res.status(404).json({ success: false, message: 'Bruker ikke funnet' });
+
+    // Build tags
+    const tags = [];
+    if (user.role === 'admin') tags.push('admin');
+    if (user.status === 'approved') tags.push('godkjent');
+
+    const [readCount, reviewCount, topReaders, topReviewers] = await Promise.all([
+      UserBook.countDocuments({ user: user._id, status: 'read' }),
+      Review.countDocuments({ user: user._id }),
+      UserBook.aggregate([
+        { $match: { status: 'read' } },
+        { $group: { _id: '$user', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 2 },
+      ]),
+      Review.aggregate([
+        { $group: { _id: '$user', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: 2 },
+      ]),
+    ]);
+
+    const userId = user._id.toString();
+    if (topReaders.some((r) => r._id.toString() === userId)) tags.push('top-leser');
+    if (topReviewers.some((r) => r._id.toString() === userId)) tags.push('top-anmelder');
+
+    // Owned books (bookshelf) — book auto-populated by UserBook pre-find middleware
+    const bookshelf = await UserBook.find({ user: user._id, owned: true }).sort({ updatedAt: -1 }).lean();
+
+    // Highest-rated reviews → favorite books
+    const favoriteReviews = await Review.find({ user: user._id })
+      .sort({ rating: -1 })
+      .limit(6)
+      .populate('book', 'title author coverImage')
+      .lean();
+    const favoriteBooks = favoriteReviews.map(r => ({ book: r.book, rating: r.rating }));
+
+    res.status(200).json({
+      success: true,
+      user,
+      tags,
+      readCount,
+      reviewCount,
+      bookshelf: bookshelf.map(ub => ({ book: ub.book })),
+      favoriteBooks,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Delete user avatar
 // @route   DELETE /api/users/avatar
 // @access  Private
