@@ -84,6 +84,9 @@ exports.getBooks = async (req, res, next) => {
       case "author":
         sortOptions = { author: 1 };
         break;
+      case "author-lastname":
+        sortOptions = null; // handled in JS below
+        break;
       case "rating":
         sortOptions = { averageRating: -1 };
         break;
@@ -94,9 +97,18 @@ exports.getBooks = async (req, res, next) => {
         sortOptions = { dateAdded: -1 };
     }
 
-    const books = await Book.find(query)
-      .sort(sortOptions)
+    let books = await Book.find(query)
+      .sort(sortOptions || { title: 1 })
       .populate("addedBy", "username displayName");
+
+    if (sort === "author-lastname") {
+      const lastName = (name) => {
+        if (!name) return "";
+        const parts = name.trim().split(/\s+/);
+        return parts[parts.length - 1].toLowerCase();
+      };
+      books = [...books].sort((a, b) => lastName(a.author).localeCompare(lastName(b.author), "nb"));
+    }
 
     res.status(200).json({
       success: true,

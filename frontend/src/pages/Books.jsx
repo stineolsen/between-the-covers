@@ -227,7 +227,8 @@ const Books = () => {
               >
                 <option value="newest">Nyeste først</option>
                 <option value="title">Tittel A-Z</option>
-                <option value="author">Forfatter A-Z</option>
+                <option value="author">Forfatter fornavn A-Z</option>
+                <option value="author-lastname">Forfatter etternavn A-Z</option>
                 <option value="rating">Høyest rated</option>
               </select>
             </div>
