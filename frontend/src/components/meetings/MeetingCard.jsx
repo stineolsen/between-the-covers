@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 import { usersApi } from "../../api/usersApi";
 import { useAuth } from "../../contexts/AuthContext";
+import MeetingRating from "./MeetingRating";
 
 const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
   const { user, isAdmin } = useAuth();
@@ -218,6 +219,16 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
         >
           <h4 className="font-bold text-gray-900 mb-2">📝 Møtenotater:</h4>
           <p className="text-gray-700 whitespace-pre-line">{meeting.notes}</p>
+        </div>
+      )}
+
+      {/* Rating for past meetings with a linked book */}
+      {meeting.status === "past" && meeting.book && (
+        <div
+          className="mb-4 p-4 rounded-2xl"
+          style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+        >
+          <MeetingRating bookId={meeting.book._id} bookTitle={meeting.book.title} />
         </div>
       )}
 
