@@ -284,6 +284,37 @@ exports.toggleLike = async (req, res, next) => {
   }
 };
 
+// @desc    Admin: create or update a review on behalf of any user
+// @route   POST /api/reviews/admin
+// @access  Private (admin only)
+exports.adminSetRating = async (req, res, next) => {
+  try {
+    const { bookId, userId, rating } = req.body;
+
+    const book = await Book.findById(bookId);
+    if (!book) return res.status(404).json({ success: false, message: "Book not found" });
+
+    let review = await Review.findOne({ book: bookId, user: userId });
+    if (review) {
+      review.rating = rating;
+      await review.save();
+    } else {
+      review = await Review.create({ book: bookId, user: userId, rating });
+    }
+
+    await review.populate("user", "username displayName avatar");
+
+    res.status(200).json({ success: true, review });
+  } catch (error) {
+    console.error("Admin set rating error:", error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((e) => e.message);
+      return res.status(400).json({ success: false, message: messages.join(", ") });
+    }
+    res.status(500).json({ success: false, message: "Failed to set rating" });
+  }
+};
+
 // @desc    Get user's review for a book
 // @route   GET /api/reviews/book/:bookId/user
 // @access  Private

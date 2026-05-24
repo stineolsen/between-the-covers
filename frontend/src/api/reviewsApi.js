@@ -49,6 +49,12 @@ export const reviewsApi = {
     const response = await api.post(`/api/reviews/${id}/like`);
     return response.data;
   },
+
+  // Admin: set rating on behalf of any user
+  adminSetRating: async (bookId, userId, rating) => {
+    const response = await api.post("/api/reviews/admin", { bookId, userId, rating });
+    return response.data;
+  },
 };
 
 export default reviewsApi;

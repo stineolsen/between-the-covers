@@ -7,8 +7,9 @@ const {
   deleteReview,
   toggleLike,
   getUserReviewForBook,
+  adminSetRating,
 } = require("../controllers/reviewController");
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -19,6 +20,9 @@ router.use(protect);
 router.get("/", getReviews);
 router.get("/:id", getReview);
 router.get("/book/:bookId/user", getUserReviewForBook);
+
+// Admin: set rating for any user
+router.post("/admin", authorize("admin"), adminSetRating);
 
 // Create, update, delete (member routes)
 router.post("/", createReview);
