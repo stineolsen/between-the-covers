@@ -26,14 +26,15 @@ const Books = () => {
   const [genre, setGenre] = useState(savedFilters.genre || "");
   const [sort, setSort] = useState(savedFilters.sort || "newest");
   const [readFilter, setReadFilter] = useState(savedFilters.readFilter || "all");
+  const [ownedOnly, setOwnedOnly] = useState(savedFilters.ownedOnly || false);
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
     sessionStorage.setItem(
       "bookFilters",
-      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort, readFilter }),
+      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly }),
     );
-  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly]);
 
   const [userBookMap, setUserBookMap] = useState({});
   const [availableGenres, setAvailableGenres] = useState([]);
@@ -52,7 +53,7 @@ const Books = () => {
         const map = {};
         (data.userBooks || []).forEach(ub => {
           const id = ub.book?._id || ub.book;
-          if (id) map[id] = { status: ub.status, _id: ub._id };
+          if (id) map[id] = { status: ub.status, _id: ub._id, owned: ub.owned };
         });
         setUserBookMap(map);
       })
@@ -73,7 +74,7 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly]);
 
   const fetchBooks = async () => {
     try {
@@ -87,6 +88,7 @@ const Books = () => {
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
       if (readFilter !== "all") params.readFilter = readFilter;
+      if (ownedOnly) params.ownedOnly = "true";
 
       const data = await booksApi.getBooks(params);
       setBooks(data.books);
@@ -106,6 +108,7 @@ const Books = () => {
     setSearch("");
     setBookclubOnly(false);
     setAudiobookOnly(false);
+    setOwnedOnly(false);
     setGenre("");
     setSort("newest");
     setReadFilter("all");
@@ -192,6 +195,23 @@ const Books = () => {
                 className="text-sm font-bold text-gray-700 cursor-pointer select-none"
               >
                 🎧 Lydbøker
+              </label>
+            </div>
+
+            {/* Owned Filter */}
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
+              <input
+                type="checkbox"
+                id="ownedOnly"
+                checked={ownedOnly}
+                onChange={(e) => setOwnedOnly(e.target.checked)}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+              <label
+                htmlFor="ownedOnly"
+                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
+              >
+                📚 Eier boken
               </label>
             </div>
 

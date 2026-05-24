@@ -7,7 +7,7 @@ const fs = require("fs");
 // @access  Private
 exports.getBooks = async (req, res, next) => {
   try {
-    const { search, bookclubOnly, audiobookOnly, genre, sort, readFilter } = req.query;
+    const { search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly } = req.query;
 
     // Build query
     let query = {};
@@ -37,19 +37,42 @@ exports.getBooks = async (req, res, next) => {
       query.genres = genre;
     }
 
-    // Filter by reading status (uses UserBook model)
-    if (readFilter === 'read' || readFilter === 'unread') {
+    // Filter by reading status and/or owned (uses UserBook model)
+    const needsUserBooks = readFilter === 'read' || readFilter === 'unread' || ownedOnly === 'true';
+    if (needsUserBooks) {
       const UserBook = require('../models/UserBook');
-      const readEntries = await UserBook.aggregate([
-        { $match: { user: req.user._id, status: 'read' } },
-        { $project: { book: 1 } },
-      ]);
-      const readBookIds = readEntries.map(e => e.book);
-      if (readFilter === 'read') {
-        query._id = { $in: readBookIds };
-      } else {
-        query._id = { $nin: readBookIds };
+      const idConstraint = {};
+
+      if (readFilter === 'read' || readFilter === 'unread') {
+        const readEntries = await UserBook.aggregate([
+          { $match: { user: req.user._id, status: 'read' } },
+          { $project: { book: 1 } },
+        ]);
+        const readBookIds = readEntries.map(e => e.book);
+        if (readFilter === 'read') {
+          idConstraint.$in = readBookIds;
+        } else {
+          idConstraint.$nin = readBookIds;
+        }
       }
+
+      if (ownedOnly === 'true') {
+        const ownedEntries = await UserBook.aggregate([
+          { $match: { user: req.user._id, owned: true } },
+          { $project: { book: 1 } },
+        ]);
+        const ownedBookIds = ownedEntries.map(e => e.book);
+        if (idConstraint.$in) {
+          // Intersect: must be in both read list and owned list
+          idConstraint.$in = idConstraint.$in.filter(id =>
+            ownedBookIds.some(o => o.equals(id))
+          );
+        } else {
+          idConstraint.$in = ownedBookIds;
+        }
+      }
+
+      query._id = idConstraint;
     }
 
     // Sort options

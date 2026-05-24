@@ -13,6 +13,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
 
   const currentStatus = userBookEntry?.status;
   const userBookId = userBookEntry?._id;
+  const isOwned = userBookEntry?.owned;
 
   const handleStatusClick = async (e, status) => {
     e.preventDefault();
@@ -73,6 +74,13 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
               style={{ background: "var(--color-primary)", opacity: 0.92 }}
             >
               {book.bookclubMonth}
+            </div>
+          )}
+
+          {/* Owned badge */}
+          {isOwned && !showOverlay && (
+            <div className="absolute top-1.5 left-1.5 text-base leading-none" title="På bokhyllen din">
+              📚
             </div>
           )}
 
