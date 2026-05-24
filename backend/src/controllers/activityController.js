@@ -46,14 +46,20 @@ exports.getActivity = async (req, res) => {
       }));
 
     const statusActivities = userBooks
-      .filter(ub => ub.user && ub.book)
-      .map(ub => ({
-        type: 'status',
-        status: ub.status,
-        user: ub.user,
-        book: ub.book,
-        date: ub.updatedAt
-      }));
+      .filter(ub => ub.user && ub.book && ub.status)
+      .map(ub => {
+        const date =
+          ub.status === 'read' ? (ub.finishedAt || ub.createdAt) :
+          ub.status === 'currently-reading' ? (ub.startedAt || ub.createdAt) :
+          ub.createdAt;
+        return {
+          type: 'status',
+          status: ub.status,
+          user: ub.user,
+          book: ub.book,
+          date,
+        };
+      });
 
     const meetingActivities = meetings.map(m => ({
       type: 'meeting',
