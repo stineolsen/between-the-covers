@@ -27,14 +27,15 @@ const Books = () => {
   const [sort, setSort] = useState(savedFilters.sort || "newest");
   const [readFilter, setReadFilter] = useState(savedFilters.readFilter || "all");
   const [ownedOnly, setOwnedOnly] = useState(savedFilters.ownedOnly || false);
+  const [showHidden, setShowHidden] = useState(savedFilters.showHidden || false);
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
     sessionStorage.setItem(
       "bookFilters",
-      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly }),
+      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden }),
     );
-  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
 
   const [userBookMap, setUserBookMap] = useState({});
   const [availableGenres, setAvailableGenres] = useState([]);
@@ -53,19 +54,24 @@ const Books = () => {
         const map = {};
         (data.userBooks || []).forEach(ub => {
           const id = ub.book?._id || ub.book;
-          if (id) map[id] = { status: ub.status, _id: ub._id, owned: ub.owned };
+          if (id) map[id] = { status: ub.status, _id: ub._id, owned: ub.owned, hidden: ub.hidden };
         });
         setUserBookMap(map);
       })
       .catch(() => {});
   }, []);
 
-  const handleStatusChange = (bookId, status, userBookId) => {
+  const handleStatusChange = (bookId, status, userBookId, hidden) => {
     setUserBookMap(prev => {
       const next = { ...prev };
-      if (status) {
-        next[bookId] = { status, _id: userBookId };
-      } else {
+      const existing = prev[bookId] || {};
+      if (status || hidden !== undefined) {
+        next[bookId] = {
+          ...existing,
+          ...(status !== undefined ? { status, _id: userBookId } : {}),
+          ...(hidden !== undefined ? { hidden } : {}),
+        };
+      } else if (!status && hidden === undefined) {
         delete next[bookId];
       }
       return next;
@@ -74,7 +80,7 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly]);
+  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
 
   const fetchBooks = async () => {
     try {
@@ -89,6 +95,7 @@ const Books = () => {
       if (sort) params.sort = sort;
       if (readFilter !== "all") params.readFilter = readFilter;
       if (ownedOnly) params.ownedOnly = "true";
+      if (showHidden) params.showHidden = "true";
 
       const data = await booksApi.getBooks(params);
       setBooks(data.books);
@@ -109,6 +116,7 @@ const Books = () => {
     setBookclubOnly(false);
     setAudiobookOnly(false);
     setOwnedOnly(false);
+    setShowHidden(false);
     setGenre("");
     setSort("newest");
     setReadFilter("all");
@@ -212,6 +220,23 @@ const Books = () => {
                 className="text-sm font-bold text-gray-700 cursor-pointer select-none"
               >
                 📚 Eier boken
+              </label>
+            </div>
+
+            {/* Show Hidden Filter */}
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
+              <input
+                type="checkbox"
+                id="showHidden"
+                checked={showHidden}
+                onChange={(e) => setShowHidden(e.target.checked)}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+              <label
+                htmlFor="showHidden"
+                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
+              >
+                🙈 Vis skjulte bøker
               </label>
             </div>
 

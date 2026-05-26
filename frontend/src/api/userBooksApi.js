@@ -71,6 +71,12 @@ export const userBooksApi = {
     const response = await api.patch(`/api/user-books/${bookId}/owned`);
     return response.data;
   },
+
+  // Toggle hidden status for a book
+  toggleHidden: async (bookId) => {
+    const response = await api.patch(`/api/user-books/${bookId}/hidden`);
+    return response.data;
+  },
 };
 
 export default userBooksApi;

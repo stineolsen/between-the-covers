@@ -7,7 +7,7 @@ const fs = require("fs");
 // @access  Private
 exports.getBooks = async (req, res, next) => {
   try {
-    const { search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly } = req.query;
+    const { search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden } = req.query;
 
     // Build query
     let query = {};
@@ -37,8 +37,8 @@ exports.getBooks = async (req, res, next) => {
       query.genres = genre;
     }
 
-    // Filter by reading status and/or owned (uses UserBook model)
-    const needsUserBooks = readFilter === 'read' || readFilter === 'unread' || ownedOnly === 'true';
+    // Filter by reading status, owned, and/or hidden (uses UserBook model)
+    const needsUserBooks = readFilter === 'read' || readFilter === 'unread' || ownedOnly === 'true' || showHidden !== 'true';
     if (needsUserBooks) {
       const UserBook = require('../models/UserBook');
       const idConstraint = {};
@@ -63,7 +63,6 @@ exports.getBooks = async (req, res, next) => {
         ]);
         const ownedBookIds = ownedEntries.map(e => e.book);
         if (idConstraint.$in) {
-          // Intersect: must be in both read list and owned list
           idConstraint.$in = idConstraint.$in.filter(id =>
             ownedBookIds.some(o => o.equals(id))
           );
@@ -72,7 +71,21 @@ exports.getBooks = async (req, res, next) => {
         }
       }
 
-      query._id = idConstraint;
+      // Always exclude hidden books unless showHidden=true
+      if (showHidden !== 'true') {
+        const hiddenEntries = await UserBook.aggregate([
+          { $match: { user: req.user._id, hidden: true } },
+          { $project: { book: 1 } },
+        ]);
+        const hiddenBookIds = hiddenEntries.map(e => e.book);
+        if (hiddenBookIds.length > 0) {
+          idConstraint.$nin = [...(idConstraint.$nin || []), ...hiddenBookIds];
+        }
+      }
+
+      if (Object.keys(idConstraint).length > 0) {
+        query._id = idConstraint;
+      }
     }
 
     // Sort options

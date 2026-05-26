@@ -29,6 +29,12 @@ const userBookSchema = new mongoose.Schema(
       default: false,
     },
 
+    // Whether the user has hidden this book from their library view
+    hidden: {
+      type: Boolean,
+      default: false,
+    },
+
     // When user started reading
     startedAt: {
       type: Date,

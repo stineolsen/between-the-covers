@@ -14,6 +14,23 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
   const currentStatus = userBookEntry?.status;
   const userBookId = userBookEntry?._id;
   const isOwned = userBookEntry?.owned;
+  const isHidden = userBookEntry?.hidden;
+
+  const handleToggleHidden = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isUpdating) return;
+    setIsUpdating(true);
+    try {
+      await userBooksApi.toggleHidden(book._id);
+      onStatusChange?.(book._id, currentStatus, userBookId, !isHidden);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUpdating(false);
+      setShowOverlay(false);
+    }
+  };
 
   const handleStatusClick = async (e, status) => {
     e.preventDefault();
@@ -55,7 +72,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
         className="group block bg-white rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
         style={{
           boxShadow: showOverlay ? "0 8px 28px rgba(107, 91, 149, 0.18)" : "0 2px 12px rgba(0,0,0,0.07)",
-          opacity: hasLinks ? 1 : 0.5,
+          opacity: isHidden ? 0.35 : hasLinks ? 1 : 0.5,
         }}
       >
         {/* Book Cover */}
@@ -113,6 +130,14 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 }
               >
                 {currentStatus === "read" ? "✓ Lest" : "+ Lest"}
+              </button>
+              <button
+                onClick={handleToggleHidden}
+                disabled={isUpdating}
+                className="w-full py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60"
+                style={{ background: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.85)" }}
+              >
+                {isHidden ? "👁 Vis igjen" : "🙈 Skjul"}
               </button>
             </div>
           )}

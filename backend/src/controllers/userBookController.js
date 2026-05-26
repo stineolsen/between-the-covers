@@ -227,6 +227,35 @@ exports.getBookReaders = async (req, res) => {
   }
 };
 
+// @desc    Toggle hidden flag for a book
+// @route   PATCH /api/user-books/:bookId/hidden
+// @access  Private
+exports.toggleHidden = async (req, res) => {
+  try {
+    let userBook = await UserBook.findOne({
+      user: req.user._id,
+      book: req.params.bookId,
+    });
+
+    if (userBook) {
+      userBook.hidden = !userBook.hidden;
+      await userBook.save();
+    } else {
+      userBook = await UserBook.create({
+        user: req.user._id,
+        book: req.params.bookId,
+        hidden: true,
+        status: null,
+      });
+    }
+
+    res.status(200).json({ success: true, hidden: userBook.hidden });
+  } catch (error) {
+    console.error("Toggle hidden error:", error);
+    res.status(500).json({ success: false, message: "Failed to update hidden state" });
+  }
+};
+
 // @desc    Toggle owned flag for a book
 // @route   PATCH /api/user-books/:bookId/owned
 // @access  Private
