@@ -1,13 +1,9 @@
 const { Resend } = require("resend");
 const User = require("../models/User");
 const Book = require("../models/Book");
+const BookRequest = require("../models/BookRequest");
 
-const DIGEST_WINDOWS_DAYS = {
-  daily: 1,
-  weekly: 7,
-  biweekly: 14,
-  monthly: 30,
-};
+const REQUEST_NOTIFY_DELAY_MS = 5 * 60 * 1000;
 
 function getClient() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -138,7 +134,7 @@ async function sendUpdatesEmail(toEmail, newBooks, newAudiobooks) {
 // Fire-and-forget: failures are logged, never thrown, so callers can call
 // this without awaiting and without risking the request that triggered it.
 // Only handles "immediate" subscribers - digest frequencies are handled by
-// sendDueDigests() on a schedule.
+// sendDigestsFor() on a schedule.
 async function notifyUpdates({ newBooks = [], newAudiobooks = [] } = {}) {
   if (newBooks.length === 0 && newAudiobooks.length === 0) return;
 
@@ -161,41 +157,40 @@ async function notifyUpdates({ newBooks = [], newAudiobooks = [] } = {}) {
   }
 }
 
-// Scheduled job (see notificationScheduler.js) - checks every non-immediate
-// frequency for users who are due, and sends each their own personal digest
-// of what's new since their lastNotifiedAt.
-async function sendDueDigests() {
-  for (const [frequency, days] of Object.entries(DIGEST_WINDOWS_DAYS)) {
-    const windowMs = days * 24 * 60 * 60 * 1000;
-    const cutoff = new Date(Date.now() - windowMs);
+// Scheduled job (see notificationScheduler.js) - called once per frequency,
+// each on its own cron trigger already timed to the right cadence (e.g. the
+// "weekly" trigger only fires Mondays), so every approved user with this
+// frequency is processed every time this runs - no extra due/elapsed check
+// needed here. lastNotifiedAt is only used as the "what's new since" floor
+// for the content query (and falls back to sinceFloorDays for someone who
+// has never been notified yet, so a brand-new subscriber doesn't get dumped
+// their entire historical catalog).
+async function sendDigestsFor(frequency, sinceFloorDays) {
+  let users;
+  try {
+    users = await User.find({
+      notificationFrequency: frequency,
+      status: "approved",
+    }).select("_id email lastNotifiedAt");
+  } catch (error) {
+    console.error(`Failed to load ${frequency} digest recipients:`, error);
+    return;
+  }
 
-    let users;
+  for (const user of users) {
     try {
-      users = await User.find({
-        notificationFrequency: frequency,
-        status: "approved",
-        $or: [{ lastNotifiedAt: null }, { lastNotifiedAt: { $lte: cutoff } }],
-      }).select("_id email lastNotifiedAt");
+      const since = user.lastNotifiedAt || new Date(Date.now() - sinceFloorDays * 24 * 60 * 60 * 1000);
+      const [newBooks, newAudiobooks] = await Promise.all([
+        Book.find({ createdAt: { $gt: since } }).select("title author").lean(),
+        Book.find({ absUpdatedAt: { $gt: since } }).select("title author").lean(),
+      ]);
+
+      if (newBooks.length === 0 && newAudiobooks.length === 0) continue;
+
+      await sendUpdatesEmail(user.email, newBooks, newAudiobooks);
+      await User.findByIdAndUpdate(user._id, { lastNotifiedAt: new Date() });
     } catch (error) {
-      console.error(`Failed to load ${frequency} digest recipients:`, error);
-      continue;
-    }
-
-    for (const user of users) {
-      try {
-        const since = user.lastNotifiedAt || new Date(Date.now() - windowMs);
-        const [newBooks, newAudiobooks] = await Promise.all([
-          Book.find({ createdAt: { $gt: since } }).select("title author").lean(),
-          Book.find({ absUpdatedAt: { $gt: since } }).select("title author").lean(),
-        ]);
-
-        if (newBooks.length === 0 && newAudiobooks.length === 0) continue;
-
-        await sendUpdatesEmail(user.email, newBooks, newAudiobooks);
-        await User.findByIdAndUpdate(user._id, { lastNotifiedAt: new Date() });
-      } catch (error) {
-        console.error(`Failed to send ${frequency} digest to`, user.email, error);
-      }
+      console.error(`Failed to send ${frequency} digest to`, user.email, error);
     }
   }
 }
@@ -217,29 +212,54 @@ function buildRequestFulfilledHtml(title, author) {
   return renderEmailLayout({ heading: "Forespørselen din er innfridd! 📖", bodyHtml, frontendUrl });
 }
 
-// Always immediate, regardless of notificationFrequency - this is a direct
-// response to the user's own request, not a general catalog broadcast.
-// Caller is responsible for checking the user's notifyOnRequestFulfilled
-// preference before calling this.
-async function notifyRequestFulfilled({ email, title, author }) {
-  if (!email) return;
+async function sendRequestFulfilledEmail(email, title, author) {
+  const client = getClient();
+  if (!client || !process.env.RESEND_FROM_EMAIL) {
+    console.error("Resend not configured - skipping request-fulfilled email to", email);
+    return;
+  }
 
+  await client.emails.send({
+    from: process.env.RESEND_FROM_EMAIL,
+    to: email,
+    subject: `📖 Boken du ba om er lagt til: ${title}`,
+    html: buildRequestFulfilledHtml(title, author),
+  });
+}
+
+// Scheduled job (see notificationScheduler.js) - runs frequently (every
+// minute) looking for requests marked "added" at least 5 minutes ago that
+// haven't been processed yet. The delay is deliberate: it gives the admin
+// a moment to actually finish adding the book before we tell the requester
+// it's there. notifiedRequesterAt is set whether or not an email was sent
+// (e.g. the requester isn't opted in), so each request is only ever
+// processed once.
+async function sendPendingRequestNotifications() {
+  const cutoff = new Date(Date.now() - REQUEST_NOTIFY_DELAY_MS);
+
+  let requests;
   try {
-    const client = getClient();
-    if (!client || !process.env.RESEND_FROM_EMAIL) {
-      console.error("Resend not configured - skipping request-fulfilled email to", email);
-      return;
-    }
-
-    await client.emails.send({
-      from: process.env.RESEND_FROM_EMAIL,
-      to: email,
-      subject: `📖 Boken du ba om er lagt til: ${title}`,
-      html: buildRequestFulfilledHtml(title, author),
-    });
+    requests = await BookRequest.find({
+      status: "added",
+      notifiedRequesterAt: null,
+      addedAt: { $lte: cutoff },
+    }).populate("requestedBy", "email notifyOnRequestFulfilled");
   } catch (error) {
-    console.error("Failed to send request-fulfilled email to", email, error);
+    console.error("Failed to load pending request notifications:", error);
+    return;
+  }
+
+  for (const request of requests) {
+    try {
+      if (request.requestedBy?.notifyOnRequestFulfilled) {
+        await sendRequestFulfilledEmail(request.requestedBy.email, request.title, request.author);
+      }
+      request.notifiedRequesterAt = new Date();
+      await request.save();
+    } catch (error) {
+      console.error("Failed to process pending request notification for", request._id, error);
+    }
   }
 }
 
-module.exports = { notifyUpdates, sendDueDigests, notifyRequestFulfilled };
+module.exports = { notifyUpdates, sendDigestsFor, sendPendingRequestNotifications };

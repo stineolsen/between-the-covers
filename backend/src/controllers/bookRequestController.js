@@ -1,5 +1,4 @@
 const BookRequest = require('../models/BookRequest');
-const { notifyRequestFulfilled } = require('../utils/emailService');
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -123,19 +122,15 @@ exports.markAsAdded = async (req, res) => {
       req.params.id,
       { $set: { status: 'added', addedAt: new Date() } },
       { new: true }
-    ).populate('requestedBy', 'displayName username email notifyOnRequestFulfilled');
+    ).populate('requestedBy', 'displayName username');
 
     if (!request) {
       return res.status(404).json({ success: false, message: 'Forespørsel ikke funnet' });
     }
 
-    if (request.requestedBy?.notifyOnRequestFulfilled) {
-      notifyRequestFulfilled({
-        email: request.requestedBy.email,
-        title: request.title,
-        author: request.author,
-      });
-    }
+    // The requester (if opted in) gets notified ~5 minutes from now by the
+    // scheduled sweep in emailService.sendPendingRequestNotifications, once
+    // there's been time for the admin to actually finish adding the book.
 
     res.status(200).json({ success: true, message: 'Merket som lagt til', request });
   } catch (error) {

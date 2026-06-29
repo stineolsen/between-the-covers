@@ -31,6 +31,13 @@ const bookRequestSchema = new mongoose.Schema(
     addedAt: {
       type: Date,
       default: null
+    },
+    // Set once the requester's "fulfilled" email has been sent (or skipped
+    // because they're not opted in) - prevents the delayed sweep from
+    // re-processing the same request every time it runs.
+    notifiedRequesterAt: {
+      type: Date,
+      default: null
     }
   },
   { timestamps: true }
