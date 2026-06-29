@@ -44,7 +44,7 @@ exports.getProfile = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { displayName, bio, favoriteGenres, notificationFrequency } = req.body;
+    const { displayName, bio, favoriteGenres, notificationFrequency, notifyOnRequestFulfilled } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -74,6 +74,9 @@ exports.updateProfile = async (req, res, next) => {
         });
       }
       user.notificationFrequency = notificationFrequency;
+    }
+    if (notifyOnRequestFulfilled !== undefined) {
+      user.notifyOnRequestFulfilled = notifyOnRequestFulfilled;
     }
 
     await user.save();

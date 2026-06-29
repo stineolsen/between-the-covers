@@ -200,4 +200,46 @@ async function sendDueDigests() {
   }
 }
 
-module.exports = { notifyUpdates, sendDueDigests };
+function buildRequestFulfilledHtml(title, author) {
+  const frontendUrl = getFrontendUrl();
+  const bodyHtml = `
+    <p style="font-size:16px; color:#111827; margin:0 0 8px;">Boken du ba om er nå lagt til i biblioteket:</p>
+    <div style="margin:16px 0; padding:16px; background:#f9fafb; border-radius:12px;">
+      <div style="font-size:16px; font-weight:bold; color:#111827;">${title}</div>
+      <div style="font-size:14px; color:#6b7280;">${author}</div>
+    </div>
+    ${
+      frontendUrl
+        ? `<a href="${frontendUrl}/books" style="display:inline-block; margin-top:8px; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">Se biblioteket</a>`
+        : ""
+    }`;
+
+  return renderEmailLayout({ heading: "Forespørselen din er innfridd! 📖", bodyHtml, frontendUrl });
+}
+
+// Always immediate, regardless of notificationFrequency - this is a direct
+// response to the user's own request, not a general catalog broadcast.
+// Caller is responsible for checking the user's notifyOnRequestFulfilled
+// preference before calling this.
+async function notifyRequestFulfilled({ email, title, author }) {
+  if (!email) return;
+
+  try {
+    const client = getClient();
+    if (!client || !process.env.RESEND_FROM_EMAIL) {
+      console.error("Resend not configured - skipping request-fulfilled email to", email);
+      return;
+    }
+
+    await client.emails.send({
+      from: process.env.RESEND_FROM_EMAIL,
+      to: email,
+      subject: `📖 Boken du ba om er lagt til: ${title}`,
+      html: buildRequestFulfilledHtml(title, author),
+    });
+  } catch (error) {
+    console.error("Failed to send request-fulfilled email to", email, error);
+  }
+}
+
+module.exports = { notifyUpdates, sendDueDigests, notifyRequestFulfilled };
