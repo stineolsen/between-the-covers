@@ -2,8 +2,10 @@ const { Resend } = require("resend");
 const User = require("../models/User");
 const Book = require("../models/Book");
 const BookRequest = require("../models/BookRequest");
+const Setting = require("../models/Setting");
 
 const REQUEST_NOTIFY_DELAY_MS = 5 * 60 * 1000;
+const IMMEDIATE_CHECK_KEY = "lastImmediateCheckAt";
 
 function getClient() {
   if (!process.env.RESEND_API_KEY) return null;
@@ -155,6 +157,35 @@ async function notifyUpdates({ newBooks = [], newAudiobooks = [] } = {}) {
   } catch (error) {
     console.error("notifyUpdates failed:", error);
   }
+}
+
+// Scheduled job (see notificationScheduler.js, every 15 min) - the single
+// source of truth for "immediate" notifications. Checks the Books
+// collection directly rather than hooking into each place a book can be
+// created (manual add, Calibre import, ABS sync), so it catches all of them
+// uniformly with no risk of double-notifying. First run ever just
+// establishes a baseline timestamp instead of reporting the entire
+// historical catalog as "new".
+async function checkForImmediateUpdates() {
+  const settingDoc = await Setting.findOne({ key: IMMEDIATE_CHECK_KEY });
+  const checkedAt = new Date();
+
+  if (!settingDoc) {
+    await Setting.create({ key: IMMEDIATE_CHECK_KEY, value: checkedAt });
+    return;
+  }
+
+  const since = new Date(settingDoc.value);
+  const [newBooks, newAudiobooks] = await Promise.all([
+    Book.find({ createdAt: { $gt: since } }).select("title author").lean(),
+    Book.find({ absUpdatedAt: { $gt: since } }).select("title author").lean(),
+  ]);
+
+  await Setting.findOneAndUpdate({ key: IMMEDIATE_CHECK_KEY }, { value: checkedAt });
+
+  if (newBooks.length === 0 && newAudiobooks.length === 0) return;
+
+  await notifyUpdates({ newBooks, newAudiobooks });
 }
 
 // Scheduled job (see notificationScheduler.js) - called once per frequency,
@@ -451,7 +482,7 @@ async function notifyAdminsNewOrder(order) {
 }
 
 module.exports = {
-  notifyUpdates,
+  checkForImmediateUpdates,
   sendDigestsFor,
   sendPendingRequestNotifications,
   sendFeatureAlert,

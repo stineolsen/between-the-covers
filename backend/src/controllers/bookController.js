@@ -1,7 +1,6 @@
 const Book = require("../models/Book");
 const path = require("path");
 const fs = require("fs");
-const { notifyUpdates } = require("../utils/emailService");
 
 // @desc    Get all books
 // @route   GET /api/books
@@ -246,8 +245,6 @@ exports.createBook = async (req, res, next) => {
       calibreDownloadLink: calibreDownloadLink || null,
       addedBy: req.user.id,
     });
-
-    notifyUpdates({ newBooks: [book] });
 
     res.status(201).json({
       success: true,

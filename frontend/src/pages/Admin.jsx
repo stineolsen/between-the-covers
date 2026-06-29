@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
@@ -43,24 +43,20 @@ const Admin = () => {
   const [bookSearchResults, setBookSearchResults] = useState([]);
   const [searchingBooks, setSearchingBooks] = useState(false);
   const [selectedBookForLink, setSelectedBookForLink] = useState(null);
+  const [now] = useState(() => Date.now());
 
-  useEffect(() => {
-    if (activeTab === "users") {
-      fetchPendingUsers();
-    } else if (activeTab === "products") {
-      fetchProducts();
-    } else if (activeTab === "orders") {
-      fetchOrders();
-    } else if (activeTab === "requests") {
-      fetchRequests();
-    } else if (activeTab === "passwords") {
-      fetchAllMembers();
-    } else if (activeTab === "import") {
-      fetchImportStatus();
-    }
-  }, [activeTab]);
+  const { visibleRequests, archivedRequestsCount } = useMemo(() => {
+    const cutoff = now - 14 * 24 * 60 * 60 * 1000;
+    const isArchived = (req) =>
+      (req.status === 'added' || req.status === 'irrelevant' || req.status === 'dismissed') &&
+      new Date(req.createdAt).getTime() < cutoff;
+    return {
+      visibleRequests: requests.filter(req => showArchive ? isArchived(req) : !isArchived(req)),
+      archivedRequestsCount: requests.filter(isArchived).length,
+    };
+  }, [requests, showArchive, now]);
 
-  const handleBookFormSuccess = (book) => {
+  const handleBookFormSuccess = () => {
     setShowBookForm(false);
     setSuccessMessage("Bok lagt til!");
     setTimeout(() => setSuccessMessage(""), 3000);
@@ -352,6 +348,22 @@ const Admin = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === "users") {
+      fetchPendingUsers();
+    } else if (activeTab === "products") {
+      fetchProducts();
+    } else if (activeTab === "orders") {
+      fetchOrders();
+    } else if (activeTab === "requests") {
+      fetchRequests();
+    } else if (activeTab === "passwords") {
+      fetchAllMembers();
+    } else if (activeTab === "import") {
+      fetchImportStatus();
+    }
+  }, [activeTab]);
 
   const handleUpdateOrderStatus = async (orderId, newStatus) => {
     try {
@@ -963,24 +975,17 @@ const Admin = () => {
               <div className="container-gradient text-center py-12 animate-fadeIn">
                 <p className="text-gray-700 text-lg font-bold">📋 Ingen bokforespørsler enda.</p>
               </div>
-            ) : (() => {
-              const cutoff = Date.now() - 14 * 24 * 60 * 60 * 1000;
-              const isArchived = (req) =>
-                (req.status === 'added' || req.status === 'irrelevant' || req.status === 'dismissed') &&
-                new Date(req.createdAt).getTime() < cutoff;
-              const visible = requests.filter(req => showArchive ? isArchived(req) : !isArchived(req));
-              const archivedCount = requests.filter(isArchived).length;
-              return (
+            ) : (
               <>
                 <div className="flex justify-end mb-2">
                   <button
                     onClick={() => setShowArchive(prev => !prev)}
                     className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80 bg-gray-100 text-gray-600"
                   >
-                    {showArchive ? '← Vis aktive' : `🗄 Arkiv${archivedCount > 0 ? ` (${archivedCount})` : ''}`}
+                    {showArchive ? '← Vis aktive' : `🗄 Arkiv${archivedRequestsCount > 0 ? ` (${archivedRequestsCount})` : ''}`}
                   </button>
                 </div>
-                {visible.length === 0 ? (
+                {visibleRequests.length === 0 ? (
                   <div className="container-gradient text-center py-12 animate-fadeIn">
                     <p className="text-gray-700 text-lg font-bold">
                       {showArchive ? '📦 Ingen arkiverte forespørsler.' : '📋 Ingen aktive forespørsler.'}
@@ -988,7 +993,7 @@ const Admin = () => {
                   </div>
                 ) : (
               <div className="grid gap-4 animate-fadeIn">
-                {visible.map((req) => (
+                {visibleRequests.map((req) => (
                   <div key={req._id} className="container-gradient hover:shadow-2xl transition-all">
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1 min-w-0">
@@ -1110,8 +1115,7 @@ const Admin = () => {
               </div>
                 )}
               </>
-              );
-            })()}
+            )}
           </>
         )}
         {/* Books Tab */}

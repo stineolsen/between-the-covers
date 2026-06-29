@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Setting = require("../models/Setting");
-const { notifyUpdates } = require("../utils/emailService");
 const {
   normalizeTitle,
   normalizeAuthor,
@@ -155,14 +154,6 @@ exports.runCalibreImport = async (req, res) => {
       const result = await booksCollection.bulkWrite(ops, { ordered: false });
       inserted = result.upsertedCount;
       modified = result.modifiedCount;
-
-      const insertedIds = Object.values(result.upsertedIds || {});
-      if (insertedIds.length) {
-        const insertedBooks = await booksCollection
-          .find({ _id: { $in: insertedIds } }, { projection: { title: 1, author: 1 } })
-          .toArray();
-        notifyUpdates({ newBooks: insertedBooks });
-      }
     }
 
     await Setting.findOneAndUpdate(
@@ -247,7 +238,6 @@ exports.runAbsSync = async (req, res) => {
     let unmatched = 0;
     let alreadyLinked = 0;
     const ops = [];
-    const linkedBooks = [];
 
     for (const a of absBooks) {
       let target = null;
@@ -316,14 +306,12 @@ exports.runAbsSync = async (req, res) => {
           },
         },
       });
-      linkedBooks.push(target);
     }
 
     let updated = 0;
     if (ops.length) {
       const result = await booksCollection.bulkWrite(ops, { ordered: false });
       updated = result.modifiedCount;
-      notifyUpdates({ newAudiobooks: linkedBooks });
     }
 
     res.status(200).json({
