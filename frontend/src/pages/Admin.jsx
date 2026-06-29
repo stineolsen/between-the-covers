@@ -3,7 +3,9 @@ import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
 import { usersApi } from "../api/usersApi";
+import { booksApi } from "../api/booksApi";
 import { importApi } from "../api/importApi";
+import { notificationApi } from "../api/notificationApi";
 import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
 
@@ -32,6 +34,15 @@ const Admin = () => {
   const [calibreImportResult, setCalibreImportResult] = useState(null);
   const [runningAbsSync, setRunningAbsSync] = useState(false);
   const [absSyncResult, setAbsSyncResult] = useState(null);
+  const [alertSubject, setAlertSubject] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+  const [sendingAlert, setSendingAlert] = useState(false);
+  const [alertResult, setAlertResult] = useState(null);
+  const [linkingRequestId, setLinkingRequestId] = useState(null);
+  const [bookSearchQuery, setBookSearchQuery] = useState("");
+  const [bookSearchResults, setBookSearchResults] = useState([]);
+  const [searchingBooks, setSearchingBooks] = useState(false);
+  const [selectedBookForLink, setSelectedBookForLink] = useState(null);
 
   useEffect(() => {
     if (activeTab === "users") {
@@ -117,6 +128,28 @@ const Admin = () => {
     }
   };
 
+  const handleSendFeatureAlert = async () => {
+    if (!alertSubject.trim() || !alertMessage.trim()) {
+      setError("Tittel og melding er påkrevd");
+      return;
+    }
+    setSendingAlert(true);
+    setAlertResult(null);
+    try {
+      const data = await notificationApi.sendFeatureAlert(alertSubject.trim(), alertMessage.trim());
+      setAlertResult(data);
+      setAlertSubject("");
+      setAlertMessage("");
+      setSuccessMessage("Varsel sendt!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Klarte ikke sende varsel");
+      console.error(err);
+    } finally {
+      setSendingAlert(false);
+    }
+  };
+
   const fetchAllMembers = async () => {
     try {
       setLoading(true);
@@ -156,15 +189,53 @@ const Admin = () => {
     }
   };
 
-  const handleMarkAsAdded = async (id) => {
+  const handleMarkAsAdded = async (id, book) => {
     try {
-      await bookRequestApi.markAsAdded(id);
-      setRequests(prev => prev.map(r => r._id === id ? { ...r, status: 'added', addedAt: new Date().toISOString() } : r));
+      await bookRequestApi.markAsAdded(id, book?._id);
+      setRequests(prev => prev.map(r => r._id === id
+        ? { ...r, status: 'added', addedAt: new Date().toISOString(), addedBook: book || null }
+        : r));
+      setLinkingRequestId(null);
+      setBookSearchQuery("");
+      setBookSearchResults([]);
+      setSelectedBookForLink(null);
       setSuccessMessage("Markert som lagt til!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError("Greide ikke oppdatere forespørsel");
       console.error(err);
+    }
+  };
+
+  const handleOpenLinkPicker = (req) => {
+    setLinkingRequestId(req._id);
+    setBookSearchQuery(req.title || "");
+    setBookSearchResults([]);
+    setSelectedBookForLink(null);
+  };
+
+  const handleCloseLinkPicker = () => {
+    setLinkingRequestId(null);
+    setBookSearchQuery("");
+    setBookSearchResults([]);
+    setSelectedBookForLink(null);
+  };
+
+  const handleSearchBooksForLink = async (query) => {
+    setBookSearchQuery(query);
+    setSelectedBookForLink(null);
+    if (!query.trim()) {
+      setBookSearchResults([]);
+      return;
+    }
+    try {
+      setSearchingBooks(true);
+      const data = await booksApi.getBooks({ search: query.trim() });
+      setBookSearchResults((data.books || []).slice(0, 6));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSearchingBooks(false);
     }
   };
 
@@ -415,6 +486,19 @@ const Admin = () => {
             }
           >
             📥 Importer
+          </button>
+          <button
+            onClick={() => setActiveTab("alerts")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "alerts" ? "text-white" : "bg-white text-gray-700"
+            }`}
+            style={
+              activeTab === "alerts"
+                ? { background: "linear-gradient(135deg, #ec4899, #f43f5e)" }
+                : {}
+            }
+          >
+            🔔 Send varsel
           </button>
         </div>
 
@@ -927,6 +1011,12 @@ const Admin = () => {
                           <span>·</span>
                           <span>{new Date(req.createdAt).toLocaleDateString('no-NO')}</span>
                         </div>
+
+                        {req.status === 'added' && req.addedBook && (
+                          <p className="mt-2 text-sm text-green-700">
+                            → Lenket til: <strong>{req.addedBook.title}</strong> ({req.addedBook.author})
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex-shrink-0 flex flex-col items-end gap-2">
@@ -942,7 +1032,7 @@ const Admin = () => {
                         {req.status === 'pending' && (
                           <>
                             <button
-                              onClick={() => handleMarkAsAdded(req._id)}
+                              onClick={() => handleOpenLinkPicker(req)}
                               className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
                               style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
                             >
@@ -959,6 +1049,62 @@ const Admin = () => {
                         )}
                       </div>
                     </div>
+
+                    {linkingRequestId === req._id && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <p className="text-sm font-bold text-gray-700 mb-2">
+                          Søk etter boken som ble lagt til (valgfritt):
+                        </p>
+                        <input
+                          type="text"
+                          value={bookSearchQuery}
+                          onChange={(e) => handleSearchBooksForLink(e.target.value)}
+                          className="input-field mb-2"
+                          placeholder="Søk på tittel eller forfatter..."
+                          autoFocus
+                        />
+                        {searchingBooks ? (
+                          <p className="text-sm text-gray-500">Søker...</p>
+                        ) : bookSearchResults.length > 0 ? (
+                          <div className="space-y-1 mb-3">
+                            {bookSearchResults.map((b) => (
+                              <button
+                                key={b._id}
+                                onClick={() => setSelectedBookForLink(b)}
+                                className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
+                                  selectedBookForLink?._id === b._id
+                                    ? "bg-purple-100 border-2 border-purple-400"
+                                    : "bg-gray-50 hover:bg-gray-100"
+                                }`}
+                              >
+                                <strong>{b.title}</strong> — {b.author}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null}
+                        <div className="flex gap-3 flex-wrap">
+                          <button
+                            onClick={() => handleMarkAsAdded(req._id, selectedBookForLink)}
+                            disabled={!selectedBookForLink}
+                            className="btn-primary px-4 py-2 text-sm disabled:opacity-50"
+                          >
+                            ✓ Bekreft med valgt bok
+                          </button>
+                          <button
+                            onClick={() => handleMarkAsAdded(req._id, null)}
+                            className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-gray-100 text-gray-600"
+                          >
+                            Marker uten å lenke bok
+                          </button>
+                          <button
+                            onClick={handleCloseLinkPicker}
+                            className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-gray-100 text-gray-600"
+                          >
+                            Avbryt
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1073,6 +1219,51 @@ const Admin = () => {
                 </div>
               )}
             </div>
+          </div>
+        )}
+        {/* Alerts Tab */}
+        {activeTab === "alerts" && (
+          <div className="container-gradient animate-fadeIn">
+            <h3 className="text-2xl font-bold gradient-text mb-2">🔔 Send varsel</h3>
+            <p className="text-gray-600 mb-6">
+              Sender en e-post til alle medlemmer som har skrudd på «Varsle meg om nye funksjoner» i
+              profilen sin. Bruk dette til f.eks. å fortelle om nye funksjoner på siden.
+            </p>
+            <div className="space-y-4 mb-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Tittel</label>
+                <input
+                  type="text"
+                  value={alertSubject}
+                  onChange={(e) => setAlertSubject(e.target.value)}
+                  className="input-field"
+                  placeholder="f.eks. Ny funksjon: Bokønsker!"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">Melding</label>
+                <textarea
+                  value={alertMessage}
+                  onChange={(e) => setAlertMessage(e.target.value)}
+                  rows="6"
+                  className="input-field"
+                  placeholder="Skriv meldingen her. Hvert linjeskift blir et eget avsnitt i e-posten."
+                />
+              </div>
+            </div>
+            <button
+              onClick={handleSendFeatureAlert}
+              disabled={sendingAlert}
+              className="btn-primary px-6 py-3 disabled:opacity-50"
+            >
+              {sendingAlert ? "Sender..." : "✨ Send varsel"}
+            </button>
+            {alertResult && (
+              <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                Sendt til {alertResult.sent} av {alertResult.recipients} mottakere
+                {alertResult.failed > 0 && ` (${alertResult.failed} feilet)`}.
+              </div>
+            )}
           </div>
         )}
       </div>

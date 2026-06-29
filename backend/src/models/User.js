@@ -81,6 +81,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    notifyOnFeatureAlerts: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

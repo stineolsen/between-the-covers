@@ -1,4 +1,5 @@
 const BookRequest = require('../models/BookRequest');
+const Book = require('../models/Book');
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -58,7 +59,8 @@ exports.getAllRequests = async (req, res) => {
   try {
     const requests = await BookRequest.find({})
       .sort({ status: 1, createdAt: -1 })
-      .populate('requestedBy', 'displayName username');
+      .populate('requestedBy', 'displayName username')
+      .populate('addedBook', 'title author');
 
     res.status(200).json({ success: true, count: requests.length, requests });
   } catch (error) {
@@ -118,11 +120,23 @@ exports.markAsIrrelevant = async (req, res) => {
 // @access  Admin
 exports.markAsAdded = async (req, res) => {
   try {
+    const { bookId } = req.body;
+    let addedBook = null;
+
+    if (bookId) {
+      addedBook = await Book.findById(bookId).select('_id');
+      if (!addedBook) {
+        return res.status(404).json({ success: false, message: 'Fant ikke boken som ble valgt' });
+      }
+    }
+
     const request = await BookRequest.findByIdAndUpdate(
       req.params.id,
-      { $set: { status: 'added', addedAt: new Date() } },
+      { $set: { status: 'added', addedAt: new Date(), addedBook: addedBook?._id || null } },
       { new: true }
-    ).populate('requestedBy', 'displayName username');
+    )
+      .populate('requestedBy', 'displayName username')
+      .populate('addedBook', 'title author');
 
     if (!request) {
       return res.status(404).json({ success: false, message: 'Forespørsel ikke funnet' });

@@ -16,8 +16,8 @@ const bookRequestApi = {
     return response.data;
   },
 
-  markAsAdded: async (id) => {
-    const response = await api.patch(`/api/book-requests/${id}/added`);
+  markAsAdded: async (id, bookId) => {
+    const response = await api.patch(`/api/book-requests/${id}/added`, { bookId });
     return response.data;
   },
 

@@ -32,6 +32,15 @@ const bookRequestSchema = new mongoose.Schema(
       type: Date,
       default: null
     },
+    // The actual catalog book that fulfills this request, set by the admin
+    // when marking it added - lets the notification show "you asked for X,
+    // we added Y" with a real link, since the requested title/author is
+    // free text and won't always exactly match the catalog entry.
+    addedBook: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Book',
+      default: null
+    },
     // Set once the requester's "fulfilled" email has been sent (or skipped
     // because they're not opted in) - prevents the delayed sweep from
     // re-processing the same request every time it runs.

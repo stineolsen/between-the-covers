@@ -25,6 +25,7 @@ const Profile = () => {
     favoriteGenres: user?.favoriteGenres?.join(", ") || "",
     notificationFrequency: user?.notificationFrequency || "never",
     notifyOnRequestFulfilled: user?.notifyOnRequestFulfilled || false,
+    notifyOnFeatureAlerts: user?.notifyOnFeatureAlerts || false,
   });
 
   const defaultAvatars = usersApi.getDefaultAvatars();
@@ -293,6 +294,21 @@ const Profile = () => {
                 </label>
               </div>
 
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="notifyOnFeatureAlerts"
+                  checked={formData.notifyOnFeatureAlerts}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notifyOnFeatureAlerts: e.target.checked })
+                  }
+                  className="w-5 h-5"
+                />
+                <label htmlFor="notifyOnFeatureAlerts" className="text-sm font-bold text-gray-700">
+                  🔔 Varsle meg om nye funksjoner på siden
+                </label>
+              </div>
+
               <div className="flex gap-4">
                 <button type="submit" className="btn-primary flex-1">
                   💾 Lagre endringer
@@ -307,6 +323,7 @@ const Profile = () => {
                       favoriteGenres: user?.favoriteGenres?.join(", ") || "",
                       notificationFrequency: user?.notificationFrequency || "never",
                       notifyOnRequestFulfilled: user?.notifyOnRequestFulfilled || false,
+                      notifyOnFeatureAlerts: user?.notifyOnFeatureAlerts || false,
                     });
                   }}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"

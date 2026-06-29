@@ -195,24 +195,44 @@ async function sendDigestsFor(frequency, sinceFloorDays) {
   }
 }
 
-function buildRequestFulfilledHtml(title, author) {
+// addedBook is the catalog Book the admin linked when marking the request
+// added (optional - older requests or ones the admin didn't bother linking
+// just show the originally requested title/author with no link).
+function buildRequestFulfilledHtml(request, addedBook) {
   const frontendUrl = getFrontendUrl();
-  const bodyHtml = `
-    <p style="font-size:16px; color:#111827; margin:0 0 8px;">Boken du ba om er nå lagt til i biblioteket:</p>
-    <div style="margin:16px 0; padding:16px; background:#f9fafb; border-radius:12px;">
-      <div style="font-size:16px; font-weight:bold; color:#111827;">${title}</div>
-      <div style="font-size:14px; color:#6b7280;">${author}</div>
-    </div>
-    ${
-      frontendUrl
-        ? `<a href="${frontendUrl}/books" style="display:inline-block; margin-top:8px; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">Se biblioteket</a>`
-        : ""
-    }`;
+  const bookLink = addedBook && frontendUrl ? `${frontendUrl}/books/${addedBook._id}` : null;
+
+  const requestedBlock = `
+    <p style="font-size:13px; color:#6b7280; margin:0 0 4px; text-transform:uppercase; letter-spacing:0.05em;">Du ba om</p>
+    <div style="margin:0 0 16px; padding:16px; background:#f9fafb; border-radius:12px;">
+      <div style="font-size:16px; font-weight:bold; color:#111827;">${request.title}</div>
+      <div style="font-size:14px; color:#6b7280;">${request.author}</div>
+    </div>`;
+
+  const addedBlock = addedBook
+    ? `
+    <p style="font-size:13px; color:#6b7280; margin:0 0 4px; text-transform:uppercase; letter-spacing:0.05em;">Lagt til i biblioteket</p>
+    <div style="margin:0 0 16px; padding:16px; background:#eef2ff; border-radius:12px;">
+      <div style="font-size:16px; font-weight:bold; color:#111827;">
+        ${bookLink ? `<a href="${bookLink}" style="color:#111827; text-decoration:none;">${addedBook.title}</a>` : addedBook.title}
+      </div>
+      <div style="font-size:14px; color:#6b7280;">${addedBook.author}</div>
+    </div>`
+    : "";
+
+  const ctaLink = bookLink || (frontendUrl ? `${frontendUrl}/books` : null);
+  const ctaLabel = bookLink ? "Se boken" : "Se biblioteket";
+  const bodyHtml =
+    requestedBlock +
+    addedBlock +
+    (ctaLink
+      ? `<a href="${ctaLink}" style="display:inline-block; margin-top:8px; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">${ctaLabel}</a>`
+      : "");
 
   return renderEmailLayout({ heading: "Forespørselen din er innfridd! 📖", bodyHtml, frontendUrl });
 }
 
-async function sendRequestFulfilledEmail(email, title, author) {
+async function sendRequestFulfilledEmail(email, request, addedBook) {
   const client = getClient();
   if (!client || !process.env.RESEND_FROM_EMAIL) {
     console.error("Resend not configured - skipping request-fulfilled email to", email);
@@ -222,8 +242,8 @@ async function sendRequestFulfilledEmail(email, title, author) {
   await client.emails.send({
     from: process.env.RESEND_FROM_EMAIL,
     to: email,
-    subject: `📖 Boken du ba om er lagt til: ${title}`,
-    html: buildRequestFulfilledHtml(title, author),
+    subject: `📖 Boken du ba om er lagt til: ${addedBook ? addedBook.title : request.title}`,
+    html: buildRequestFulfilledHtml(request, addedBook),
   });
 }
 
@@ -243,7 +263,9 @@ async function sendPendingRequestNotifications() {
       status: "added",
       notifiedRequesterAt: null,
       addedAt: { $lte: cutoff },
-    }).populate("requestedBy", "email notifyOnRequestFulfilled");
+    })
+      .populate("requestedBy", "email notifyOnRequestFulfilled")
+      .populate("addedBook", "title author");
   } catch (error) {
     console.error("Failed to load pending request notifications:", error);
     return;
@@ -252,7 +274,7 @@ async function sendPendingRequestNotifications() {
   for (const request of requests) {
     try {
       if (request.requestedBy?.notifyOnRequestFulfilled) {
-        await sendRequestFulfilledEmail(request.requestedBy.email, request.title, request.author);
+        await sendRequestFulfilledEmail(request.requestedBy.email, request, request.addedBook);
       }
       request.notifiedRequesterAt = new Date();
       await request.save();
@@ -262,4 +284,65 @@ async function sendPendingRequestNotifications() {
   }
 }
 
-module.exports = { notifyUpdates, sendDigestsFor, sendPendingRequestNotifications };
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function buildAnnouncementHtml(message) {
+  const frontendUrl = getFrontendUrl();
+  const bodyHtml = message
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => `<p style="font-size:15px; color:#111827; margin:0 0 12px; line-height:1.5;">${escapeHtml(line)}</p>`)
+    .join("");
+
+  return renderEmailLayout({ heading: "Nyheter fra Between the Covers 🔔", bodyHtml, frontendUrl });
+}
+
+async function sendAnnouncementEmail(email, subject, message) {
+  const client = getClient();
+  if (!client || !process.env.RESEND_FROM_EMAIL) {
+    console.error("Resend not configured - skipping announcement email to", email);
+    return;
+  }
+
+  await client.emails.send({
+    from: process.env.RESEND_FROM_EMAIL,
+    to: email,
+    subject,
+    html: buildAnnouncementHtml(message),
+  });
+}
+
+// Admin-triggered broadcast (e.g. "we just shipped X") - not tied to any
+// book data or schedule, sent immediately to everyone opted into feature
+// alerts. Unlike the other notify* functions this isn't fire-and-forget:
+// the admin route awaits it so it can report back how many emails went out.
+async function sendFeatureAlert({ subject, message }) {
+  const recipients = await User.find({
+    notifyOnFeatureAlerts: true,
+    status: "approved",
+  }).select("email");
+
+  let sent = 0;
+  let failed = 0;
+  for (const recipient of recipients) {
+    try {
+      await sendAnnouncementEmail(recipient.email, subject, message);
+      sent++;
+    } catch (error) {
+      console.error("Failed to send feature alert to", recipient.email, error);
+      failed++;
+    }
+  }
+
+  return { recipients: recipients.length, sent, failed };
+}
+
+module.exports = { notifyUpdates, sendDigestsFor, sendPendingRequestNotifications, sendFeatureAlert };
