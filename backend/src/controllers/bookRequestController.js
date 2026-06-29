@@ -1,5 +1,6 @@
 const BookRequest = require('../models/BookRequest');
 const Book = require('../models/Book');
+const { notifyAdminsNewRequest } = require('../utils/emailService');
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -19,6 +20,13 @@ exports.createRequest = async (req, res) => {
       author: author.trim(),
       formats: formats || [],
       requestedBy: req.user._id
+    });
+
+    notifyAdminsNewRequest({
+      title: request.title,
+      author: request.author,
+      formats: request.formats,
+      requesterName: req.user.displayName || req.user.username,
     });
 
     res.status(201).json({ success: true, message: 'Forespørsel sendt!', request });

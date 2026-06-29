@@ -51,6 +51,8 @@ exports.updateProfile = async (req, res, next) => {
       notificationFrequency,
       notifyOnRequestFulfilled,
       notifyOnFeatureAlerts,
+      notifyOnNewRequest,
+      notifyOnNewOrder,
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -87,6 +89,12 @@ exports.updateProfile = async (req, res, next) => {
     }
     if (notifyOnFeatureAlerts !== undefined) {
       user.notifyOnFeatureAlerts = notifyOnFeatureAlerts;
+    }
+    if (notifyOnNewRequest !== undefined) {
+      user.notifyOnNewRequest = notifyOnNewRequest;
+    }
+    if (notifyOnNewOrder !== undefined) {
+      user.notifyOnNewOrder = notifyOnNewOrder;
     }
 
     await user.save();

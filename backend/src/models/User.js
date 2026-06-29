@@ -85,6 +85,16 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Admin-only alerts - meaningless for regular members, but kept as a
+    // plain field (not role-restricted at the schema level) for simplicity.
+    notifyOnNewRequest: {
+      type: Boolean,
+      default: false,
+    },
+    notifyOnNewOrder: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

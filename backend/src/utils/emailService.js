@@ -345,4 +345,116 @@ async function sendFeatureAlert({ subject, message }) {
   return { recipients: recipients.length, sent, failed };
 }
 
-module.exports = { notifyUpdates, sendDigestsFor, sendPendingRequestNotifications, sendFeatureAlert };
+function getAdminRecipients(opOptInField) {
+  return User.find({ role: "admin", status: "approved", [opOptInField]: true }).select("email");
+}
+
+function buildNewRequestHtml(request) {
+  const frontendUrl = getFrontendUrl();
+  const formatLabels = { ebook: "📱 E-bok", audiobook: "🎧 Lydbok" };
+  const formatsText = (request.formats || []).map((f) => formatLabels[f] || f).join(", ");
+
+  const bodyHtml = `
+    <div style="margin:0 0 8px; padding:16px; background:#f9fafb; border-radius:12px;">
+      <div style="font-size:16px; font-weight:bold; color:#111827;">${request.title}</div>
+      <div style="font-size:14px; color:#6b7280;">${request.author}</div>
+      ${formatsText ? `<div style="font-size:13px; color:#6b7280; margin-top:6px;">${formatsText}</div>` : ""}
+    </div>
+    <p style="font-size:14px; color:#6b7280; margin:0 0 16px;">Fra: <strong>${request.requesterName}</strong></p>
+    ${
+      frontendUrl
+        ? `<a href="${frontendUrl}/admin" style="display:inline-block; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">Se i admin</a>`
+        : ""
+    }`;
+
+  return renderEmailLayout({ heading: "Ny bokforespørsel! 📋", bodyHtml, frontendUrl });
+}
+
+// Fire-and-forget admin alert - request is a plain object ({ title, author,
+// formats, requesterName }), not a Mongoose doc, so the controller doesn't
+// need to populate anything just for this.
+async function notifyAdminsNewRequest(request) {
+  try {
+    const client = getClient();
+    if (!client || !process.env.RESEND_FROM_EMAIL) {
+      console.error("Resend not configured - skipping new-request admin alert");
+      return;
+    }
+
+    const admins = await getAdminRecipients("notifyOnNewRequest");
+    for (const admin of admins) {
+      try {
+        await client.emails.send({
+          from: process.env.RESEND_FROM_EMAIL,
+          to: admin.email,
+          subject: `📋 Ny bokforespørsel: ${request.title}`,
+          html: buildNewRequestHtml(request),
+        });
+      } catch (error) {
+        console.error("Failed to send new-request alert to", admin.email, error);
+      }
+    }
+  } catch (error) {
+    console.error("notifyAdminsNewRequest failed:", error);
+  }
+}
+
+function buildNewOrderHtml(order) {
+  const frontendUrl = getFrontendUrl();
+  const itemRows = order.items
+    .map((item) => `<div style="font-size:14px; color:#111827; margin-bottom:4px;">${item.quantity}x ${item.productName}</div>`)
+    .join("");
+
+  const bodyHtml = `
+    <p style="font-size:14px; color:#6b7280; margin:0 0 8px;">Fra: <strong>${order.customerName}</strong> (${order.customerEmail})</p>
+    <div style="margin:0 0 16px; padding:16px; background:#f9fafb; border-radius:12px;">
+      ${itemRows}
+      <div style="font-size:16px; font-weight:bold; color:#111827; margin-top:8px; padding-top:8px; border-top:1px solid #e5e7eb;">
+        Totalt: ${order.totalAmount.toFixed(2)} kr
+      </div>
+    </div>
+    ${
+      frontendUrl
+        ? `<a href="${frontendUrl}/admin" style="display:inline-block; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">Se i admin</a>`
+        : ""
+    }`;
+
+  return renderEmailLayout({ heading: "Ny bestilling! 🛍️", bodyHtml, frontendUrl });
+}
+
+// Fire-and-forget admin alert - order is the Order doc returned by
+// Order.create(), which already has everything needed (no populate needed).
+async function notifyAdminsNewOrder(order) {
+  try {
+    const client = getClient();
+    if (!client || !process.env.RESEND_FROM_EMAIL) {
+      console.error("Resend not configured - skipping new-order admin alert");
+      return;
+    }
+
+    const admins = await getAdminRecipients("notifyOnNewOrder");
+    for (const admin of admins) {
+      try {
+        await client.emails.send({
+          from: process.env.RESEND_FROM_EMAIL,
+          to: admin.email,
+          subject: `🛍️ Ny bestilling fra ${order.customerName}`,
+          html: buildNewOrderHtml(order),
+        });
+      } catch (error) {
+        console.error("Failed to send new-order alert to", admin.email, error);
+      }
+    }
+  } catch (error) {
+    console.error("notifyAdminsNewOrder failed:", error);
+  }
+}
+
+module.exports = {
+  notifyUpdates,
+  sendDigestsFor,
+  sendPendingRequestNotifications,
+  sendFeatureAlert,
+  notifyAdminsNewRequest,
+  notifyAdminsNewOrder,
+};

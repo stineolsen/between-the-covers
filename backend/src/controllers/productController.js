@@ -1,5 +1,6 @@
 const Product = require("../models/Product");
 const Order = require("../models/Order");
+const { notifyAdminsNewOrder } = require("../utils/emailService");
 
 // @desc    Get all products (with optional filters)
 // @route   GET /api/products
@@ -289,6 +290,8 @@ exports.submitContactOrder = async (req, res) => {
       totalAmount,
       itemCount: items.length,
     });
+
+    notifyAdminsNewOrder(order);
 
     res.status(201).json({
       success: true,

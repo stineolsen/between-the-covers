@@ -26,6 +26,8 @@ const Profile = () => {
     notificationFrequency: user?.notificationFrequency || "never",
     notifyOnRequestFulfilled: user?.notifyOnRequestFulfilled || false,
     notifyOnFeatureAlerts: user?.notifyOnFeatureAlerts || false,
+    notifyOnNewRequest: user?.notifyOnNewRequest || false,
+    notifyOnNewOrder: user?.notifyOnNewOrder || false,
   });
 
   const defaultAvatars = usersApi.getDefaultAvatars();
@@ -309,6 +311,40 @@ const Profile = () => {
                 </label>
               </div>
 
+              {user?.role === "admin" && (
+                <div className="space-y-3 p-4 rounded-2xl bg-purple-50">
+                  <p className="text-xs font-bold text-purple-700 uppercase tracking-wide">Admin-varsler</p>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnNewRequest"
+                      checked={formData.notifyOnNewRequest}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnNewRequest: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnNewRequest" className="text-sm font-bold text-gray-700">
+                      📋 Varsle meg om nye bokforespørsler
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnNewOrder"
+                      checked={formData.notifyOnNewOrder}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnNewOrder: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnNewOrder" className="text-sm font-bold text-gray-700">
+                      🛍️ Varsle meg om nye bestillinger
+                    </label>
+                  </div>
+                </div>
+              )}
+
               <div className="flex gap-4">
                 <button type="submit" className="btn-primary flex-1">
                   💾 Lagre endringer
@@ -324,6 +360,8 @@ const Profile = () => {
                       notificationFrequency: user?.notificationFrequency || "never",
                       notifyOnRequestFulfilled: user?.notifyOnRequestFulfilled || false,
                       notifyOnFeatureAlerts: user?.notifyOnFeatureAlerts || false,
+                      notifyOnNewRequest: user?.notifyOnNewRequest || false,
+                      notifyOnNewOrder: user?.notifyOnNewOrder || false,
                     });
                   }}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
