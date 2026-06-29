@@ -3,6 +3,7 @@ import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
 import { usersApi } from "../api/usersApi";
+import { importApi } from "../api/importApi";
 import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
 
@@ -25,6 +26,12 @@ const Admin = () => {
   const [editingProduct, setEditingProduct] = useState(null);
   const [showArchive, setShowArchive] = useState(false);
   const [showBookForm, setShowBookForm] = useState(false);
+  const [calibreImportSince, setCalibreImportSince] = useState(null);
+  const [calibreSinceInput, setCalibreSinceInput] = useState("");
+  const [runningCalibreImport, setRunningCalibreImport] = useState(false);
+  const [calibreImportResult, setCalibreImportResult] = useState(null);
+  const [runningAbsSync, setRunningAbsSync] = useState(false);
+  const [absSyncResult, setAbsSyncResult] = useState(null);
 
   useEffect(() => {
     if (activeTab === "users") {
@@ -37,6 +44,8 @@ const Admin = () => {
       fetchRequests();
     } else if (activeTab === "passwords") {
       fetchAllMembers();
+    } else if (activeTab === "import") {
+      fetchImportStatus();
     }
   }, [activeTab]);
 
@@ -44,6 +53,68 @@ const Admin = () => {
     setShowBookForm(false);
     setSuccessMessage("Bok lagt til!");
     setTimeout(() => setSuccessMessage(""), 3000);
+  };
+
+  const fetchImportStatus = async () => {
+    try {
+      setLoading(true);
+      const data = await importApi.getStatus();
+      setCalibreImportSince(data.calibreImportSince);
+      setCalibreSinceInput(data.calibreImportSince ? data.calibreImportSince.slice(0, 10) : "");
+      setError("");
+    } catch (err) {
+      setError("Greide ikke laste importstatus");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveCalibreSince = async () => {
+    try {
+      const since = calibreSinceInput ? new Date(calibreSinceInput).toISOString() : null;
+      const data = await importApi.setCalibreSince(since);
+      setCalibreImportSince(data.calibreImportSince);
+      setSuccessMessage("Importdato lagret!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke lagre importdato");
+      console.error(err);
+    }
+  };
+
+  const handleRunCalibreImport = async () => {
+    setRunningCalibreImport(true);
+    setCalibreImportResult(null);
+    try {
+      const data = await importApi.runCalibreImport();
+      setCalibreImportResult(data);
+      setCalibreImportSince(data.calibreImportSince);
+      setCalibreSinceInput(data.calibreImportSince ? data.calibreImportSince.slice(0, 10) : "");
+      setSuccessMessage("Bokimport fullført!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Bokimport feilet");
+      console.error(err);
+    } finally {
+      setRunningCalibreImport(false);
+    }
+  };
+
+  const handleRunAbsSync = async () => {
+    setRunningAbsSync(true);
+    setAbsSyncResult(null);
+    try {
+      const data = await importApi.runAbsSync();
+      setAbsSyncResult(data);
+      setSuccessMessage("Lydboksynkronisering fullført!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Lydboksynkronisering feilet");
+      console.error(err);
+    } finally {
+      setRunningAbsSync(false);
+    }
   };
 
   const fetchAllMembers = async () => {
@@ -331,6 +402,19 @@ const Admin = () => {
             }
           >
             📚 Legg til bok
+          </button>
+          <button
+            onClick={() => setActiveTab("import")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "import" ? "text-white" : "bg-white text-gray-700"
+            }`}
+            style={
+              activeTab === "import"
+                ? { background: "linear-gradient(135deg, #0ea5e9, #6366f1)" }
+                : {}
+            }
+          >
+            📥 Importer
           </button>
         </div>
 
@@ -913,6 +997,83 @@ const Admin = () => {
               </div>
             )}
           </>
+        )}
+        {/* Import Tab */}
+        {activeTab === "import" && (
+          <div className="grid gap-6 animate-fadeIn">
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">
+                📚 Importer bøker (Calibre)
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Henter nye og endrede bøker fra Calibre-Web siden datoen under.
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Sist importert:{" "}
+                <strong>
+                  {calibreImportSince
+                    ? new Date(calibreImportSince).toLocaleString("no-NO")
+                    : "Aldri"}
+                </strong>
+              </p>
+              <div className="flex items-center gap-3 flex-wrap mb-4">
+                <input
+                  type="date"
+                  value={calibreSinceInput}
+                  onChange={(e) => setCalibreSinceInput(e.target.value)}
+                  className="input-field py-2 w-auto"
+                />
+                <button
+                  onClick={handleSaveCalibreSince}
+                  className="btn-secondary px-4 py-2 text-sm"
+                >
+                  Lagre dato
+                </button>
+                <button
+                  onClick={handleRunCalibreImport}
+                  disabled={runningCalibreImport}
+                  className="btn-primary px-6 py-3 disabled:opacity-50"
+                >
+                  {runningCalibreImport ? "Importerer..." : "✨ Importer bøker"}
+                </button>
+              </div>
+              {calibreImportResult && (
+                <div className="p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                  Sett gjennom {calibreImportResult.scanned} bøker —{" "}
+                  {calibreImportResult.inserted} nye, {calibreImportResult.modified} oppdatert
+                  {calibreImportResult.skipped > 0 &&
+                    `, ${calibreImportResult.skipped} hoppet over`}
+                  .
+                </div>
+              )}
+            </div>
+
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">
+                🎧 Synkroniser lydbøker (Audiobookshelf)
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Skanner hele lydboksamlingen og fyller kun inn lydboklenker som mangler —
+                overskriver aldri eksisterende lenker.
+              </p>
+              <button
+                onClick={handleRunAbsSync}
+                disabled={runningAbsSync}
+                className="btn-primary px-6 py-3 disabled:opacity-50"
+              >
+                {runningAbsSync ? "Synkroniserer..." : "✨ Synkroniser lydbøker"}
+              </button>
+              {absSyncResult && (
+                <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                  Sett gjennom {absSyncResult.scanned} lydbøker —{" "}
+                  {absSyncResult.updated} lenker lagt til ({absSyncResult.matchedIsbn} via ISBN,{" "}
+                  {absSyncResult.matchedExact} eksakt, {absSyncResult.matchedFuzzy} fuzzy),{" "}
+                  {absSyncResult.unmatched} uten treff, {absSyncResult.alreadyLinked} hadde
+                  allerede lenke.
+                </div>
+              )}
+            </div>
+          </div>
         )}
       </div>
 

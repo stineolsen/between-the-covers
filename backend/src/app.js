@@ -16,6 +16,7 @@ const shopRoutes = require("./routes/shopRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const recommendationRoutes = require("./routes/recommendationRoutes");
 const bookRequestRoutes = require("./routes/bookRequestRoutes");
+const importRoutes = require("./routes/importRoutes");
 
 const app = express();
 
@@ -49,6 +50,7 @@ app.use("/api/shop", shopRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/recommendations", recommendationRoutes);
 app.use("/api/book-requests", bookRequestRoutes);
+app.use("/api/admin/import", importRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { booksApi } from "../api/booksApi";
 import { userBooksApi } from "../api/userBooksApi";
 import BookGrid from "../components/books/BookGrid";
@@ -8,6 +8,7 @@ import AddBookModal from "../components/books/AddBookModal";
 const Books = () => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const scrollRestored = useRef(false);
   const [error, setError] = useState("");
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -106,6 +107,25 @@ const Books = () => {
       setLoading(false);
     }
   };
+
+  // Save scroll position when leaving the page
+  useEffect(() => {
+    return () => {
+      sessionStorage.setItem("bookScrollY", window.scrollY);
+    };
+  }, []);
+
+  // Restore scroll position after books have loaded (only once per visit)
+  useEffect(() => {
+    if (!loading && books.length > 0 && !scrollRestored.current) {
+      const saved = sessionStorage.getItem("bookScrollY");
+      if (saved) {
+        scrollRestored.current = true;
+        sessionStorage.removeItem("bookScrollY");
+        requestAnimationFrame(() => window.scrollTo({ top: parseInt(saved), behavior: "instant" }));
+      }
+    }
+  }, [loading, books]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);

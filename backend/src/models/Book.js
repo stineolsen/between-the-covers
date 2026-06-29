@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { normalizeTitle, normalizeAuthor } = require("../utils/importHelpers");
 
 const bookSchema = new mongoose.Schema(
   {
@@ -116,6 +117,17 @@ const bookSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+    // Match keys used by the Calibre/Audiobookshelf import jobs - kept in sync
+    // with title/author via the pre-save hook below
+    titleNormalized: {
+      type: String,
+      default: null,
+    },
+    authorNormalized: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -132,6 +144,12 @@ bookSchema.index({ averageRating: -1 });
 // Virtual for checking if book has cover image
 bookSchema.virtual("hasCover").get(function () {
   return !!this.coverImage;
+});
+
+// Keep the import match keys in sync whenever title/author change
+bookSchema.pre("save", function () {
+  this.titleNormalized = normalizeTitle(this.title);
+  this.authorNormalized = normalizeAuthor(this.author);
 });
 
 // Method to update average rating
