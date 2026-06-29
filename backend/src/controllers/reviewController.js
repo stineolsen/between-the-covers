@@ -95,7 +95,7 @@ exports.createReview = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: "Book not found",
+        message: "Noe er feil, finner ikke boken",
       });
     }
 
@@ -292,7 +292,7 @@ exports.adminSetRating = async (req, res, next) => {
     const { bookId, userId, rating } = req.body;
 
     const book = await Book.findById(bookId);
-    if (!book) return res.status(404).json({ success: false, message: "Book not found" });
+    if (!book) return res.status(404).json({ success: false, message: "Noe er feil, finner ikke boken" });
 
     let review = await Review.findOne({ book: bookId, user: userId });
     if (review) {

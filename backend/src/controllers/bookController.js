@@ -1,6 +1,7 @@
 const Book = require("../models/Book");
 const path = require("path");
 const fs = require("fs");
+const { notifyUpdates } = require("../utils/emailService");
 
 // @desc    Get all books
 // @route   GET /api/books
@@ -166,7 +167,7 @@ exports.getBook = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: "Book not found",
+        message: "Noe er feil, finner ikke boken",
       });
     }
 
@@ -246,6 +247,8 @@ exports.createBook = async (req, res, next) => {
       addedBy: req.user.id,
     });
 
+    notifyUpdates({ newBooks: [book] });
+
     res.status(201).json({
       success: true,
       message: "Book created successfully",
@@ -277,7 +280,7 @@ exports.updateBook = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: "Book not found",
+        message: "Noe er feil, finner ikke boken",
       });
     }
 
@@ -386,7 +389,7 @@ exports.deleteBook = async (req, res, next) => {
     if (!book) {
       return res.status(404).json({
         success: false,
-        message: "Book not found",
+        message: "Noe er feil, finner ikke boken",
       });
     }
 
@@ -449,7 +452,7 @@ exports.uploadCover = async (req, res, next) => {
     const book = await Book.findById(req.params.id);
 
     if (!book) {
-      // Delete uploaded file if book not found
+      // Delete uploaded file if Noe er feil, finner ikke boken
       if (req.file) {
         const filePath = path.join(
           __dirname,
@@ -463,7 +466,7 @@ exports.uploadCover = async (req, res, next) => {
 
       return res.status(404).json({
         success: false,
-        message: "Book not found",
+        message: "Noe er feil, finner ikke boken",
       });
     }
 

@@ -44,7 +44,7 @@ exports.getProfile = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { displayName, bio, favoriteGenres } = req.body;
+    const { displayName, bio, favoriteGenres, notificationFrequency } = req.body;
 
     const user = await User.findById(req.user._id);
 
@@ -64,6 +64,16 @@ exports.updateProfile = async (req, res, next) => {
       } else {
         user.favoriteGenres = favoriteGenres;
       }
+    }
+    if (notificationFrequency !== undefined) {
+      const validValues = User.schema.path("notificationFrequency").enumValues;
+      if (!validValues.includes(notificationFrequency)) {
+        return res.status(400).json({
+          success: false,
+          message: `notificationFrequency must be one of: ${validValues.join(", ")}`,
+        });
+      }
+      user.notificationFrequency = notificationFrequency;
     }
 
     await user.save();

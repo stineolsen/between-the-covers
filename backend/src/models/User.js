@@ -68,6 +68,15 @@ const userSchema = new mongoose.Schema(
         type: String,
       },
     ],
+    notificationFrequency: {
+      type: String,
+      enum: ["never", "immediate", "daily", "weekly", "biweekly", "monthly"],
+      default: "never",
+    },
+    lastNotifiedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

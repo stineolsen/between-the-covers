@@ -23,6 +23,7 @@ const Profile = () => {
     displayName: user?.displayName || "",
     bio: user?.bio || "",
     favoriteGenres: user?.favoriteGenres?.join(", ") || "",
+    notificationFrequency: user?.notificationFrequency || "never",
   });
 
   const defaultAvatars = usersApi.getDefaultAvatars();
@@ -257,6 +258,25 @@ const Profile = () => {
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  📧 Varsle meg om nye bøker og lydbøker
+                </label>
+                <select
+                  name="notificationFrequency"
+                  value={formData.notificationFrequency}
+                  onChange={handleChange}
+                  className="input-field"
+                >
+                  <option value="never">Aldri</option>
+                  <option value="immediate">Med en gang (når bøker legges til)</option>
+                  <option value="daily">Daglig</option>
+                  <option value="weekly">Ukentlig</option>
+                  <option value="biweekly">Hver 14. dag</option>
+                  <option value="monthly">Månedlig</option>
+                </select>
+              </div>
+
               <div className="flex gap-4">
                 <button type="submit" className="btn-primary flex-1">
                   💾 Lagre endringer
@@ -269,6 +289,7 @@ const Profile = () => {
                       displayName: user?.displayName || "",
                       bio: user?.bio || "",
                       favoriteGenres: user?.favoriteGenres?.join(", ") || "",
+                      notificationFrequency: user?.notificationFrequency || "never",
                     });
                   }}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"

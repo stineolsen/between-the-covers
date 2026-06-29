@@ -114,7 +114,7 @@ exports.createMeeting = async (req, res) => {
       if (!book) {
         return res.status(404).json({
           success: false,
-          message: "Book not found",
+          message: "Noe er feil, finner ikke boken",
         });
       }
     }
@@ -186,7 +186,7 @@ exports.updateMeeting = async (req, res) => {
       if (!book) {
         return res.status(404).json({
           success: false,
-          message: "Book not found",
+          message: "Noe er feil, finner ikke boken",
         });
       }
     }

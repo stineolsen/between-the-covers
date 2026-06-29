@@ -275,7 +275,7 @@ const BookDetail = () => {
             style={{ background: "linear-gradient(135deg, #f093fb, #f5576c)" }}
           >
             <p className="text-white text-2xl font-bold mb-6">
-              😢 {error || "Book not found"}
+              😢 {error || "Noe er feil, finner ikke boken"}
             </p>
             <Link to="/books" className="btn-accent">
               ← Tilbake til bøker

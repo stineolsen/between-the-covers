@@ -76,10 +76,10 @@ exports.setBookStatus = async (req, res) => {
     // Validate book exists
     const book = await Book.findById(bookId);
     if (!book) {
-      console.log("Book not found:", bookId);
+      console.log("Noe er feil, finner ikke boken:", bookId);
       return res.status(404).json({
         success: false,
-        message: "Book not found",
+        message: "Noe er feil, finner ikke boken",
       });
     }
 
@@ -147,7 +147,7 @@ exports.updateFinishedDate = async (req, res) => {
     if (!userBook) {
       return res
         .status(404)
-        .json({ success: false, message: "Book not found in your list" });
+        .json({ success: false, message: "Noe er feil, finner ikke boken in your list" });
     }
 
     // Sync readingDate on the user's review for this book (if one exists)
@@ -182,7 +182,7 @@ exports.removeUserBook = async (req, res) => {
     if (!userBook) {
       return res.status(404).json({
         success: false,
-        message: "Book not found in your list",
+        message: "Noe er feil, finner ikke boken in your list",
       });
     }
 

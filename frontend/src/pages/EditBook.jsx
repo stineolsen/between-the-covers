@@ -42,7 +42,7 @@ const EditBook = () => {
         <div className="max-w-4xl mx-auto px-4">
           <div className="card bg-red-50 border border-red-200 text-center py-12">
             <p className="text-red-700 text-lg mb-4">
-              {error || "Book not found"}
+              {error || "Noe er feil, finner ikke boken"}
             </p>
             <Link to="/books" className="btn-primary">
               Tilbake til bøker

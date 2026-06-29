@@ -1,11 +1,15 @@
 require("dotenv").config();
 const app = require("./app");
 const connectDB = require("./config/database");
+const { startNotificationScheduler } = require("./utils/notificationScheduler");
 
 const PORT = process.env.PORT || 5000;
 
 // Connect to database
 connectDB();
+
+// Start the hourly digest-notification check
+startNotificationScheduler();
 
 // Start server
 const server = app.listen(PORT, () => {
