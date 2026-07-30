@@ -33,7 +33,7 @@ const sendTokenResponse = (user, statusCode, res) => {
     .json({
       success: true,
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         displayName: user.displayName,

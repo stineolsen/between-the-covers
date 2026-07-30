@@ -28,6 +28,8 @@ const Profile = () => {
     notifyOnFeatureAlerts: user?.notifyOnFeatureAlerts || false,
     notifyOnNewRequest: user?.notifyOnNewRequest || false,
     notifyOnNewOrder: user?.notifyOnNewOrder || false,
+    notifyOnListShared: user?.notifyOnListShared || false,
+    notifyOnListComment: user?.notifyOnListComment || false,
   });
 
   const defaultAvatars = usersApi.getDefaultAvatars();
@@ -311,6 +313,36 @@ const Profile = () => {
                 </label>
               </div>
 
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="notifyOnListShared"
+                  checked={formData.notifyOnListShared}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notifyOnListShared: e.target.checked })
+                  }
+                  className="w-5 h-5"
+                />
+                <label htmlFor="notifyOnListShared" className="text-sm font-bold text-gray-700">
+                  📋 Varsle meg når noen deler en liste med meg
+                </label>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  id="notifyOnListComment"
+                  checked={formData.notifyOnListComment}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notifyOnListComment: e.target.checked })
+                  }
+                  className="w-5 h-5"
+                />
+                <label htmlFor="notifyOnListComment" className="text-sm font-bold text-gray-700">
+                  💬 Varsle meg om nye kommentarer på listene mine
+                </label>
+              </div>
+
               {user?.role === "admin" && (
                 <div className="space-y-3 p-4 rounded-2xl bg-purple-50">
                   <p className="text-xs font-bold text-purple-700 uppercase tracking-wide">Admin-varsler</p>
@@ -362,6 +394,8 @@ const Profile = () => {
                       notifyOnFeatureAlerts: user?.notifyOnFeatureAlerts || false,
                       notifyOnNewRequest: user?.notifyOnNewRequest || false,
                       notifyOnNewOrder: user?.notifyOnNewOrder || false,
+                      notifyOnListShared: user?.notifyOnListShared || false,
+                      notifyOnListComment: user?.notifyOnListComment || false,
                     });
                   }}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"

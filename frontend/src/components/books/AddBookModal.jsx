@@ -11,7 +11,7 @@ const cleanSubjects = (subjects = []) =>
     .filter((s) => !GENRE_BLOCKLIST.some((b) => s.toLowerCase().includes(b)))
     .slice(0, 6);
 
-const AddBookModal = ({ onClose }) => {
+const AddBookModal = ({ onClose, onCreated }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState("search"); // "search" | "confirm"
   const [query, setQuery] = useState("");
@@ -104,7 +104,11 @@ const AddBookModal = ({ onClose }) => {
         coverImageUrl: form.coverImageUrl || undefined,
         libraryLinks: { audiobook: null, ebook: null },
       });
-      navigate(`/books/${result.book._id}`);
+      if (onCreated) {
+        onCreated(result.book);
+      } else {
+        navigate(`/books/${result.book._id}`);
+      }
     } catch (err) {
       setSubmitError(err.response?.data?.message || "Greide ikke legge til bok.");
     } finally {

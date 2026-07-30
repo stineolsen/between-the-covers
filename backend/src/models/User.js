@@ -95,6 +95,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    notifyOnListShared: {
+      type: Boolean,
+      default: false,
+    },
+    notifyOnListComment: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

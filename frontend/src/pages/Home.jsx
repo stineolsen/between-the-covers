@@ -2,6 +2,7 @@ import { useAuth } from "../contexts/AuthContext";
 import NextMeeting from "../components/meetings/NextMeeting";
 import ActivityFeed from "../components/common/ActivityFeed";
 import RecommendationFeed from "../components/common/RecommendationFeed";
+import ListNotificationFeed from "../components/common/ListNotificationFeed";
 import MyRequestsFeed from "../components/common/MyRequestsFeed";
 import { Link } from "react-router-dom";
 
@@ -83,6 +84,9 @@ const Home = () => {
 
         {/* Recommendations for this user */}
         <RecommendationFeed />
+
+        {/* List shares/comments for this user */}
+        <ListNotificationFeed />
 
         {/* My book requests */}
         <MyRequestsFeed />

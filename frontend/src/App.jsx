@@ -17,6 +17,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
 import BookDetail from "./pages/BookDetail";
+import Lists from "./pages/Lists";
+import ListDetail from "./pages/ListDetail";
 import AddBook from "./pages/AddBook";
 import EditBook from "./pages/EditBook";
 import Meetings from "./pages/Meetings";
@@ -78,6 +80,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <BookDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/lists"
+                  element={
+                    <ProtectedRoute>
+                      <Lists />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/lists/:id"
+                  element={
+                    <ProtectedRoute>
+                      <ListDetail />
                     </ProtectedRoute>
                   }
                 />

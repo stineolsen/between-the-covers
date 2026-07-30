@@ -53,6 +53,8 @@ exports.updateProfile = async (req, res, next) => {
       notifyOnFeatureAlerts,
       notifyOnNewRequest,
       notifyOnNewOrder,
+      notifyOnListShared,
+      notifyOnListComment,
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -95,6 +97,12 @@ exports.updateProfile = async (req, res, next) => {
     }
     if (notifyOnNewOrder !== undefined) {
       user.notifyOnNewOrder = notifyOnNewOrder;
+    }
+    if (notifyOnListShared !== undefined) {
+      user.notifyOnListShared = notifyOnListShared;
+    }
+    if (notifyOnListComment !== undefined) {
+      user.notifyOnListComment = notifyOnListComment;
     }
 
     await user.save();

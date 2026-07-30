@@ -55,6 +55,12 @@ const Navbar = () => {
                   Bøker
                 </Link>
                 <Link
+                  to="/lists"
+                  className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110"
+                >
+                  Lister
+                </Link>
+                <Link
                   to="/meetings"
                   className="text-white hover:text-white/80 font-medium transition-all transform hover:scale-110"
                 >
@@ -137,6 +143,14 @@ const Navbar = () => {
                   style={{ background: "rgba(255, 255, 255, 0.1)" }}
                 >
                   📚 Bøker
+                </Link>
+                <Link
+                  to="/lists"
+                  onClick={closeMobileMenu}
+                  className="text-white hover:text-white/80 font-medium py-2 px-4 rounded-xl transition-all"
+                  style={{ background: "rgba(255, 255, 255, 0.1)" }}
+                >
+                  📋 Lister
                 </Link>
                 <Link
                   to="/meetings"
