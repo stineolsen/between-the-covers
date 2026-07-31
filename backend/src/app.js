@@ -21,6 +21,8 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const listRoutes = require("./routes/listRoutes");
 const commentRoutes = require("./routes/commentRoutes");
 const listNotificationRoutes = require("./routes/listNotificationRoutes");
+const authorRoutes = require("./routes/authorRoutes");
+const seriesRoutes = require("./routes/seriesRoutes");
 
 const app = express();
 
@@ -59,6 +61,8 @@ app.use("/api/admin/notifications", notificationRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/list-notifications", listNotificationRoutes);
+app.use("/api/authors", authorRoutes);
+app.use("/api/series", seriesRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

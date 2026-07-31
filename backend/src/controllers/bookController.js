@@ -153,6 +153,63 @@ exports.getGenres = async (req, res, next) => {
   }
 };
 
+// @desc    Get all books by a given author (exact authorNormalized match)
+// @route   GET /api/authors/:authorNormalized
+// @access  Private
+exports.getBooksByAuthor = async (req, res, next) => {
+  try {
+    const books = await Book.find({
+      authorNormalized: req.params.authorNormalized,
+    }).sort({ series: 1, seriesNumber: 1, title: 1 });
+
+    if (books.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Fant ingen bøker av denne forfatteren",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      author: books[0].author,
+      count: books.length,
+      books,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all books in a given series (case-insensitive exact match), ordered by seriesNumber
+// @route   GET /api/series/:seriesName
+// @access  Private
+exports.getBooksBySeries = async (req, res, next) => {
+  try {
+    const seriesName = decodeURIComponent(req.params.seriesName);
+    const escaped = seriesName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const books = await Book.find({
+      series: new RegExp(`^${escaped}$`, "i"),
+    }).sort({ seriesNumber: 1, title: 1 });
+
+    if (books.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "Fant ingen bøker i denne serien",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      series: books[0].series,
+      count: books.length,
+      books,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get single book
 // @route   GET /api/books/:id
 // @access  Private

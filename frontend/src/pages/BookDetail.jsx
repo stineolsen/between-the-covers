@@ -10,6 +10,8 @@ import ReviewList from "../components/reviews/ReviewList";
 import ReviewForm from "../components/reviews/ReviewForm";
 import StatusSelector from "../components/books/StatusSelector";
 import RecommendModal from "../components/books/RecommendModal";
+import AddToListMenu from "../components/books/AddToListMenu";
+import { normalizeAuthor } from "../utils/normalizeAuthor";
 
 const BookDetail = () => {
   const { id } = useParams();
@@ -332,7 +334,15 @@ const BookDetail = () => {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
               {book.title}
             </h1>
-            <p className="text-md md:text-lg text-gray-500 mb-4">av {book.author}</p>
+            <p className="text-md md:text-lg text-gray-500 mb-4">
+              av{" "}
+              <Link
+                to={`/authors/${encodeURIComponent(normalizeAuthor(book.author))}`}
+                className="hover:text-purple-700 hover:underline transition-colors"
+              >
+                {book.author}
+              </Link>
+            </p>
 
             {book.averageRating > 0 && (
               <div className="flex items-center gap-2 mb-4">
@@ -429,6 +439,11 @@ const BookDetail = () => {
                 </div>
               )}
 
+              {/* Add to list */}
+              <div className="mt-4">
+                <AddToListMenu book={book} />
+              </div>
+
               {/* Recommend button */}
               <div className="mt-4">
                 <button
@@ -482,7 +497,12 @@ const BookDetail = () => {
                       📚 Serie
                     </h3>
                     <p className="text-gray-700 font-medium">
-                      {book.series}
+                      <Link
+                        to={`/series/${encodeURIComponent(book.series)}`}
+                        className="hover:text-purple-700 hover:underline transition-colors"
+                      >
+                        {book.series}
+                      </Link>
                       {book.seriesNumber ? ` #${book.seriesNumber}` : ""}
                     </p>
                   </div>

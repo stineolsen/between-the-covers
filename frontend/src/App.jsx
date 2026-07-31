@@ -17,6 +17,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Books from "./pages/Books";
 import BookDetail from "./pages/BookDetail";
+import AuthorDetail from "./pages/AuthorDetail";
+import SeriesDetail from "./pages/SeriesDetail";
 import Lists from "./pages/Lists";
 import ListDetail from "./pages/ListDetail";
 import AddBook from "./pages/AddBook";
@@ -80,6 +82,22 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <BookDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/authors/:authorNormalized"
+                  element={
+                    <ProtectedRoute>
+                      <AuthorDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/series/:seriesName"
+                  element={
+                    <ProtectedRoute>
+                      <SeriesDetail />
                     </ProtectedRoute>
                   }
                 />

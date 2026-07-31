@@ -13,6 +13,18 @@ export const booksApi = {
     return response.data;
   },
 
+  // Get all books by a given author (exact authorNormalized match)
+  getByAuthor: async (authorNormalized) => {
+    const response = await api.get(`/api/authors/${encodeURIComponent(authorNormalized)}`);
+    return response.data;
+  },
+
+  // Get all books in a given series, ordered by seriesNumber
+  getBySeries: async (seriesName) => {
+    const response = await api.get(`/api/series/${encodeURIComponent(seriesName)}`);
+    return response.data;
+  },
+
   // Get books by status (for reading history)
   getBooksByStatus: async (status) => {
     const response = await api.get(`/api/books/status/${status}`);
