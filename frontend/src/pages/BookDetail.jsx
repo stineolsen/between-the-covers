@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { booksApi } from "../api/booksApi";
 import { reviewsApi } from "../api/reviewsApi";
 import { userBooksApi } from "../api/userBooksApi";
-import { usersApi } from "../api/usersApi";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import ReviewList from "../components/reviews/ReviewList";
@@ -11,6 +10,7 @@ import ReviewForm from "../components/reviews/ReviewForm";
 import StatusSelector from "../components/books/StatusSelector";
 import RecommendModal from "../components/books/RecommendModal";
 import AddToListMenu from "../components/books/AddToListMenu";
+import UserAvatar from "../components/common/UserAvatar";
 import { normalizeAuthor } from "../utils/normalizeAuthor";
 
 const BookDetail = () => {
@@ -612,14 +612,7 @@ const BookDetail = () => {
                         title={finishedAt ? new Date(finishedAt).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" }) : undefined}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
                       >
-                        {u.avatar ? (
-                          <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
-                        ) : (
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
-                            {(u.displayName || u.username || "?")[0].toUpperCase()}
-                          </span>
-                        )}
+                        <UserAvatar user={u} className="w-5 h-5 rounded-full text-xs font-bold" />
                         {u.displayName || u.username}
                       </Link>
                     ))}
@@ -640,14 +633,7 @@ const BookDetail = () => {
                         to={`/members/${u._id}`}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
                       >
-                        {u.avatar ? (
-                          <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
-                        ) : (
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                            style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
-                            {(u.displayName || u.username || "?")[0].toUpperCase()}
-                          </span>
-                        )}
+                        <UserAvatar user={u} className="w-5 h-5 rounded-full text-xs font-bold" />
                         {u.displayName || u.username}
                       </Link>
                     ))}
@@ -668,14 +654,7 @@ const BookDetail = () => {
                         to={`/members/${u._id}`}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
                       >
-                        {u.avatar ? (
-                          <img src={usersApi.getAvatarUrl(u.avatar)} alt={u.displayName} className="w-5 h-5 rounded-full object-cover" />
-                        ) : (
-                          <span className="w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
-                            {(u.displayName || u.username || "?")[0].toUpperCase()}
-                          </span>
-                        )}
+                        <UserAvatar user={u} className="w-5 h-5 rounded-full text-xs font-bold" />
                         {u.displayName || u.username}
                       </Link>
                     ))}

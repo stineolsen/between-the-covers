@@ -8,7 +8,7 @@ import AddBookToListModal from "../components/lists/AddBookToListModal";
 import ShareListModal from "../components/lists/ShareListModal";
 import ListFormModal from "../components/lists/ListFormModal";
 import CommentThread from "../components/lists/CommentThread";
-import { avatarColor } from "../components/lists/avatarColor";
+import UserAvatar from "../components/common/UserAvatar";
 
 const ListDetail = () => {
   const { id } = useParams();
@@ -127,24 +127,14 @@ const ListDetail = () => {
           {/* Owner + collaborators */}
           <div className="flex items-center gap-2 flex-wrap mt-4">
             <div className="flex items-center gap-1.5" title={`Eier: ${ownerName}`}>
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                style={{ background: avatarColor(ownerName) }}
-              >
-                {ownerName[0]?.toUpperCase()}
-              </div>
+              <UserAvatar user={list.owner} className="w-7 h-7 rounded-full text-xs font-bold" />
               <span className="text-xs text-gray-600 font-medium">{ownerName} (eier)</span>
             </div>
             {(list.collaborators || []).map((c) => {
               const name = c.displayName || c.username;
               return (
                 <div key={c._id} className="flex items-center gap-1.5 bg-white/60 rounded-full pl-1 pr-2 py-0.5">
-                  <div
-                    className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                    style={{ background: avatarColor(name) }}
-                  >
-                    {name[0]?.toUpperCase()}
-                  </div>
+                  <UserAvatar user={c} className="w-7 h-7 rounded-full text-xs font-bold" />
                   <span className="text-xs text-gray-600 font-medium">{name}</span>
                   {canEdit && (
                     <button

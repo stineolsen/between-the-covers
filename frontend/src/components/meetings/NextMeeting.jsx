@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { meetingsApi } from "../../api/meetingsApi";
 import { booksApi } from "../../api/booksApi";
-import { usersApi } from "../../api/usersApi";
 import { useAuth } from "../../contexts/AuthContext";
+import UserAvatar from "../common/UserAvatar";
 
 const NextMeeting = () => {
   const { user } = useAuth();
@@ -218,19 +218,10 @@ const NextMeeting = () => {
                         to={`/members/${attendeeId}`}
                         className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full backdrop-blur-sm hover:opacity-80 transition-opacity"
                       >
-                        <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-sm">
-                          {attendee.avatar ? (
-                            <img
-                              src={usersApi.getAvatarUrl(attendee.avatar)}
-                              alt={displayName}
-                              className="w-full h-full rounded-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-purple-600 font-bold">
-                              {displayName.charAt(0).toUpperCase()}
-                            </span>
-                          )}
-                        </div>
+                        <UserAvatar
+                          user={attendee}
+                          className="w-6 h-6 rounded-full text-sm flex-shrink-0"
+                        />
                         <span className="text-sm font-medium">
                           {displayName}
                         </span>

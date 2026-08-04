@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 import BookCoverFallback from "../common/BookCoverFallback";
-import { avatarColor } from "./avatarColor";
+import UserAvatar from "../common/UserAvatar";
 
 const ListCard = ({ list }) => {
   const ownerName = list.owner?.displayName || list.owner?.username || "Ukjent";
@@ -52,12 +52,10 @@ const ListCard = ({ list }) => {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
-              style={{ background: avatarColor(ownerName) }}
-            >
-              {ownerName[0]?.toUpperCase()}
-            </div>
+            <UserAvatar
+              user={list.owner}
+              className="w-6 h-6 rounded-full text-xs font-bold flex-shrink-0"
+            />
             <span className="text-xs text-gray-600">{ownerName}</span>
           </div>
           <span className="text-xs text-gray-400 font-medium">

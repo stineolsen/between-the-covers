@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import StarRating from "./StarRating";
+import UserAvatar from "../common/UserAvatar";
 
 const ReviewCard = ({
   review,
@@ -36,12 +37,7 @@ const ReviewCard = ({
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           {/* User Avatar */}
-          <div
-            className="w-12 h-12 rounded-full flex items-center justify-center text-2xl font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
-          >
-            {review.user?.displayName?.[0] || review.user?.username?.[0] || "?"}
-          </div>
+          <UserAvatar user={review.user} className="w-12 h-12 rounded-full text-2xl font-bold" />
 
           {/* User Info */}
           <div>

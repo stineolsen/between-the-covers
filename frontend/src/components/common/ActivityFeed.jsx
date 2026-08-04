@@ -1,20 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import activityApi from '../../api/activityApi';
-
-const AVATAR_COLORS = [
-  'linear-gradient(135deg, #7c3aed, #a855f7)',
-  'linear-gradient(135deg, #db2777, #f472b6)',
-  'linear-gradient(135deg, #0891b2, #22d3ee)',
-  'linear-gradient(135deg, #059669, #34d399)',
-  'linear-gradient(135deg, #d97706, #fbbf24)',
-  'linear-gradient(135deg, #dc2626, #f87171)',
-];
-
-const avatarColor = (name = '') => {
-  const idx = name.charCodeAt(0) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[idx];
-};
+import UserAvatar from './UserAvatar';
 
 const relativeTime = (date) => {
   const diffMs = Date.now() - new Date(date);
@@ -40,17 +27,9 @@ const Stars = ({ rating }) => {
   );
 };
 
-const Avatar = ({ user }) => {
-  const name = user?.displayName || user?.username || '?';
-  return (
-    <div
-      className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-      style={{ background: avatarColor(name) }}
-    >
-      {name[0]?.toUpperCase()}
-    </div>
-  );
-};
+const Avatar = ({ user }) => (
+  <UserAvatar user={user} className="w-9 h-9 rounded-full font-bold text-sm flex-shrink-0" />
+);
 
 const BookThumb = ({ book }) => {
   if (!book?.coverImage) return null;
@@ -149,14 +128,12 @@ const ActivityItem = ({ activity }) => {
           {count > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {attendees.slice(0, 5).map((att, i) => (
-                <div
+                <UserAvatar
                   key={att._id || i}
+                  user={att}
                   title={att.displayName || att.username}
-                  className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                  style={{ background: avatarColor(att.displayName || att.username || '?') }}
-                >
-                  {(att.displayName || att.username || '?')[0]?.toUpperCase()}
-                </div>
+                  className="w-6 h-6 rounded-full text-xs font-bold"
+                />
               ))}
               {count > 5 && (
                 <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-bold">

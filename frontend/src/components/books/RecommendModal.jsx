@@ -3,15 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { usersApi } from '../../api/usersApi';
 import recommendationApi from '../../api/recommendationApi';
-
-const AVATAR_COLORS = [
-  'linear-gradient(135deg, #7c3aed, #a855f7)',
-  'linear-gradient(135deg, #db2777, #f472b6)',
-  'linear-gradient(135deg, #0891b2, #22d3ee)',
-  'linear-gradient(135deg, #059669, #34d399)',
-  'linear-gradient(135deg, #d97706, #fbbf24)',
-];
-const avatarColor = (name = '') => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+import UserAvatar from '../common/UserAvatar';
 
 const RecommendModal = ({ book, onClose }) => {
   const { user } = useAuth();
@@ -118,12 +110,10 @@ const RecommendModal = ({ book, onClose }) => {
                     onChange={() => toggleMember(member._id)}
                     className="w-4 h-4 accent-purple-600 flex-shrink-0"
                   />
-                  <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                    style={{ background: avatarColor(name) }}
-                  >
-                    {name[0]?.toUpperCase()}
-                  </div>
+                  <UserAvatar
+                    user={member}
+                    className="w-8 h-8 rounded-full font-bold text-sm flex-shrink-0"
+                  />
                   <span className="text-gray-800 text-sm font-medium">{name}</span>
                 </label>
               );

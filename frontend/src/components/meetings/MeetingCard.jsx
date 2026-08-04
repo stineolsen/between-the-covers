@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
-import { usersApi } from "../../api/usersApi";
 import { useAuth } from "../../contexts/AuthContext";
 import MeetingRating from "./MeetingRating";
+import UserAvatar from "../common/UserAvatar";
 
 const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
   const { user, isAdmin } = useAuth();
@@ -175,23 +175,10 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
                 <Link
                   key={`attendee-${attendeeId}-${index}`}
                   to={`/members/${attendeeId}`}
-                  className="w-10 h-10 rounded-full bg-white border-2 border-white shadow-lg flex items-center justify-center text-xl hover:opacity-80 transition-opacity"
-                  style={{
-                    background: "linear-gradient(135deg, #667eea, #764ba2)",
-                  }}
+                  className="w-10 h-10 rounded-full border-2 border-white shadow-lg overflow-hidden block hover:opacity-80 transition-opacity"
                   title={displayName}
                 >
-                  {attendee.avatar ? (
-                    <img
-                      src={usersApi.getAvatarUrl(attendee.avatar)}
-                      alt={displayName}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white font-bold">
-                      {displayName.charAt(0).toUpperCase()}
-                    </span>
-                  )}
+                  <UserAvatar user={attendee} className="w-full h-full text-xl" />
                 </Link>
               );
             })}

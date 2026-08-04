@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import UserAvatar from "../common/UserAvatar";
 
 const CommentCard = ({ comment, onEdit, onDelete }) => {
   const { user, isAdmin } = useAuth();
@@ -21,12 +22,10 @@ const CommentCard = ({ comment, onEdit, onDelete }) => {
     <div className="rounded-2xl p-4" style={{ background: "rgba(255, 255, 255, 0.7)" }}>
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-3">
-          <div
-            className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
-          >
-            {comment.user?.displayName?.[0] || comment.user?.username?.[0] || "?"}
-          </div>
+          <UserAvatar
+            user={comment.user}
+            className="w-9 h-9 rounded-full text-sm font-bold flex-shrink-0"
+          />
           <div>
             <p className="font-bold text-gray-900 text-sm">
               {comment.user?.displayName || comment.user?.username || "Anonym"}

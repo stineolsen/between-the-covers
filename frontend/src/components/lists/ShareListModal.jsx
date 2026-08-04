@@ -3,7 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { usersApi } from "../../api/usersApi";
 import listsApi from "../../api/listsApi";
-import { avatarColor } from "./avatarColor";
+import UserAvatar from "../common/UserAvatar";
 
 const ShareListModal = ({ list, onClose, onShared }) => {
   const { user } = useAuth();
@@ -118,12 +118,10 @@ const ShareListModal = ({ list, onClose, onShared }) => {
                       onChange={() => toggleMember(member._id)}
                       className="w-4 h-4 accent-purple-600 flex-shrink-0"
                     />
-                    <div
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                      style={{ background: avatarColor(name) }}
-                    >
-                      {name[0]?.toUpperCase()}
-                    </div>
+                    <UserAvatar
+                      user={member}
+                      className="w-8 h-8 rounded-full font-bold text-sm flex-shrink-0"
+                    />
                     <span className="text-gray-800 text-sm font-medium">{name}</span>
                   </label>
                 );

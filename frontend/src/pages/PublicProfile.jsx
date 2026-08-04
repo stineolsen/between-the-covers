@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { usersApi } from "../api/usersApi";
 import { booksApi } from "../api/booksApi";
 import { useAuth } from "../contexts/AuthContext";
+import UserAvatar from "../components/common/UserAvatar";
 
 const TAG_CONFIG = {
   admin:          { label: 'Admin',          bg: 'linear-gradient(135deg, #f093fb, #f5576c)' },
@@ -81,7 +82,6 @@ const PublicProfile = () => {
   }
 
   const { user, tags, bookshelf, favoriteBooks } = profile;
-  const avatarUrl = user.avatar ? usersApi.getAvatarUrl(user.avatar) : null;
 
   return (
     <div className="min-h-screen py-12">
@@ -90,24 +90,10 @@ const PublicProfile = () => {
         {/* Avatar + name card */}
         <div className="container-gradient flex flex-col items-center text-center pb-8">
           {/* Avatar */}
-          <div
-            className="w-40 h-40 rounded-full overflow-hidden shadow-xl mb-4"
-            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
-          >
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt={user.displayName}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <span className="text-6xl text-white font-bold">
-                  {(user.displayName || user.username || "?")[0].toUpperCase()}
-                </span>
-              </div>
-            )}
-          </div>
+          <UserAvatar
+            user={user}
+            className="w-40 h-40 rounded-full overflow-hidden shadow-xl mb-4 text-6xl"
+          />
 
           {/* Name */}
           <h2 className="text-2xl font-bold text-gray-900 mb-1">

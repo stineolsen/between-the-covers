@@ -1,15 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import listNotificationApi from "../../api/listNotificationApi";
-
-const AVATAR_COLORS = [
-  "linear-gradient(135deg, #7c3aed, #a855f7)",
-  "linear-gradient(135deg, #db2777, #f472b6)",
-  "linear-gradient(135deg, #0891b2, #22d3ee)",
-  "linear-gradient(135deg, #059669, #34d399)",
-  "linear-gradient(135deg, #d97706, #fbbf24)",
-];
-const avatarColor = (name = "") => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
+import UserAvatar from "./UserAvatar";
 
 const ListNotificationFeed = () => {
   const [notifications, setNotifications] = useState([]);
@@ -48,12 +40,7 @@ const ListNotificationFeed = () => {
               className="flex items-center gap-4 rounded-2xl p-4"
               style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,113,133,0.14))" }}
             >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-                style={{ background: avatarColor(fromName) }}
-              >
-                {fromName[0]?.toUpperCase()}
-              </div>
+              <UserAvatar user={n.from} className="w-10 h-10 rounded-full font-bold flex-shrink-0" />
 
               <div className="flex-1 min-w-0">
                 <Link to={`/lists/${list?._id}`} className="font-bold text-gray-800 hover:text-purple-700 transition-colors block truncate">
