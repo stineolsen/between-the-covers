@@ -239,6 +239,7 @@ exports.runAbsSync = async (req, res) => {
     let unmatched = 0;
     let alreadyLinked = 0;
     const ops = [];
+    const unmatchedItems = [];
 
     for (const a of absBooks) {
       let target = null;
@@ -280,6 +281,12 @@ exports.runAbsSync = async (req, res) => {
 
       if (!target) {
         unmatched++;
+        unmatchedItems.push({
+          title: a.title,
+          author: a.author,
+          absId: a.absId,
+          audiobookUrl: a.audiobookUrl,
+        });
         continue;
       }
 
@@ -324,6 +331,7 @@ exports.runAbsSync = async (req, res) => {
       unmatched,
       alreadyLinked,
       updated,
+      unmatchedItems,
     });
   } catch (error) {
     console.error("ABS sync error:", error);

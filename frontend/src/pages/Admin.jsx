@@ -34,6 +34,7 @@ const Admin = () => {
   const [calibreImportResult, setCalibreImportResult] = useState(null);
   const [runningAbsSync, setRunningAbsSync] = useState(false);
   const [absSyncResult, setAbsSyncResult] = useState(null);
+  const [showUnmatchedAbs, setShowUnmatchedAbs] = useState(false);
   const [runningAbsListeningSync, setRunningAbsListeningSync] = useState(false);
   const [absListeningSyncResult, setAbsListeningSyncResult] = useState(null);
   const [absUsernameInputs, setAbsUsernameInputs] = useState({});
@@ -115,6 +116,7 @@ const Admin = () => {
   const handleRunAbsSync = async () => {
     setRunningAbsSync(true);
     setAbsSyncResult(null);
+    setShowUnmatchedAbs(false);
     try {
       const data = await importApi.runAbsSync();
       setAbsSyncResult(data);
@@ -1286,6 +1288,37 @@ const Admin = () => {
                   {absSyncResult.matchedExact} eksakt, {absSyncResult.matchedFuzzy} fuzzy),{" "}
                   {absSyncResult.unmatched} uten treff, {absSyncResult.alreadyLinked} hadde
                   allerede lenke.
+                  {absSyncResult.unmatchedItems?.length > 0 && (
+                    <>
+                      <button
+                        onClick={() => setShowUnmatchedAbs((v) => !v)}
+                        className="block mt-2 font-bold underline hover:no-underline"
+                      >
+                        {showUnmatchedAbs ? "Skjul" : "Vis"} bøker uten treff (
+                        {absSyncResult.unmatchedItems.length})
+                      </button>
+                      {showUnmatchedAbs && (
+                        <ul className="mt-3 space-y-1.5 max-h-96 overflow-y-auto pr-1">
+                          {absSyncResult.unmatchedItems.map((item, i) => (
+                            <li key={item.absId || i} className="p-2 rounded-lg bg-white/60">
+                              <span className="font-semibold">{item.title}</span>
+                              {item.author && <span className="text-green-700"> — {item.author}</span>}
+                              {item.audiobookUrl && (
+                                <a
+                                  href={item.audiobookUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-2 underline"
+                                >
+                                  Se i Audiobookshelf ↗
+                                </a>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  )}
                 </div>
               )}
             </div>
