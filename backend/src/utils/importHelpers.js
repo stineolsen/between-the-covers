@@ -209,6 +209,34 @@ async function fetchAllAbsItems(baseUrl, token, libraryId) {
   return data.results || data.items || [];
 }
 
+async function fetchAbsUsers(baseUrl, token) {
+  const data = await absGet(baseUrl, token, "/api/users");
+  return data.users || [];
+}
+
+// Sums the timeListening (seconds) of every session ABS has recorded for
+// this user, paging through /listening-sessions until exhausted.
+async function fetchAbsListeningSeconds(baseUrl, token, absUserId) {
+  let page = 0;
+  let numPages = 1;
+  let totalSeconds = 0;
+
+  do {
+    const data = await absGet(
+      baseUrl,
+      token,
+      `/api/users/${absUserId}/listening-sessions?page=${page}&itemsPerPage=100`,
+    );
+    for (const session of data.sessions || []) {
+      totalSeconds += session.timeListening || 0;
+    }
+    numPages = data.numPages || 1;
+    page++;
+  } while (page < numPages);
+
+  return Math.round(totalSeconds);
+}
+
 // ABS metadata shapes vary by version, so pull title/author/isbn as best-effort
 function mapAbsItem(item, publicItemBase) {
   const media = item.media || item;
@@ -249,4 +277,6 @@ module.exports = {
   resolveAbsLibraryId,
   fetchAllAbsItems,
   mapAbsItem,
+  fetchAbsUsers,
+  fetchAbsListeningSeconds,
 };

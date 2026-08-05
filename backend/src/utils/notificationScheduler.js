@@ -1,5 +1,6 @@
 const cron = require("node-cron");
 const { sendDigestsFor, sendPendingRequestNotifications, checkForImmediateUpdates } = require("./emailService");
+const { syncAbsListeningStats } = require("./absListeningSync");
 
 const TIMEZONE = "Europe/Oslo";
 
@@ -36,9 +37,12 @@ function startNotificationScheduler() {
   cron.schedule("*/10 * * * *", runSafely("immediate updates check", checkForImmediateUpdates), {
     timezone: TIMEZONE,
   });
+  cron.schedule("0 3 * * *", runSafely("abs listening stats sync", syncAbsListeningStats), {
+    timezone: TIMEZONE,
+  });
 
   console.log(
-    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, Europe/Oslo)",
+    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, Europe/Oslo)",
   );
 }
 

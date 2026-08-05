@@ -50,6 +50,12 @@ export const usersApi = {
     return response.data;
   },
 
+  // Admin: link (or clear, pass "") a member's Audiobookshelf username
+  setAbsUsername: async (userId, absUsername) => {
+    const response = await api.put(`/api/users/${userId}/abs-username`, { absUsername });
+    return response.data;
+  },
+
   // Helper to get avatar URL
   getAvatarUrl: (avatarPath) => {
     if (!avatarPath) return null;

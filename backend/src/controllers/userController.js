@@ -8,9 +8,34 @@ const fs = require("fs");
 exports.getMembers = async (req, res, next) => {
   try {
     const members = await User.find({ status: 'approved' })
-      .select('_id displayName username avatar')
+      .select('_id displayName username avatar email absUsername absTotalListeningSeconds absLastSyncedAt')
       .sort({ displayName: 1 });
     res.status(200).json({ success: true, members });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Admin: link (or clear) a member's Audiobookshelf username for listening-stat sync
+// @route   PUT /api/users/:userId/abs-username
+// @access  Private (admin only)
+exports.setAbsUsername = async (req, res, next) => {
+  try {
+    const { absUsername } = req.body;
+
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Changing (or clearing) the mapping invalidates whatever stats we'd
+    // previously synced under the old mapping, so reset until the next sync.
+    user.absUsername = absUsername?.trim() || null;
+    user.absTotalListeningSeconds = 0;
+    user.absLastSyncedAt = null;
+    await user.save();
+
+    res.status(200).json({ success: true, user });
   } catch (error) {
     next(error);
   }
@@ -251,7 +276,7 @@ exports.getPublicProfile = async (req, res, next) => {
     if (user.role === 'admin') tags.push('admin');
     if (user.status === 'approved') tags.push('godkjent');
 
-    const [readCount, reviewCount, topReaders, topReviewers] = await Promise.all([
+    const [readCount, reviewCount, topReaders, topReviewers, topListeners] = await Promise.all([
       UserBook.countDocuments({ user: user._id, status: 'read' }),
       Review.countDocuments({ user: user._id }),
       UserBook.aggregate([
@@ -265,11 +290,16 @@ exports.getPublicProfile = async (req, res, next) => {
         { $sort: { count: -1 } },
         { $limit: 2 },
       ]),
+      User.find({ absTotalListeningSeconds: { $gt: 0 } })
+        .sort({ absTotalListeningSeconds: -1 })
+        .limit(2)
+        .select('_id'),
     ]);
 
     const userId = user._id.toString();
     if (topReaders.some((r) => r._id.toString() === userId)) tags.push('top-leser');
     if (topReviewers.some((r) => r._id.toString() === userId)) tags.push('top-anmelder');
+    if (topListeners.some((r) => r._id.toString() === userId)) tags.push('topp-lytter');
 
     // Owned books (bookshelf) — book auto-populated by UserBook pre-find middleware
     const bookshelf = await UserBook.find({ user: user._id, owned: true }).sort({ updatedAt: -1 }).lean();

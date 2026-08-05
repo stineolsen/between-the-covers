@@ -9,6 +9,7 @@ const TAG_CONFIG = {
   admin:          { label: 'Admin',          bg: 'linear-gradient(135deg, #f093fb, #f5576c)' },
   'top-leser':    { label: 'Topp leser',      bg: 'linear-gradient(135deg, #667eea, #764ba2)' },
   'top-anmelder': { label: 'Topp anmelder',   bg: 'linear-gradient(135deg, #f59e0b, #d97706)' },
+  'topp-lytter':  { label: 'Topp lytter',     bg: 'linear-gradient(135deg, #0891b2, #22d3ee)' },
 };
 
 const PublicProfile = () => {

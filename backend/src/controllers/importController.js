@@ -12,6 +12,7 @@ const {
   fetchAllAbsItems,
   mapAbsItem,
 } = require("../utils/importHelpers");
+const { syncAbsListeningStats } = require("../utils/absListeningSync");
 
 const CALIBRE_SINCE_KEY = "calibreImportSince";
 const MAX_OPDS_PAGES = 200;
@@ -327,5 +328,18 @@ exports.runAbsSync = async (req, res) => {
   } catch (error) {
     console.error("ABS sync error:", error);
     res.status(500).json({ success: false, message: "Failed to run Audiobookshelf sync" });
+  }
+};
+
+// @desc    Admin: refresh members' Audiobookshelf listening-time totals (for the "Topp lytter" badge)
+// @route   POST /api/admin/import/abs-listening/run
+// @access  Private (admin only)
+exports.runAbsListeningSync = async (req, res) => {
+  try {
+    const result = await syncAbsListeningStats();
+    res.status(200).json({ success: true, ...result });
+  } catch (error) {
+    console.error("ABS listening stats sync error:", error);
+    res.status(500).json({ success: false, message: error.message || "Failed to sync listening stats" });
   }
 };

@@ -24,6 +24,12 @@ export const importApi = {
     const response = await api.post("/api/admin/import/abs/run");
     return response.data;
   },
+
+  // Refresh members' Audiobookshelf listening-time totals (Topp lytter badge)
+  runAbsListeningSync: async () => {
+    const response = await api.post("/api/admin/import/abs-listening/run");
+    return response.data;
+  },
 };
 
 export default importApi;

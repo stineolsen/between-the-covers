@@ -34,6 +34,10 @@ const Admin = () => {
   const [calibreImportResult, setCalibreImportResult] = useState(null);
   const [runningAbsSync, setRunningAbsSync] = useState(false);
   const [absSyncResult, setAbsSyncResult] = useState(null);
+  const [runningAbsListeningSync, setRunningAbsListeningSync] = useState(false);
+  const [absListeningSyncResult, setAbsListeningSyncResult] = useState(null);
+  const [absUsernameInputs, setAbsUsernameInputs] = useState({});
+  const [savingAbsUsername, setSavingAbsUsername] = useState(null);
   const [alertSubject, setAlertSubject] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [sendingAlert, setSendingAlert] = useState(false);
@@ -121,6 +125,40 @@ const Admin = () => {
       console.error(err);
     } finally {
       setRunningAbsSync(false);
+    }
+  };
+
+  const handleRunAbsListeningSync = async () => {
+    setRunningAbsListeningSync(true);
+    setAbsListeningSyncResult(null);
+    try {
+      const data = await importApi.runAbsListeningSync();
+      setAbsListeningSyncResult(data);
+      setSuccessMessage("Lyttestatistikk oppdatert!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+      const membersData = await usersApi.getMembers();
+      setAllMembers(membersData.members || []);
+    } catch (err) {
+      setError(err.response?.data?.message || "Klarte ikke oppdatere lyttestatistikk");
+      console.error(err);
+    } finally {
+      setRunningAbsListeningSync(false);
+    }
+  };
+
+  const handleSaveAbsUsername = async (memberId) => {
+    setSavingAbsUsername(memberId);
+    try {
+      const value = absUsernameInputs[memberId] ?? "";
+      const data = await usersApi.setAbsUsername(memberId, value);
+      setAllMembers((prev) => prev.map((m) => (m._id === memberId ? data.user : m)));
+      setSuccessMessage("Audiobookshelf-brukernavn lagret!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Klarte ikke lagre brukernavn");
+      console.error(err);
+    } finally {
+      setSavingAbsUsername(null);
     }
   };
 
@@ -953,6 +991,34 @@ const Admin = () => {
                         🔑 Tilbakestill passord
                       </button>
                     </div>
+
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                      <span className="text-sm text-gray-500 flex-shrink-0">🎧 Audiobookshelf:</span>
+                      <input
+                        type="text"
+                        placeholder="ABS-brukernavn"
+                        value={absUsernameInputs[member._id] ?? member.absUsername ?? ""}
+                        onChange={(e) =>
+                          setAbsUsernameInputs((prev) => ({ ...prev, [member._id]: e.target.value }))
+                        }
+                        className="input-field py-1.5 text-sm flex-1 max-w-[200px]"
+                      />
+                      <button
+                        onClick={() => handleSaveAbsUsername(member._id)}
+                        disabled={savingAbsUsername === member._id}
+                        className="text-xs font-bold px-4 py-1.5 rounded-full text-white disabled:opacity-50"
+                        style={{ background: "var(--color-primary)" }}
+                      >
+                        {savingAbsUsername === member._id ? "..." : "Lagre"}
+                      </button>
+                      {member.absUsername && (
+                        <span className="text-xs text-gray-400 flex-shrink-0">
+                          {member.absTotalListeningSeconds > 0
+                            ? `${(member.absTotalListeningSeconds / 3600).toFixed(1)} t lyttet`
+                            : "Ikke synkronisert ennå"}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1220,6 +1286,31 @@ const Admin = () => {
                   {absSyncResult.matchedExact} eksakt, {absSyncResult.matchedFuzzy} fuzzy),{" "}
                   {absSyncResult.unmatched} uten treff, {absSyncResult.alreadyLinked} hadde
                   allerede lenke.
+                </div>
+              )}
+            </div>
+
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">
+                🎧 Lyttestatistikk (Topp lytter-merket)
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Henter total lyttetid fra Audiobookshelf for medlemmer som har fått koblet et
+                Audiobookshelf-brukernavn (under "Passord"-fanen). Kjøres automatisk hver natt kl. 03:00,
+                men kan også kjøres manuelt her. De to som har lyttet mest får "Topp lytter"-merket på profilen sin.
+              </p>
+              <button
+                onClick={handleRunAbsListeningSync}
+                disabled={runningAbsListeningSync}
+                className="btn-primary px-6 py-3 disabled:opacity-50"
+              >
+                {runningAbsListeningSync ? "Synkroniserer..." : "✨ Oppdater lyttestatistikk"}
+              </button>
+              {absListeningSyncResult && (
+                <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                  Sjekket {absListeningSyncResult.checked} koblede medlemmer —{" "}
+                  {absListeningSyncResult.matched} oppdatert, {absListeningSyncResult.unmatched} uten
+                  treff i Audiobookshelf.
                 </div>
               )}
             </div>

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
+const { protect, authorize } = require("../middleware/authMiddleware");
 const { uploadSingle } = require("../middleware/uploadMiddleware");
 const {
   getMembers,
@@ -10,6 +10,7 @@ const {
   selectDefaultAvatar,
   deleteAvatar,
   getPublicProfile,
+  setAbsUsername,
 } = require("../controllers/userController");
 
 // Members list (for recommendation recipient selection)
@@ -26,5 +27,8 @@ router.delete("/avatar", protect, deleteAvatar);
 
 // Public profile route
 router.get("/:userId/profile", protect, getPublicProfile);
+
+// Admin: link a member's Audiobookshelf username
+router.put("/:userId/abs-username", protect, authorize("admin"), setAbsUsername);
 
 module.exports = router;

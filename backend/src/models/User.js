@@ -103,6 +103,21 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Admin-set link to this member's Audiobookshelf account, used to pull
+    // listening stats for the "Topp lytter" badge (see absListeningSync.js)
+    absUsername: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    absTotalListeningSeconds: {
+      type: Number,
+      default: 0,
+    },
+    absLastSyncedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
