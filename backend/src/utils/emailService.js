@@ -3,6 +3,8 @@ const User = require("../models/User");
 const Book = require("../models/Book");
 const BookRequest = require("../models/BookRequest");
 const Setting = require("../models/Setting");
+const PushSubscription = require("../models/PushSubscription");
+const { sendPushToUser } = require("./pushService");
 
 const REQUEST_NOTIFY_DELAY_MS = 5 * 60 * 1000;
 const IMMEDIATE_CHECK_KEY = "lastImmediateCheckAt";
@@ -156,6 +158,25 @@ async function notifyUpdates({ newBooks = [], newAudiobooks = [] } = {}) {
     }
   } catch (error) {
     console.error("notifyUpdates failed:", error);
+  }
+
+  // Push notifications are opt-in via having a subscription at all (see
+  // pushService.js), independent of the email notificationFrequency setting
+  // above - so this queries subscribers directly rather than reusing `recipients`.
+  try {
+    const subscriberIds = await PushSubscription.distinct("user");
+    const body =
+      newBooks.length > 0 && newAudiobooks.length > 0
+        ? `${newBooks.length} nye bøker, ${newAudiobooks.length} nye lydbøker`
+        : newAudiobooks.length > 0
+          ? `${newAudiobooks.length} ${newAudiobooks.length === 1 ? "ny lydbok" : "nye lydbøker"}`
+          : `${newBooks.length} ${newBooks.length === 1 ? "ny bok" : "nye bøker"}`;
+
+    for (const userId of subscriberIds) {
+      await sendPushToUser(userId, { title: buildHeading(newBooks, newAudiobooks), body, url: "/books" });
+    }
+  } catch (error) {
+    console.error("notifyUpdates push failed:", error);
   }
 }
 
@@ -542,6 +563,22 @@ async function notifyListShared(list, sharedBy, recipientUserIds) {
   } catch (error) {
     console.error("notifyListShared failed:", error);
   }
+
+  // Independent of the email try block above (and its notifyOnListShared /
+  // Resend-configured gating) - push opts in purely via having a subscription.
+  try {
+    const sharedByName = sharedBy.displayName || sharedBy.username;
+    const subscriberIds = await PushSubscription.distinct("user", { user: { $in: recipientUserIds } });
+    for (const userId of subscriberIds) {
+      await sendPushToUser(userId, {
+        title: `${sharedByName} delte en liste med deg! 📋`,
+        body: list.title,
+        url: `/lists/${list._id}`,
+      });
+    }
+  } catch (error) {
+    console.error("notifyListShared push failed:", error);
+  }
 }
 
 function buildListCommentHtml(list, comment, commenter) {
@@ -605,6 +642,23 @@ async function notifyListComment(list, comment, commenter, recipientUserIds) {
     }
   } catch (error) {
     console.error("notifyListComment failed:", error);
+  }
+
+  // Independent of the email try block above, same reasoning as notifyListShared.
+  try {
+    if (!recipientUserIds || recipientUserIds.length === 0) return;
+
+    const commenterName = commenter.displayName || commenter.username;
+    const subscriberIds = await PushSubscription.distinct("user", { user: { $in: recipientUserIds } });
+    for (const userId of subscriberIds) {
+      await sendPushToUser(userId, {
+        title: `Ny kommentar på «${list.title}» 💬`,
+        body: `${commenterName}: ${comment.content}`,
+        url: `/lists/${list._id}`,
+      });
+    }
+  } catch (error) {
+    console.error("notifyListComment push failed:", error);
   }
 }
 

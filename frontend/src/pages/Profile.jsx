@@ -6,11 +6,41 @@ import { usersApi } from "../api/usersApi";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";
 import { booksApi } from "../api/booksApi";
+import {
+  getPushSubscriptionState,
+  subscribeToPush,
+  unsubscribeFromPush,
+} from "../utils/pushNotifications";
 
 const Profile = () => {
   const { user, setUser } = useAuth();
   const toast = useToast();
   const fileInputRef = useRef(null);
+  const [pushState, setPushState] = useState("loading"); // loading | unsupported | unsubscribed | subscribed
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    getPushSubscriptionState().then(setPushState);
+  }, []);
+
+  const handleTogglePush = async () => {
+    setPushBusy(true);
+    try {
+      if (pushState === "subscribed") {
+        await unsubscribeFromPush();
+        setPushState("unsubscribed");
+        toast.success("Push-varsler skrudd av");
+      } else {
+        await subscribeToPush();
+        setPushState("subscribed");
+        toast.success("Push-varsler skrudd på!");
+      }
+    } catch (error) {
+      toast.error(error.message || "Klarte ikke endre push-varsler");
+    } finally {
+      setPushBusy(false);
+    }
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -459,6 +489,37 @@ const Profile = () => {
             </div>
           )}
         </div>
+        {/* Push Notifications Section */}
+        {pushState !== "unsupported" && (
+          <div className="container-gradient mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">🔔 Push-varsler</h3>
+                <p className="text-gray-600 text-sm">
+                  Få varsler direkte på enheten din når nye bøker legges til, noen deler en
+                  liste med deg, eller kommenterer på listene dine.
+                </p>
+              </div>
+              <button
+                onClick={handleTogglePush}
+                disabled={pushState === "loading" || pushBusy}
+                className="flex-shrink-0 px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-white disabled:opacity-50"
+                style={{
+                  background:
+                    pushState === "subscribed"
+                      ? "linear-gradient(135deg, #9ca3af, #6b7280)"
+                      : "linear-gradient(135deg, #6b5b95, #8b6bb5)",
+                }}
+              >
+                {pushBusy
+                  ? "..."
+                  : pushState === "subscribed"
+                    ? "Skru av"
+                    : "🔔 Skru på push-varsler"}
+              </button>
+            </div>
+          </div>
+        )}
         {/* Change Password Section */}
         <div className="container-gradient mt-6">
           <button
