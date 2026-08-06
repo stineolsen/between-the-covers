@@ -315,6 +315,7 @@ exports.runAbsSync = async (req, res) => {
             titleNormalized: 1,
             authorNormalized: 1,
             libraryLinks: 1,
+            absId: 1,
           },
         },
       )
@@ -322,8 +323,10 @@ exports.runAbsSync = async (req, res) => {
 
     const byIsbn = new Map();
     const byNorm = new Map();
+    const byAbsId = new Map();
     for (const b of mongoBooks) {
       if (b.isbn) byIsbn.set(b.isbn, b);
+      if (b.absId) byAbsId.set(b.absId, b);
       const key = `${b.titleNormalized || normalizeTitle(b.title)}::${b.authorNormalized || normalizeAuthor(b.author)}`;
       byNorm.set(key, b);
     }
@@ -337,9 +340,17 @@ exports.runAbsSync = async (req, res) => {
     const unmatchedItems = [];
 
     for (const a of absBooks) {
-      let target = null;
+      // Checked first, ahead of title/author matching: once an item has been
+      // linked - whether by this same auto-match below, or by an admin via
+      // the "Match til bok"/"Ny bok" tools for something that never matches
+      // automatically (e.g. title mismatches) - it must never show up as
+      // unmatched again on a later sync, regardless of what title/author
+      // matching would (or wouldn't) find for it.
+      let target = a.absId && byAbsId.has(a.absId) ? byAbsId.get(a.absId) : null;
 
-      if (a.isbn && byIsbn.has(a.isbn)) {
+      if (target) {
+        // already linked by absId, skip straight to the alreadyLinked check below
+      } else if (a.isbn && byIsbn.has(a.isbn)) {
         target = byIsbn.get(a.isbn);
         matchedIsbn++;
       } else {
