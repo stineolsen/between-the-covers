@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Setting = require("../models/Setting");
+const Book = require("../models/Book");
 const {
   normalizeTitle,
   normalizeAuthor,
@@ -17,11 +18,14 @@ const { syncAbsListeningStats } = require("../utils/absListeningSync");
 const CALIBRE_SINCE_KEY = "calibreImportSince";
 const MAX_OPDS_PAGES = 200;
 
-function buildCalibreBookOp(parsed, calibreWebBookBase, adminUserId) {
-  const titleNormalized = normalizeTitle(parsed.title);
-  const authorNormalized = normalizeAuthor(parsed.author);
-
-  const doc = {
+// Shared metadata fields for both the insert and update paths below.
+// libraryLinks.ebook is deliberately NOT included here - it's set separately
+// via dot notation in each op, since a plain `libraryLinks: {...}` in $set
+// replaces the whole subdocument and would silently wipe out any existing
+// libraryLinks.audiobook (e.g. one set by the Audiobookshelf sync, or the
+// admin "match"/"add as new book" flow for an unmatched audiobook).
+function calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized) {
+  return {
     title: parsed.title,
     author: parsed.author,
     description: parsed.description,
@@ -32,33 +36,53 @@ function buildCalibreBookOp(parsed, calibreWebBookBase, adminUserId) {
     publisher: parsed.publisher,
     language: normalizeLanguageForAtlas(parsed.languageCode),
     languageCode: parsed.languageCode,
-    libraryLinks: {
-      ebook: parsed.calibreId ? `${calibreWebBookBase}${parsed.calibreId}` : null,
-    },
     lastModified: parsed.updatedAt,
     calibreId: parsed.calibreId,
-    calibreDownloadLink: null,
     addedBy: adminUserId,
     titleNormalized,
     authorNormalized,
   };
+}
 
+// A book already exists that matches this OPDS entry (by exact or fuzzy
+// title/author match against the current catalog) - update it in place
+// rather than inserting a duplicate.
+function buildCalibreBookUpdateOp(parsed, calibreWebBookBase, adminUserId, targetId, titleNormalized, authorNormalized) {
   return {
     updateOne: {
-      filter: { titleNormalized, authorNormalized },
+      filter: { _id: targetId },
       update: {
-        $setOnInsert: {
-          averageRating: 0,
-          reviewCount: 0,
-          dateAdded: new Date(),
-          createdAt: new Date(),
-        },
         $set: {
-          ...doc,
+          ...calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized),
+          "libraryLinks.ebook": parsed.calibreId ? `${calibreWebBookBase}${parsed.calibreId}` : null,
           updatedAt: new Date(),
         },
       },
-      upsert: true,
+    },
+  };
+}
+
+// No existing book matched - insert a new one. Caller supplies `_id` so it
+// can immediately register this book in its in-memory matching maps, in
+// case a later OPDS entry in the same import run normalizes to the same
+// title+author (see runCalibreImport).
+function buildCalibreBookInsertOp(id, parsed, calibreWebBookBase, adminUserId, titleNormalized, authorNormalized) {
+  return {
+    insertOne: {
+      document: {
+        _id: id,
+        ...calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized),
+        libraryLinks: {
+          ebook: parsed.calibreId ? `${calibreWebBookBase}${parsed.calibreId}` : null,
+          audiobook: null,
+        },
+        calibreDownloadLink: null,
+        averageRating: 0,
+        reviewCount: 0,
+        dateAdded: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     },
   };
 }
@@ -119,7 +143,7 @@ exports.runCalibreImport = async (req, res) => {
     let scanned = 0;
     let skipped = 0;
     let reachedCutoff = false;
-    const ops = [];
+    const parsedEntries = [];
 
     while (url && pageCount < MAX_OPDS_PAGES) {
       const xml = await fetchOpdsXml(url, CALIBRE_WEB_USERNAME, CALIBRE_WEB_PASSWORD);
@@ -140,7 +164,7 @@ exports.runCalibreImport = async (req, res) => {
           continue;
         }
 
-        ops.push(buildCalibreBookOp(parsed, calibreWebBookBase, req.user._id));
+        parsedEntries.push(parsed);
       }
 
       pageCount++;
@@ -148,12 +172,81 @@ exports.runCalibreImport = async (req, res) => {
       url = getOpdsNextPageUrl(xml, CALIBRE_WEB_BASE_URL);
     }
 
+    // Match each entry against the existing catalog the same way runAbsSync
+    // does (exact normalized title+author, then fuzzy title with tolerant
+    // author matching) so re-importing a book that already exists - e.g. one
+    // added via the Audiobookshelf "unmatched" admin flow - updates it in
+    // place instead of creating a duplicate.
+    const booksCollection = mongoose.connection.db.collection("books");
+    const mongoBooks = await booksCollection
+      .find({}, { projection: { _id: 1, title: 1, author: 1, titleNormalized: 1, authorNormalized: 1 } })
+      .toArray();
+    const byNorm = new Map();
+    for (const b of mongoBooks) {
+      const key = `${b.titleNormalized || normalizeTitle(b.title)}::${b.authorNormalized || normalizeAuthor(b.author)}`;
+      byNorm.set(key, b);
+    }
+
+    let matchedExact = 0;
+    let matchedFuzzy = 0;
+    const ops = [];
+
+    for (const parsed of parsedEntries) {
+      const titleNormalized = normalizeTitle(parsed.title);
+      const authorNormalized = normalizeAuthor(parsed.author);
+      const key = `${titleNormalized}::${authorNormalized}`;
+
+      let target = byNorm.get(key) || null;
+      if (target) {
+        matchedExact++;
+      } else {
+        let best = null;
+        let bestScore = 0;
+        for (const m of mongoBooks) {
+          const mAuthorNormalized = m.authorNormalized || normalizeAuthor(m.author);
+          const authorOk =
+            !authorNormalized ||
+            !mAuthorNormalized ||
+            mAuthorNormalized === authorNormalized ||
+            mAuthorNormalized.includes(authorNormalized) ||
+            authorNormalized.includes(mAuthorNormalized);
+
+          if (!authorOk) continue;
+
+          const score = titleSimilarity(parsed.title, m.title);
+          if (score > bestScore) {
+            bestScore = score;
+            best = m;
+          }
+        }
+        if (best && bestScore >= 0.9) {
+          target = best;
+          matchedFuzzy++;
+        }
+      }
+
+      if (target) {
+        ops.push(buildCalibreBookUpdateOp(parsed, calibreWebBookBase, req.user._id, target._id, titleNormalized, authorNormalized));
+      } else {
+        const id = new mongoose.Types.ObjectId();
+        ops.push(buildCalibreBookInsertOp(id, parsed, calibreWebBookBase, req.user._id, titleNormalized, authorNormalized));
+        // Register immediately so a later entry in this same run that
+        // normalizes to the same key updates this one instead of also
+        // inserting - bulkWrite ops don't see each other's effects.
+        const stub = { _id: id, title: parsed.title, author: parsed.author, titleNormalized, authorNormalized };
+        byNorm.set(key, stub);
+        mongoBooks.push(stub);
+      }
+    }
+
     let inserted = 0;
     let modified = 0;
     if (ops.length) {
-      const booksCollection = mongoose.connection.db.collection("books");
-      const result = await booksCollection.bulkWrite(ops, { ordered: false });
-      inserted = result.upsertedCount;
+      // Ordered, unlike the other bulkWrites in this file - a later op may
+      // reference the _id of an earlier insertOne in the same batch (see
+      // above), so they must run in sequence for that to resolve correctly.
+      const result = await booksCollection.bulkWrite(ops, { ordered: true });
+      inserted = result.insertedCount;
       modified = result.modifiedCount;
     }
 
@@ -169,6 +262,8 @@ exports.runCalibreImport = async (req, res) => {
       skipped,
       inserted,
       modified,
+      matchedExact,
+      matchedFuzzy,
       since: since ? since.toISOString() : null,
       calibreImportSince: runStartedAt.toISOString(),
     });
@@ -349,5 +444,34 @@ exports.runAbsListeningSync = async (req, res) => {
   } catch (error) {
     console.error("ABS listening stats sync error:", error);
     res.status(500).json({ success: false, message: error.message || "Failed to sync listening stats" });
+  }
+};
+
+// @desc    Admin: manually link an unmatched Audiobookshelf item to a library book
+//          (an admin-driven equivalent of what runAbsSync's automatic matching does)
+// @route   POST /api/admin/import/abs/match
+// @access  Private (admin only)
+exports.matchAbsItem = async (req, res) => {
+  try {
+    const { bookId, absId, audiobookUrl } = req.body;
+    if (!bookId || !audiobookUrl) {
+      return res.status(400).json({ success: false, message: "Mangler bookId eller audiobookUrl" });
+    }
+
+    const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ success: false, message: "Fant ikke boken" });
+    }
+
+    book.libraryLinks = book.libraryLinks || {};
+    book.libraryLinks.audiobook = audiobookUrl;
+    if (absId) book.absId = absId;
+    book.absUpdatedAt = new Date();
+    await book.save();
+
+    res.status(200).json({ success: true, message: "Lydbok koblet til", book });
+  } catch (error) {
+    console.error("Match ABS item error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke koble til lydbok" });
   }
 };

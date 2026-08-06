@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 
@@ -11,10 +11,10 @@ const cleanSubjects = (subjects = []) =>
     .filter((s) => !GENRE_BLOCKLIST.some((b) => s.toLowerCase().includes(b)))
     .slice(0, 6);
 
-const AddBookModal = ({ onClose, onCreated }) => {
+const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState("search"); // "search" | "confirm"
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
@@ -44,6 +44,11 @@ const AddBookModal = ({ onClose, onCreated }) => {
       setSearching(false);
     }
   };
+
+  useEffect(() => {
+    if (initialQuery.trim()) searchOpenLibrary(initialQuery);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleQueryChange = (e) => {
     const val = e.target.value;

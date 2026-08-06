@@ -5,6 +5,7 @@ const {
   runCalibreImport,
   runAbsSync,
   runAbsListeningSync,
+  matchAbsItem,
 } = require("../controllers/importController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -17,5 +18,6 @@ router.post("/calibre/since", setCalibreImportSince);
 router.post("/calibre/run", runCalibreImport);
 router.post("/abs/run", runAbsSync);
 router.post("/abs-listening/run", runAbsListeningSync);
+router.post("/abs/match", matchAbsItem);
 
 module.exports = router;

@@ -6,7 +6,7 @@ const Setting = require("../models/Setting");
 const PushSubscription = require("../models/PushSubscription");
 const { sendPushToUser } = require("./pushService");
 
-const REQUEST_NOTIFY_DELAY_MS = 5 * 60 * 1000;
+const REQUEST_NOTIFY_DELAY_MS = 10 * 60 * 1000;
 const IMMEDIATE_CHECK_KEY = "lastImmediateCheckAt";
 
 function getClient() {
@@ -572,7 +572,7 @@ async function notifyListShared(list, sharedBy, recipientUserIds) {
     for (const userId of subscriberIds) {
       await sendPushToUser(userId, {
         title: `${sharedByName} delte en liste med deg! 📋`,
-        body: list.title,
+        body: `Liste: ${list.title}`,
         url: `/lists/${list._id}`,
       });
     }

@@ -30,6 +30,12 @@ export const importApi = {
     const response = await api.post("/api/admin/import/abs-listening/run");
     return response.data;
   },
+
+  // Manually link an unmatched Audiobookshelf item to an existing library book
+  matchAbsItem: async ({ bookId, absId, audiobookUrl }) => {
+    const response = await api.post("/api/admin/import/abs/match", { bookId, absId, audiobookUrl });
+    return response.data;
+  },
 };
 
 export default importApi;

@@ -8,6 +8,8 @@ import { importApi } from "../api/importApi";
 import { notificationApi } from "../api/notificationApi";
 import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
+import AddBookModal from "../components/books/AddBookModal";
+import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -35,6 +37,9 @@ const Admin = () => {
   const [runningAbsSync, setRunningAbsSync] = useState(false);
   const [absSyncResult, setAbsSyncResult] = useState(null);
   const [showUnmatchedAbs, setShowUnmatchedAbs] = useState(false);
+  const [matchingAbsItem, setMatchingAbsItem] = useState(null);
+  const [addingAbsItem, setAddingAbsItem] = useState(null);
+  const [linkingNewBook, setLinkingNewBook] = useState(false);
   const [runningAbsListeningSync, setRunningAbsListeningSync] = useState(false);
   const [absListeningSyncResult, setAbsListeningSyncResult] = useState(null);
   const [absUsernameInputs, setAbsUsernameInputs] = useState({});
@@ -161,6 +166,40 @@ const Admin = () => {
       console.error(err);
     } finally {
       setSavingAbsUsername(null);
+    }
+  };
+
+  // Removes a resolved (matched or newly-created-and-linked) item from the
+  // unmatched list shown after an ABS sync, without needing to re-run it.
+  const handleAbsItemResolved = (absId) => {
+    setAbsSyncResult((prev) =>
+      prev
+        ? {
+            ...prev,
+            unmatched: Math.max(0, prev.unmatched - 1),
+            unmatchedItems: prev.unmatchedItems.filter((i) => i.absId !== absId),
+          }
+        : prev,
+    );
+  };
+
+  const handleNewBookCreated = async (book) => {
+    if (!addingAbsItem) return;
+    setLinkingNewBook(true);
+    try {
+      await importApi.matchAbsItem({
+        bookId: book._id,
+        absId: addingAbsItem.absId,
+        audiobookUrl: addingAbsItem.audiobookUrl,
+      });
+      handleAbsItemResolved(addingAbsItem.absId);
+      setSuccessMessage("Bok lagt til og koblet til lydboken!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Boken ble lagt til, men klarte ikke koble lydboklenken");
+    } finally {
+      setLinkingNewBook(false);
+      setAddingAbsItem(null);
     }
   };
 
@@ -1259,6 +1298,8 @@ const Admin = () => {
                 <div className="p-4 rounded-xl bg-green-50 text-green-800 text-sm">
                   Sett gjennom {calibreImportResult.scanned} bøker —{" "}
                   {calibreImportResult.inserted} nye, {calibreImportResult.modified} oppdatert
+                  {(calibreImportResult.matchedExact > 0 || calibreImportResult.matchedFuzzy > 0) &&
+                    ` (${calibreImportResult.matchedExact || 0} eksakt, ${calibreImportResult.matchedFuzzy || 0} fuzzy)`}
                   {calibreImportResult.skipped > 0 &&
                     `, ${calibreImportResult.skipped} hoppet over`}
                   .
@@ -1300,19 +1341,40 @@ const Admin = () => {
                       {showUnmatchedAbs && (
                         <ul className="mt-3 space-y-1.5 max-h-96 overflow-y-auto pr-1">
                           {absSyncResult.unmatchedItems.map((item, i) => (
-                            <li key={item.absId || i} className="p-2 rounded-lg bg-white/60">
-                              <span className="font-semibold">{item.title}</span>
-                              {item.author && <span className="text-green-700"> — {item.author}</span>}
-                              {item.audiobookUrl && (
-                                <a
-                                  href={item.audiobookUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="ml-2 underline"
+                            <li
+                              key={item.absId || i}
+                              className="p-2 rounded-lg bg-white/60 flex items-center justify-between gap-3 flex-wrap"
+                            >
+                              <div>
+                                <span className="font-semibold">{item.title}</span>
+                                {item.author && <span className="text-green-700"> — {item.author}</span>}
+                                {item.audiobookUrl && (
+                                  <a
+                                    href={item.audiobookUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="ml-2 underline"
+                                  >
+                                    Se i Audiobookshelf ↗
+                                  </a>
+                                )}
+                              </div>
+                              <div className="flex gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => setMatchingAbsItem(item)}
+                                  className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                                  style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)" }}
                                 >
-                                  Se i Audiobookshelf ↗
-                                </a>
-                              )}
+                                  🔗 Match til bok
+                                </button>
+                                <button
+                                  onClick={() => setAddingAbsItem(item)}
+                                  className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
+                                  style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
+                                >
+                                  ✨ Ny bok
+                                </button>
+                              </div>
                             </li>
                           ))}
                         </ul>
@@ -1440,6 +1502,22 @@ const Admin = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {matchingAbsItem && (
+        <MatchAbsItemModal
+          item={matchingAbsItem}
+          onClose={() => setMatchingAbsItem(null)}
+          onMatched={() => handleAbsItemResolved(matchingAbsItem.absId)}
+        />
+      )}
+
+      {addingAbsItem && (
+        <AddBookModal
+          initialQuery={`${addingAbsItem.title} ${addingAbsItem.author || ""}`.trim()}
+          onClose={() => !linkingNewBook && setAddingAbsItem(null)}
+          onCreated={handleNewBookCreated}
+        />
       )}
     </div>
   );
