@@ -98,6 +98,20 @@ const bookSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Audiobookshelf library item id this book is linked to - written by both
+    // the automatic sync's bulk raw-driver writes and the admin "match"/"add
+    // as new book" flow (matchAbsItem, via the Mongoose model). Must be a
+    // declared schema field or the latter silently drops it on save().
+    absId: {
+      type: String,
+      default: null,
+      sparse: true,
+    },
+    absUpdatedAt: {
+      type: Date,
+      default: null,
+    },
+
     // Aggregated stats (calculated from reviews)
     averageRating: {
       type: Number,
