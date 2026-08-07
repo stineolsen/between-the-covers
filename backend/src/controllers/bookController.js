@@ -7,7 +7,7 @@ const fs = require("fs");
 // @access  Private
 exports.getBooks = async (req, res, next) => {
   try {
-    const { search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden } = req.query;
+    const { search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden } = req.query;
 
     // Build query
     let query = {};
@@ -30,6 +30,11 @@ exports.getBooks = async (req, res, next) => {
     // Filter by audiobook availability
     if (audiobookOnly === "true") {
       query["libraryLinks.audiobook"] = { $nin: [null, "", undefined] };
+    }
+
+    // Filter by ebook availability
+    if (ebookOnly === "true") {
+      query["libraryLinks.ebook"] = { $nin: [null, "", undefined] };
     }
 
     // Filter by genre

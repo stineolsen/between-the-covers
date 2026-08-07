@@ -23,6 +23,9 @@ const Books = () => {
   const [audiobookOnly, setAudiobookOnly] = useState(
     savedFilters.audiobookOnly || false,
   );
+  const [ebookOnly, setEbookOnly] = useState(
+    savedFilters.ebookOnly || false,
+  );
   const [genre, setGenre] = useState(savedFilters.genre || "");
   const [sort, setSort] = useState(savedFilters.sort || "newest");
   const [readFilter, setReadFilter] = useState(savedFilters.readFilter || "all");
@@ -33,9 +36,9 @@ const Books = () => {
   useEffect(() => {
     sessionStorage.setItem(
       "bookFilters",
-      JSON.stringify({ search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden }),
+      JSON.stringify({ search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden }),
     );
-  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
+  }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
 
   const [userBookMap, setUserBookMap] = useState({});
   const [availableGenres, setAvailableGenres] = useState([]);
@@ -80,7 +83,7 @@ const Books = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [search, bookclubOnly, audiobookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
+  }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
 
   const fetchBooks = async () => {
     try {
@@ -91,6 +94,7 @@ const Books = () => {
       if (search) params.search = search;
       if (bookclubOnly) params.bookclubOnly = "true";
       if (audiobookOnly) params.audiobookOnly = "true";
+      if (ebookOnly) params.ebookOnly = "true";
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
       if (readFilter !== "all") params.readFilter = readFilter;
@@ -203,6 +207,23 @@ const Books = () => {
                 className="text-sm font-bold text-gray-700 cursor-pointer select-none"
               >
                 🎧 Lydbøker
+              </label>
+            </div>
+
+            {/* Ebook Filter */}
+            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
+              <input
+                type="checkbox"
+                id="ebookOnly"
+                checked={ebookOnly}
+                onChange={(e) => setEbookOnly(e.target.checked)}
+                className="w-5 h-5 rounded cursor-pointer"
+              />
+              <label
+                htmlFor="ebookOnly"
+                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
+              >
+                📖 E-bøker
               </label>
             </div>
 
