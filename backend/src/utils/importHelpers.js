@@ -37,33 +37,49 @@ function titleSimilarity(a, b) {
   return maxLen === 0 ? 1 : 1 - dist / maxLen;
 }
 
-// Fix Atlas "language override unsupported: eng" by storing analyzer-friendly names
+// MongoDB's text index reads the "language" field on each document to pick
+// its stemmer, and only accepts a fixed set of English words - anything else
+// (an ISO code like "eng", or a Norwegian word like "norsk") throws
+// "language override unsupported: <value>" on save. This accepts ISO 639
+// codes (from Calibre/OPDS metadata) as well as free-text English or
+// Norwegian language names (from manual entry or the National Library
+// search), and normalizes all of them to the word MongoDB expects. Anything
+// unrecognized maps to "none", which MongoDB accepts as "skip stemming for
+// this document" - safer than passing an arbitrary string through and
+// risking the same save error for a language we didn't anticipate.
 function normalizeLanguageForAtlas(code) {
   if (!code) return null;
   const v = code.toString().trim().toLowerCase();
   const map = {
-    eng: "english",
-    en: "english",
-    nob: "norwegian",
-    nno: "norwegian",
-    nor: "norwegian",
-    no: "norwegian",
-    dan: "danish",
-    da: "danish",
-    swe: "swedish",
-    sv: "swedish",
-    deu: "german",
-    ger: "german",
-    de: "german",
-    fra: "french",
-    fre: "french",
-    fr: "french",
-    spa: "spanish",
-    es: "spanish",
-    ita: "italian",
-    it: "italian",
+    // English - codes, English name, Norwegian name
+    eng: "english", en: "english", english: "english", engelsk: "english",
+    // Norwegian
+    nob: "norwegian", nno: "norwegian", nor: "norwegian", no: "norwegian",
+    norwegian: "norwegian", norsk: "norwegian",
+    // Danish
+    dan: "danish", da: "danish", danish: "danish", dansk: "danish",
+    // Swedish
+    swe: "swedish", sv: "swedish", swedish: "swedish", svensk: "swedish",
+    // German
+    deu: "german", ger: "german", de: "german", german: "german", tysk: "german",
+    // French
+    fra: "french", fre: "french", fr: "french", french: "french", fransk: "french",
+    // Spanish
+    spa: "spanish", es: "spanish", spanish: "spanish", spansk: "spanish",
+    // Italian
+    ita: "italian", it: "italian", italian: "italian", italiensk: "italian",
+    // Dutch
+    nld: "dutch", dut: "dutch", nl: "dutch", dutch: "dutch", nederlandsk: "dutch",
+    // Finnish
+    fin: "finnish", fi: "finnish", finnish: "finnish", finsk: "finnish",
+    // Others MongoDB's text index also supports
+    hun: "hungarian", hu: "hungarian", hungarian: "hungarian", ungarsk: "hungarian",
+    por: "portuguese", pt: "portuguese", portuguese: "portuguese", portugisisk: "portuguese",
+    ron: "romanian", rum: "romanian", ro: "romanian", romanian: "romanian", rumensk: "romanian",
+    rus: "russian", ru: "russian", russian: "russian", russisk: "russian",
+    tur: "turkish", tr: "turkish", turkish: "turkish", tyrkisk: "turkish",
   };
-  return map[v] || v;
+  return map[v] || "none";
 }
 
 // Strips HTML comments down to readable plain text with paragraph breaks.

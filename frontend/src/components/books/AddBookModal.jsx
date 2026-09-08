@@ -11,11 +11,74 @@ const cleanSubjects = (subjects = []) =>
     .filter((s) => !GENRE_BLOCKLIST.some((b) => s.toLowerCase().includes(b)))
     .slice(0, 6);
 
+// Maps a Nasjonalbiblioteket (National Library of Norway) language code to
+// what the rest of the app expects in the free-text "language" field. Uses
+// the same English words the backend normalizes everything to (MongoDB's
+// text index only accepts a fixed set of English language names).
+const NB_LANGUAGE_NAMES = { nob: "Norwegian", nno: "Norwegian", nor: "Norwegian", eng: "English", swe: "Swedish", dan: "Danish" };
+
+// Normalizes an Open Library or Nasjonalbiblioteket search result into the
+// shape the picker/confirm-step below needs, so both sources render and
+// select the same way.
+const normalizeOpenLibraryDoc = (doc) => ({
+  key: `ol-${doc.key}`,
+  title: doc.title || "",
+  author: (doc.author_name || []).join(", "),
+  year: doc.first_publish_year || "",
+  pageCount: doc.number_of_pages_median || "",
+  isbn: (doc.isbn || [])[0] || "",
+  genres: cleanSubjects(doc.subject),
+  language: "English",
+  series: "",
+  coverUrl: OL_COVER(doc.cover_i) || "",
+});
+
+const normalizeNbItem = (item) => {
+  const m = item.metadata || {};
+  const langCode = (m.languages || [])[0]?.code;
+  return {
+    key: `nb-${item.id}`,
+    title: m.title || "",
+    author: (m.creators || []).join(", "),
+    year: parseInt(m.originInfo?.issued, 10) || "",
+    pageCount: m.pageCount || "",
+    isbn: (m.identifiers?.isbn13 || [])[0] || "",
+    genres: [],
+    language: NB_LANGUAGE_NAMES[langCode] || "Norsk",
+    series: (m.series || [])[0] || "",
+    coverUrl: item._links?.thumbnail_medium?.href || "",
+  };
+};
+
+// A single search result row - same layout regardless of which API it came from.
+const ResultRow = ({ doc, onSelect }) => (
+  <button
+    onClick={() => onSelect(doc)}
+    className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-purple-50 transition-colors text-left"
+  >
+    <div className="w-10 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+      {doc.coverUrl ? (
+        <img src={doc.coverUrl} alt={doc.title} className="w-full h-full object-cover" />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">📖</div>
+      )}
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="font-bold text-gray-900 truncate">{doc.title}</p>
+      <p className="text-sm text-gray-500 truncate">
+        {doc.author}
+        {doc.year ? ` · ${doc.year}` : ""}
+      </p>
+    </div>
+  </button>
+);
+
 const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState("search"); // "search" | "confirm"
   const [query, setQuery] = useState(initialQuery);
-  const [results, setResults] = useState([]);
+  const [olResults, setOlResults] = useState([]);
+  const [nbResults, setNbResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const debounceRef = useRef(null);
@@ -29,24 +92,35 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  const searchOpenLibrary = async (q) => {
-    if (!q.trim()) { setResults([]); return; }
+  const fetchOpenLibrary = async (q) => {
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=8&fields=key,title,author_name,first_publish_year,isbn,number_of_pages_median,cover_i,subject,publisher`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return (data.docs || []).map(normalizeOpenLibraryDoc);
+  };
+
+  const fetchNasjonalbiblioteket = async (q) => {
+    const url = `https://api.nb.no/catalog/v1/items?q=${encodeURIComponent(q)}&filter=mediatype:b%C3%B8ker&size=8`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return (data._embedded?.items || []).map(normalizeNbItem);
+  };
+
+  const performSearch = async (q) => {
+    if (!q.trim()) { setOlResults([]); setNbResults([]); return; }
     setSearching(true);
     setSearchError("");
-    try {
-      const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=8&fields=key,title,author_name,first_publish_year,isbn,number_of_pages_median,cover_i,subject,publisher`;
-      const res = await fetch(url);
-      const data = await res.json();
-      setResults(data.docs || []);
-    } catch {
+    const [ol, nb] = await Promise.allSettled([fetchOpenLibrary(q), fetchNasjonalbiblioteket(q)]);
+    setOlResults(ol.status === "fulfilled" ? ol.value : []);
+    setNbResults(nb.status === "fulfilled" ? nb.value : []);
+    if (ol.status === "rejected" && nb.status === "rejected") {
       setSearchError("Greide ikke søke — sjekk internettforbindelsen.");
-    } finally {
-      setSearching(false);
     }
+    setSearching(false);
   };
 
   useEffect(() => {
-    if (initialQuery.trim()) searchOpenLibrary(initialQuery);
+    if (initialQuery.trim()) performSearch(initialQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -54,22 +128,22 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
     const val = e.target.value;
     setQuery(val);
     clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => searchOpenLibrary(val), 400);
+    debounceRef.current = setTimeout(() => performSearch(val), 400);
   };
 
   const handleSelect = (doc) => {
     setForm({
-      title: doc.title || "",
-      author: (doc.author_name || []).join(", "),
+      title: doc.title,
+      author: doc.author,
       description: "",
-      publishedYear: doc.first_publish_year || "",
-      pageCount: doc.number_of_pages_median || "",
-      isbn: (doc.isbn || [])[0] || "",
-      genres: cleanSubjects(doc.subject),
-      language: "English",
-      series: "",
+      publishedYear: doc.year,
+      pageCount: doc.pageCount,
+      isbn: doc.isbn,
+      genres: doc.genres,
+      language: doc.language,
+      series: doc.series,
       seriesNumber: "",
-      coverImageUrl: OL_COVER(doc.cover_i) || "",
+      coverImageUrl: doc.coverUrl,
     });
     setGenreInput("");
     setSubmitError("");
@@ -179,44 +253,31 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                 <p className="text-red-500 text-sm font-semibold">{searchError}</p>
               )}
 
-              {results.length > 0 && (
+              {olResults.length > 0 && (
                 <div className="space-y-2">
-                  {results.map((doc) => (
-                    <button
-                      key={doc.key}
-                      onClick={() => handleSelect(doc)}
-                      className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-purple-50 transition-colors text-left"
-                    >
-                      <div className="w-10 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                        {doc.cover_i ? (
-                          <img
-                            src={OL_COVER(doc.cover_i)}
-                            alt={doc.title}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">📖</div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-900 truncate">{doc.title}</p>
-                        <p className="text-sm text-gray-500 truncate">
-                          {(doc.author_name || []).join(", ")}
-                          {doc.first_publish_year ? ` · ${doc.first_publish_year}` : ""}
-                        </p>
-                      </div>
-                    </button>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">📖 Open Library</p>
+                  {olResults.map((doc) => (
+                    <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
                   ))}
                 </div>
               )}
 
-              {!searching && query && results.length === 0 && !searchError && (
+              {nbResults.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇳🇴 Nasjonalbiblioteket</p>
+                  {nbResults.map((doc) => (
+                    <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
+                  ))}
+                </div>
+              )}
+
+              {!searching && query && olResults.length === 0 && nbResults.length === 0 && !searchError && (
                 <p className="text-center text-gray-500 py-8">Ingen resultater for «{query}»</p>
               )}
 
               {!query && (
                 <p className="text-center text-gray-400 py-12">
-                  Skriv inn en tittel eller forfatter for å søke i Open Library
+                  Skriv inn en tittel eller forfatter for å søke i Open Library og Nasjonalbiblioteket
                 </p>
               )}
             </div>

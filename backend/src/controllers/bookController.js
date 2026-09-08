@@ -1,6 +1,7 @@
 const Book = require("../models/Book");
 const path = require("path");
 const fs = require("fs");
+const { normalizeLanguageForAtlas } = require("../utils/importHelpers");
 
 // @desc    Get all books
 // @route   GET /api/books
@@ -298,7 +299,7 @@ exports.createBook = async (req, res, next) => {
       genres: parsedGenres,
       pageCount,
       publisher,
-      language,
+      language: normalizeLanguageForAtlas(language) || undefined,
       series: series || null,
       seriesNumber: seriesNumber || null,
       bookclubMonth: bookclubMonth || null,
@@ -385,7 +386,7 @@ exports.updateBook = async (req, res, next) => {
     if (publishedYear) book.publishedYear = publishedYear;
     if (pageCount !== undefined) book.pageCount = pageCount;
     if (publisher !== undefined) book.publisher = publisher;
-    if (language) book.language = language;
+    if (language) book.language = normalizeLanguageForAtlas(language);
     if (series !== undefined) book.series = series || null;
     if (seriesNumber !== undefined) book.seriesNumber = seriesNumber || null;
     if (bookclubMonth !== undefined) book.bookclubMonth = bookclubMonth || null;
