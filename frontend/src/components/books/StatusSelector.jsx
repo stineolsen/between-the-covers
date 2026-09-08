@@ -105,6 +105,12 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
         })}
       </div>
 
+      {selectedStatus && (
+        <p className="text-xs text-gray-500 text-center">
+          Klikk på status igjen for å fjerne den
+        </p>
+      )}
+
       {/* Current Status Display */}
       {selectedStatus && (
         <div

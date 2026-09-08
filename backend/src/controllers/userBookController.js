@@ -186,7 +186,7 @@ exports.removeUserBook = async (req, res) => {
       });
     }
 
-    await userBook.remove();
+    await userBook.deleteOne();
 
     res.status(200).json({
       success: true,

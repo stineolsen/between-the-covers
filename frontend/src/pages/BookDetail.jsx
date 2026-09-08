@@ -34,6 +34,7 @@ const BookDetail = () => {
 
   // User book status states
   const [userBookStatus, setUserBookStatus] = useState(null);
+  const [userBookId, setUserBookId] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
 
   // Readers state
@@ -192,13 +193,16 @@ const BookDetail = () => {
       const data = await userBooksApi.getUserBookStatus(id);
       if (data.userBook) {
         setUserBookStatus(data.userBook.status);
+        setUserBookId(data.userBook._id);
         setUserOwned(data.userBook.owned || false);
       } else {
         setUserBookStatus(null);
+        setUserBookId(null);
         setUserOwned(false);
       }
     } catch (err) {
       setUserBookStatus(null);
+      setUserBookId(null);
       setUserOwned(false);
     }
   };
@@ -225,25 +229,28 @@ const BookDetail = () => {
     }
   };
 
-  // Handle status change
+  // Handle status change - clicking the currently active status removes it
   const handleStatusChange = async (status) => {
     try {
-      console.log("Oppdater status til:", status, "for bok:", id);
       setStatusLoading(true);
-      const result = await userBooksApi.setBookStatus(id, status);
-      console.log("Status oppdatert resultat:", result);
-      setUserBookStatus(status);
-
-      // Show success message
-      toast.success("Lese status oppdatert!");
+      if (status === userBookStatus) {
+        await userBooksApi.removeUserBook(userBookId);
+        setUserBookStatus(null);
+        setUserBookId(null);
+        toast.success("Status fjernet!");
+      } else {
+        const result = await userBooksApi.setBookStatus(id, status);
+        setUserBookStatus(status);
+        setUserBookId(result.userBook?._id);
+        toast.success("Lese status oppdatert!");
+      }
     } catch (err) {
       console.error("Status oppdatering error:", err);
-      console.error("Error response:", err.response);
-      console.error("Error data:", err.response?.data);
       toast.error(
         err.response?.data?.message ||
           "Greide ikke oppdatere status. Venligst sjekk logg for detaljer.",
       );
+      throw err;
     } finally {
       setStatusLoading(false);
     }
