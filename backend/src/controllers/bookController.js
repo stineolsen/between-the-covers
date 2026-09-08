@@ -1,4 +1,5 @@
 const Book = require("../models/Book");
+const List = require("../models/List");
 const path = require("path");
 const fs = require("fs");
 const { normalizeLanguageForAtlas } = require("../utils/importHelpers");
@@ -466,6 +467,11 @@ exports.deleteBook = async (req, res, next) => {
     }
 
     await book.deleteOne();
+
+    // Pull this book out of any list it's on - otherwise the list keeps a
+    // dangling reference that crashes rendering (nothing else cleans these
+    // up when a book is deleted).
+    await List.updateMany({ "books.book": book._id }, { $pull: { books: { book: book._id } } });
 
     res.status(200).json({
       success: true,

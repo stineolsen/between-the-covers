@@ -198,7 +198,7 @@ const ListDetail = () => {
       {showAddBookModal && (
         <AddBookToListModal
           listId={list._id}
-          existingBookIds={list.books.map((entry) => entry.book._id)}
+          existingBookIds={list.books.filter((entry) => entry.book).map((entry) => entry.book._id)}
           onClose={() => setShowAddBookModal(false)}
           onAdded={(updatedList) => setList(updatedList)}
         />

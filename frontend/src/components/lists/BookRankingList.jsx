@@ -19,10 +19,15 @@ import BookRankingRow from "./BookRankingRow";
 
 const BookRankingList = ({ listId, books, canEdit, onBooksChange }) => {
   const toast = useToast();
-  const [items, setItems] = useState(books);
+  // A book referenced here can have been deleted elsewhere in the app -
+  // drop any entry whose book no longer exists rather than crashing on
+  // entry.book._id below.
+  const validBooks = (list) => (list || []).filter((entry) => entry.book);
+
+  const [items, setItems] = useState(validBooks(books));
 
   useEffect(() => {
-    setItems(books);
+    setItems(validBooks(books));
   }, [books]);
 
   const sensors = useSensors(
