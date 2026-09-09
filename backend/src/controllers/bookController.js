@@ -145,7 +145,18 @@ exports.getBooks = async (req, res, next) => {
 // @access  Private
 exports.getGenres = async (req, res, next) => {
   try {
+    // Exclude books this user has hidden, same as getBooks' default (no
+    // showHidden=true) scope - otherwise a genre whose books are all hidden
+    // shows a count here but returns zero results when clicked.
+    const UserBook = require('../models/UserBook');
+    const hiddenEntries = await UserBook.aggregate([
+      { $match: { user: req.user._id, hidden: true } },
+      { $project: { book: 1 } },
+    ]);
+    const hiddenBookIds = hiddenEntries.map((e) => e.book);
+
     const genreCounts = await Book.aggregate([
+      ...(hiddenBookIds.length ? [{ $match: { _id: { $nin: hiddenBookIds } } }] : []),
       { $unwind: '$genres' },
       { $match: { genres: { $nin: [null, ''] } } },
       { $group: { _id: '$genres', count: { $sum: 1 } } },
@@ -395,10 +406,15 @@ exports.updateBook = async (req, res, next) => {
     if (calibreDownloadLink !== undefined)
       book.calibreDownloadLink = calibreDownloadLink;
 
-    // Parse and update genres
-    if (genres) {
+    // Parse and update genres - `genres !== undefined` (not just truthy) so
+    // sending an empty string/array to clear all tags is actually persisted
+    // instead of silently ignored.
+    if (genres !== undefined) {
       if (typeof genres === "string") {
-        book.genres = genres.split(",").map((g) => g.trim());
+        book.genres = genres
+          .split(",")
+          .map((g) => g.trim())
+          .filter(Boolean);
       } else {
         book.genres = genres;
       }
