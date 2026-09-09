@@ -34,7 +34,10 @@ function calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNorma
     publishedYear: parsed.publishedYear,
     genres: parsed.genres,
     publisher: parsed.publisher,
-    language: normalizeLanguageForAtlas(parsed.languageCode),
+    // bulkWrite bypasses the Book schema's `language` default ("English"), so
+    // this must never be null - MongoDB's text index reads this field as its
+    // stemmer language and rejects a non-string value with a hard write error.
+    language: normalizeLanguageForAtlas(parsed.languageCode) || "none",
     languageCode: parsed.languageCode,
     lastModified: parsed.updatedAt,
     calibreId: parsed.calibreId,
