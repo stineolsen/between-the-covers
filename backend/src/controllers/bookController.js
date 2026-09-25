@@ -44,31 +44,47 @@ exports.getBooks = async (req, res, next) => {
       query.genres = genre;
     }
 
+    // readFilter is a comma-separated subset of read/unread/dnf - these three
+    // buckets are mutually exclusive and cover every book for a given user
+    // (unread = no status, to-read, or currently-reading), so multi-select
+    // is just an OR across whichever buckets are checked.
+    const selectedBuckets = (readFilter || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => ['read', 'unread', 'dnf'].includes(s));
+
     // Filter by reading status, owned, and/or hidden (uses UserBook model)
-    const needsUserBooks = readFilter === 'read' || readFilter === 'unread' || readFilter === 'dnf' || ownedOnly === 'true' || showHidden !== 'true';
+    const needsUserBooks = selectedBuckets.length > 0 || ownedOnly === 'true' || showHidden !== 'true';
     if (needsUserBooks) {
       const UserBook = require('../models/UserBook');
       const idConstraint = {};
 
-      if (readFilter === 'read' || readFilter === 'unread') {
-        const readEntries = await UserBook.aggregate([
-          { $match: { user: req.user._id, status: 'read' } },
-          { $project: { book: 1 } },
+      // Selecting none or all three buckets means no constraint (show everything)
+      if (selectedBuckets.length > 0 && selectedBuckets.length < 3) {
+        const statusEntries = await UserBook.aggregate([
+          { $match: { user: req.user._id, status: { $in: ['read', 'dnf'] } } },
+          { $project: { book: 1, status: 1 } },
         ]);
-        const readBookIds = readEntries.map(e => e.book);
-        if (readFilter === 'read') {
-          idConstraint.$in = readBookIds;
-        } else {
-          idConstraint.$nin = readBookIds;
-        }
-      }
+        const readBookIds = statusEntries.filter(e => e.status === 'read').map(e => e.book);
+        const dnfBookIds = statusEntries.filter(e => e.status === 'dnf').map(e => e.book);
 
-      if (readFilter === 'dnf') {
-        const dnfEntries = await UserBook.aggregate([
-          { $match: { user: req.user._id, status: 'dnf' } },
-          { $project: { book: 1 } },
-        ]);
-        idConstraint.$in = dnfEntries.map(e => e.book);
+        if (!selectedBuckets.includes('unread')) {
+          // Only read and/or dnf selected - books must be in the union of those
+          idConstraint.$in = [
+            ...(selectedBuckets.includes('read') ? readBookIds : []),
+            ...(selectedBuckets.includes('dnf') ? dnfBookIds : []),
+          ];
+        } else {
+          // Unread selected alongside at most one of read/dnf - exclude the
+          // bucket(s) that were left unchecked
+          const excludeIds = [
+            ...(!selectedBuckets.includes('read') ? readBookIds : []),
+            ...(!selectedBuckets.includes('dnf') ? dnfBookIds : []),
+          ];
+          if (excludeIds.length > 0) {
+            idConstraint.$nin = [...(idConstraint.$nin || []), ...excludeIds];
+          }
+        }
       }
 
       if (ownedOnly === 'true') {

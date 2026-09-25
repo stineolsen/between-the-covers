@@ -28,7 +28,17 @@ const Books = () => {
   );
   const [genre, setGenre] = useState(savedFilters.genre || "");
   const [sort, setSort] = useState(savedFilters.sort || "newest");
-  const [readFilter, setReadFilter] = useState(savedFilters.readFilter || "all");
+  const [readFilter, setReadFilter] = useState(() => {
+    const saved = savedFilters.readFilter;
+    if (Array.isArray(saved)) return saved;
+    if (saved && saved !== "all") return [saved];
+    return [];
+  });
+  const toggleReadFilter = (value) => {
+    setReadFilter((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value],
+    );
+  };
   const [ownedOnly, setOwnedOnly] = useState(savedFilters.ownedOnly || false);
   const [showHidden, setShowHidden] = useState(savedFilters.showHidden || false);
 
@@ -81,10 +91,6 @@ const Books = () => {
     });
   };
 
-  useEffect(() => {
-    fetchBooks();
-  }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
-
   const fetchBooks = async () => {
     try {
       setLoading(true);
@@ -97,7 +103,7 @@ const Books = () => {
       if (ebookOnly) params.ebookOnly = "true";
       if (genre) params.genre = genre;
       if (sort) params.sort = sort;
-      if (readFilter !== "all") params.readFilter = readFilter;
+      if (readFilter.length > 0) params.readFilter = readFilter.join(",");
       if (ownedOnly) params.ownedOnly = "true";
       if (showHidden) params.showHidden = "true";
 
@@ -110,6 +116,10 @@ const Books = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchBooks();
+  }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
@@ -284,19 +294,29 @@ const Books = () => {
               <label className="block text-sm font-bold text-gray-700 mb-2">
                 👁️ Lesestatus
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setReadFilter([])}
+                  className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+                  style={
+                    readFilter.length === 0
+                      ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                      : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
+                  }
+                >
+                  Alle bøker
+                </button>
                 {[
-                  { value: "all", label: "Alle bøker" },
                   { value: "read", label: "✅ Lest" },
                   { value: "unread", label: "📚 Ulest" },
                   { value: "dnf", label: "🚫 DNF" },
                 ].map(({ value, label }) => (
                   <button
                     key={value}
-                    onClick={() => setReadFilter(value)}
+                    onClick={() => toggleReadFilter(value)}
                     className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                     style={
-                      readFilter === value
+                      readFilter.includes(value)
                         ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
                         : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
                     }
