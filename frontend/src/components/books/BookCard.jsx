@@ -132,6 +132,18 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 {currentStatus === "read" ? "✓ Lest" : "+ Lest"}
               </button>
               <button
+                onClick={(e) => handleStatusClick(e, "dnf")}
+                disabled={isUpdating}
+                className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
+                style={
+                  currentStatus === "dnf"
+                    ? { background: "linear-gradient(135deg, #6b7280, #4b5563)", color: "white" }
+                    : { background: "rgba(255,255,255,0.92)", color: "#4b5563" }
+                }
+              >
+                {currentStatus === "dnf" ? "✓ DNF" : "+ DNF"}
+              </button>
+              <button
                 onClick={handleToggleHidden}
                 disabled={isUpdating}
                 className="w-full py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60"
@@ -153,10 +165,18 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                       ? "rgba(16,185,129,0.88)"
                       : currentStatus === "to-read"
                       ? "rgba(124,58,237,0.88)"
+                      : currentStatus === "dnf"
+                      ? "rgba(75,85,99,0.88)"
                       : "rgba(59,130,246,0.88)",
                 }}
               >
-                {currentStatus === "read" ? "✓ Lest" : currentStatus === "to-read" ? "TBR" : "Leser"}
+                {currentStatus === "read"
+                  ? "✓ Lest"
+                  : currentStatus === "to-read"
+                  ? "TBR"
+                  : currentStatus === "dnf"
+                  ? "DNF"
+                  : "Leser"}
               </span>
             </div>
           )}

@@ -19,7 +19,7 @@ const userBookSchema = new mongoose.Schema(
     // User's personal reading status for this book
     status: {
       type: String,
-      enum: ["to-read", "currently-reading", "read"],
+      enum: ["to-read", "currently-reading", "read", "dnf"],
       default: null,
     },
 

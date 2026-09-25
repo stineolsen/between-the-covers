@@ -30,6 +30,13 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
       gradient: "linear-gradient(135deg, #10b981, #14b8a6)",
       description: "Du har fullført denne boka",
     },
+    {
+      value: "dnf",
+      label: "🚫 DNF",
+      icon: "🚫",
+      gradient: "linear-gradient(135deg, #6b7280, #4b5563)",
+      description: "Du ga opp denne boka",
+    },
   ];
 
   const handleStatusClick = async (status) => {
@@ -54,7 +61,7 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
         📚 Din lesestatus
       </h3>
 
-      <div className="grid grid-cols-3 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-4 gap-2">
         {statuses.map((status) => {
           const isSelected = selectedStatus === status.value;
 
@@ -122,6 +129,7 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
             {selectedStatus === "currently-reading" &&
               "📖 Du leser denne boken for øyeblikket"}
             {selectedStatus === "read" && "✅ Markert som lest"}
+            {selectedStatus === "dnf" && "🚫 Markert som ikke fullført (DNF)"}
           </p>
         </div>
       )}

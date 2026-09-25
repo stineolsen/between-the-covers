@@ -78,6 +78,7 @@ const ActivityItem = ({ activity }) => {
     const verb =
       status === 'read' ? 'har lest' :
       status === 'currently-reading' ? 'leser nå' :
+      status === 'dnf' ? 'ga opp' :
       'la til';
     const suffix = status === 'to-read' ? ' på leserlisten' : '';
     return (

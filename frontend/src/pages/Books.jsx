@@ -289,6 +289,7 @@ const Books = () => {
                   { value: "all", label: "Alle bøker" },
                   { value: "read", label: "✅ Lest" },
                   { value: "unread", label: "📚 Ulest" },
+                  { value: "dnf", label: "🚫 DNF" },
                 ].map(({ value, label }) => (
                   <button
                     key={value}

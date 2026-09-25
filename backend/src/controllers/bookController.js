@@ -45,7 +45,7 @@ exports.getBooks = async (req, res, next) => {
     }
 
     // Filter by reading status, owned, and/or hidden (uses UserBook model)
-    const needsUserBooks = readFilter === 'read' || readFilter === 'unread' || ownedOnly === 'true' || showHidden !== 'true';
+    const needsUserBooks = readFilter === 'read' || readFilter === 'unread' || readFilter === 'dnf' || ownedOnly === 'true' || showHidden !== 'true';
     if (needsUserBooks) {
       const UserBook = require('../models/UserBook');
       const idConstraint = {};
@@ -61,6 +61,14 @@ exports.getBooks = async (req, res, next) => {
         } else {
           idConstraint.$nin = readBookIds;
         }
+      }
+
+      if (readFilter === 'dnf') {
+        const dnfEntries = await UserBook.aggregate([
+          { $match: { user: req.user._id, status: 'dnf' } },
+          { $project: { book: 1 } },
+        ]);
+        idConstraint.$in = dnfEntries.map(e => e.book);
       }
 
       if (ownedOnly === 'true') {
@@ -505,7 +513,7 @@ exports.getBooksByStatus = async (req, res, next) => {
   try {
     const { status } = req.params;
 
-    if (!["to-read", "currently-reading", "read"].includes(status)) {
+    if (!["to-read", "currently-reading", "read", "dnf"].includes(status)) {
       return res.status(400).json({
         success: false,
         message: "Invalid status",

@@ -123,6 +123,7 @@ const ReadingHistory = () => {
   const [readBooks, setReadBooks] = useState([]);
   const [currentlyReading, setCurrentlyReading] = useState([]);
   const [toRead, setToRead] = useState([]);
+  const [dnfBooks, setDnfBooks] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [yearFilter, setYearFilter] = useState("all");
@@ -136,15 +137,17 @@ const ReadingHistory = () => {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const [readData, currentData, toReadData, statsData] = await Promise.all([
+      const [readData, currentData, toReadData, dnfData, statsData] = await Promise.all([
         userBooksApi.getUserBooks({ status: "read" }),
         userBooksApi.getUserBooks({ status: "currently-reading" }),
         userBooksApi.getUserBooks({ status: "to-read" }),
+        userBooksApi.getUserBooks({ status: "dnf" }),
         userBooksApi.getReadingStats(),
       ]);
       setReadBooks(readData.userBooks || []);
       setCurrentlyReading(currentData.userBooks || []);
       setToRead(toReadData.userBooks || []);
+      setDnfBooks(dnfData.userBooks || []);
       setStats(statsData.stats || {});
     } catch (error) {
       console.error("Greide ikke hente lesedata:", error);
@@ -227,7 +230,7 @@ const ReadingHistory = () => {
 
         {/* Stat cards — clickable to switch tab */}
         {stats && (
-          <div className="grid grid-cols-3 gap-4 mb-8 animate-fadeIn">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 animate-fadeIn">
             <button
               onClick={() => setActiveTab("read")}
               className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105 text-left"
@@ -266,6 +269,19 @@ const ReadingHistory = () => {
               <div className="text-4xl font-bold mb-1">{stats["to-read"] || 0}</div>
               <div className="text-lg font-medium">TBR</div>
             </button>
+
+            <button
+              onClick={() => setActiveTab("dnf")}
+              className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105 text-left"
+              style={{
+                background: "linear-gradient(135deg, #6b7280, #4b5563)",
+                outline: activeTab === "dnf" ? "3px solid white" : "none",
+              }}
+            >
+              <div className="text-4xl mb-2">🚫</div>
+              <div className="text-4xl font-bold mb-1">{stats.dnf || 0}</div>
+              <div className="text-lg font-medium">DNF</div>
+            </button>
           </div>
         )}
 
@@ -279,6 +295,9 @@ const ReadingHistory = () => {
           </button>
           <button onClick={() => setActiveTab("to-read")} className={tabClass("to-read")} style={tabStyle("to-read")}>
             📚 TBR
+          </button>
+          <button onClick={() => setActiveTab("dnf")} className={tabClass("dnf")} style={tabStyle("dnf")}>
+            🚫 DNF
           </button>
         </div>
 
@@ -438,6 +457,32 @@ const ReadingHistory = () => {
                     userBook={userBook}
                     badge="📚 TBR"
                     badgeStyle={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+                    footer={null}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* DNF TAB */}
+        {activeTab === "dnf" && (
+          <>
+            {dnfBooks.length === 0 ? (
+              <div className="container-gradient text-center py-20 animate-fadeIn">
+                <div className="text-6xl mb-4">🚫</div>
+                <h2 className="text-3xl font-bold gradient-text mb-3">Ingen DNF-bøker</h2>
+                <p className="text-gray-600 text-lg mb-6">Bøker du gir opp underveis havner her.</p>
+                <Link to="/books" className="btn-primary inline-block">Sjekk ut bøkene</Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fadeIn">
+                {dnfBooks.map((userBook) => (
+                  <BookCard
+                    key={userBook._id}
+                    userBook={userBook}
+                    badge="🚫 DNF"
+                    badgeStyle={{ background: "linear-gradient(135deg, #6b7280, #4b5563)" }}
                     footer={null}
                   />
                 ))}

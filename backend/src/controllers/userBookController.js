@@ -350,6 +350,7 @@ exports.getReadingStats = async (req, res) => {
       "to-read": 0,
       "currently-reading": 0,
       read: 0,
+      dnf: 0,
     };
 
     stats.forEach((stat) => {
