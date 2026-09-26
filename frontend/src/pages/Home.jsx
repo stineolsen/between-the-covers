@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/useAuth";
 import { meetingsApi } from "../api/meetingsApi";
 import { booksApi } from "../api/booksApi";
 import { userBooksApi } from "../api/userBooksApi";

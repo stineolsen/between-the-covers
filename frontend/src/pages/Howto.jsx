@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { href, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Howto = () => {
   return (

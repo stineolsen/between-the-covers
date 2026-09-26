@@ -131,10 +131,6 @@ const ReadingHistory = () => {
   const [editingDateId, setEditingDateId] = useState(null);
   const [dateError, setDateError] = useState("");
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
-
   const fetchAll = async () => {
     try {
       setLoading(true);
@@ -156,6 +152,10 @@ const ReadingHistory = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
   const handleDateChange = async (userBookId, newDate) => {
     setDateError("");

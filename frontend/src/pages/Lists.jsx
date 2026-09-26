@@ -14,10 +14,6 @@ const Lists = () => {
   const [sort, setSort] = useState("newest");
   const [showFormModal, setShowFormModal] = useState(false);
 
-  useEffect(() => {
-    fetchLists();
-  }, [tab, search, sort]);
-
   const fetchLists = async () => {
     try {
       setLoading(true);
@@ -33,6 +29,10 @@ const Lists = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchLists();
+  }, [tab, search, sort]);
 
   return (
     <div className="min-h-screen py-8">

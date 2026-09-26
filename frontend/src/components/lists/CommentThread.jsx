@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useToast } from "../../contexts/ToastContext";
+import { useToast } from "../../contexts/useToast";
 import commentsApi from "../../api/commentsApi";
 import CommentCard from "./CommentCard";
 

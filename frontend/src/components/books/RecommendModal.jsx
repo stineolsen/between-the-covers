@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/useAuth';
+import { useToast } from '../../contexts/useToast';
 import { usersApi } from '../../api/usersApi';
 import recommendationApi from '../../api/recommendationApi';
 import UserAvatar from '../common/UserAvatar';

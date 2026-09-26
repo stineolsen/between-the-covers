@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { usersApi } from "../../api/usersApi";
-import { useAuth } from "../../contexts/AuthContext";
-import { useToast } from "../../contexts/ToastContext";
+import { useAuth } from "../../contexts/useAuth";
+import { useToast } from "../../contexts/useToast";
 import { goalProgress, getPaceStatus } from "../../utils/readingGoal";
 
 const PACE_STYLES = {

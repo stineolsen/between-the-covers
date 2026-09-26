@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import StarRating from "../reviews/StarRating";
 import { reviewsApi } from "../../api/reviewsApi";
 import { usersApi } from "../../api/usersApi";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 
 // Own rating widget — used by all members including admin
 const OwnRating = ({ bookId }) => {

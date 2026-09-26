@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 import StarRating from "./StarRating";
 import UserAvatar from "../common/UserAvatar";
 
@@ -11,7 +11,6 @@ const ReviewCard = ({
   showSpoilers = false,
 }) => {
   const { user, isAdmin } = useAuth();
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showFullContent, setShowFullContent] = useState(
     !review.spoilers || showSpoilers,
   );

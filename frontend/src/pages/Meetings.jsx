@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { meetingsApi } from "../api/meetingsApi";
-import { useAuth } from "../contexts/AuthContext";
-import { useToast } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/useAuth";
+import { useToast } from "../contexts/useToast";
 import MeetingCard from "../components/meetings/MeetingCard";
 import MeetingForm from "../components/meetings/MeetingForm";
 
@@ -13,10 +13,6 @@ const Meetings = () => {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingMeeting, setEditingMeeting] = useState(null);
-
-  useEffect(() => {
-    fetchMeetings();
-  }, [activeTab]);
 
   const fetchMeetings = async () => {
     try {
@@ -33,6 +29,10 @@ const Meetings = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchMeetings();
+  }, [activeTab]);
 
   const handleCreateMeeting = () => {
     setEditingMeeting(null);

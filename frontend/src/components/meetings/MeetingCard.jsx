@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 import MeetingRating from "./MeetingRating";
 import UserAvatar from "../common/UserAvatar";
 

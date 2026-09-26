@@ -21,6 +21,18 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const fetchBooks = async () => {
+    try {
+      const data = await booksApi.getBooks();
+      const sorted = (data.books || []).sort((a, b) =>
+        a.title.localeCompare(b.title, "nb"),
+      );
+      setBooks(sorted);
+    } catch (err) {
+      console.error("Greide ikke hente bøker:", err);
+    }
+  };
+
   useEffect(() => {
     fetchBooks();
 
@@ -40,18 +52,6 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
       });
     }
   }, [meeting]);
-
-  const fetchBooks = async () => {
-    try {
-      const data = await booksApi.getBooks();
-      const sorted = (data.books || []).sort((a, b) =>
-        a.title.localeCompare(b.title, "nb"),
-      );
-      setBooks(sorted);
-    } catch (err) {
-      console.error("Greide ikke hente bøker:", err);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;

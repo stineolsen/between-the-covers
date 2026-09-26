@@ -27,28 +27,6 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
   const [sizeInput, setSizeInput] = useState('');
   const fileInputRef = useRef(null);
 
-  useEffect(() => {
-    fetchBooks();
-
-    if (product) {
-      setFormData({
-        name: product.name || "",
-        description: product.description || "",
-        price: product.price || "",
-        currency: product.currency || "NOK",
-        category: product.category || "annet",
-        stock: product.stock || "",
-        isAvailable:
-          product.isAvailable !== undefined ? product.isAvailable : true,
-        bookId: product.book?._id || "",
-      });
-      if (product.images && product.images[0]) {
-        setImagePreview(`${API_URL}/uploads/products/${product.images[0]}`);
-      }
-      setSizes(product.sizes || []);
-    }
-  }, [product]);
-
   const addSize = () => {
     const trimmed = sizeInput.trim().toUpperCase();
     if (trimmed && !sizes.includes(trimmed)) {
@@ -81,6 +59,28 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
       console.error("Greide ikke hente bøker:", err);
     }
   };
+
+  useEffect(() => {
+    fetchBooks();
+
+    if (product) {
+      setFormData({
+        name: product.name || "",
+        description: product.description || "",
+        price: product.price || "",
+        currency: product.currency || "NOK",
+        category: product.category || "annet",
+        stock: product.stock || "",
+        isAvailable:
+          product.isAvailable !== undefined ? product.isAvailable : true,
+        bookId: product.book?._id || "",
+      });
+      if (product.images && product.images[0]) {
+        setImagePreview(`${API_URL}/uploads/products/${product.images[0]}`);
+      }
+      setSizes(product.sizes || []);
+    }
+  }, [product]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

@@ -3,8 +3,8 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { booksApi } from "../api/booksApi";
 import { reviewsApi } from "../api/reviewsApi";
 import { userBooksApi } from "../api/userBooksApi";
-import { useAuth } from "../contexts/AuthContext";
-import { useToast } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/useAuth";
+import { useToast } from "../contexts/useToast";
 import ReviewList from "../components/reviews/ReviewList";
 import ReviewForm from "../components/reviews/ReviewForm";
 import StatusSelector from "../components/books/StatusSelector";
@@ -17,7 +17,7 @@ import { normalizeAuthor } from "../utils/normalizeAuthor";
 const BookDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAdmin, user } = useAuth();
+  const { isAdmin } = useAuth();
   const toast = useToast();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,16 +44,6 @@ const BookDetail = () => {
   const [owners, setOwners] = useState([]);
   const [userOwned, setUserOwned] = useState(false);
   const [ownedLoading, setOwnedLoading] = useState(false);
-
-  useEffect(() => {
-    fetchBook();
-    fetchReviews();
-    fetchUserReview();
-    fetchUserBookStatus();
-    fetchReaders();
-    fetchTBR();
-    fetchOwners();
-  }, [id]);
 
   const fetchReaders = async () => {
     try {
@@ -124,7 +114,7 @@ const BookDetail = () => {
       if (data.review) {
         setUserReview(data.review);
       }
-    } catch (err) {
+    } catch {
       // No review found, that's ok
       setUserReview(null);
     }
@@ -201,7 +191,7 @@ const BookDetail = () => {
         setUserBookId(null);
         setUserOwned(false);
       }
-    } catch (err) {
+    } catch {
       setUserBookStatus(null);
       setUserBookId(null);
       setUserOwned(false);
@@ -216,6 +206,16 @@ const BookDetail = () => {
       setOwners([]);
     }
   };
+
+  useEffect(() => {
+    fetchBook();
+    fetchReviews();
+    fetchUserReview();
+    fetchUserBookStatus();
+    fetchReaders();
+    fetchTBR();
+    fetchOwners();
+  }, [id]);
 
   const handleToggleOwned = async () => {
     setOwnedLoading(true);

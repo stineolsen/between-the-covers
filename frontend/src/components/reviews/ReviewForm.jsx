@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import StarRating from "./StarRating";
 
 const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {

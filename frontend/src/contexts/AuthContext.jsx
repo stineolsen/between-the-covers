@@ -1,25 +1,11 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { authApi } from "../api/authApi";
-
-const AuthContext = createContext();
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
-};
+import { AuthContext } from "./useAuth";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Check if user is logged in on mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
 
   const checkAuth = async () => {
     try {
@@ -33,13 +19,18 @@ export const AuthProvider = ({ children }) => {
 
       const data = await authApi.getMe();
       setUser(data.user);
-    } catch (error) {
+    } catch {
       setUser(null);
       localStorage.removeItem("token"); // Clear invalid token
     } finally {
       setLoading(false);
     }
   };
+
+  // Check if user is logged in on mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const login = async (credentials) => {
     try {
@@ -107,5 +98,3 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export default AuthContext;

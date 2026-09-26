@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 import UserAvatar from "../common/UserAvatar";
 
 const CommentCard = ({ comment, onEdit, onDelete }) => {

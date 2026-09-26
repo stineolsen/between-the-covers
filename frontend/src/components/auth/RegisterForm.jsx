@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -43,7 +43,7 @@ const RegisterForm = () => {
 
     setLoading(true);
 
-    const { confirmPassword, ...registerData } = formData;
+    const { confirmPassword: _confirmPassword, ...registerData } = formData;
     const result = await register(registerData);
 
     if (result.success) {

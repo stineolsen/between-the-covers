@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { usersApi } from "../api/usersApi";
 import { booksApi } from "../api/booksApi";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/useAuth";
 import UserAvatar from "../components/common/UserAvatar";
 
 const TAG_CONFIG = {
@@ -193,7 +193,7 @@ const PublicProfile = () => {
               Favorittbøker
             </h2>
             <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-              {favoriteBooks.map(({ book, rating }, index) => {
+              {favoriteBooks.map(({ book }, index) => {
                 if (!book) return null;
                 const cover = booksApi.getCoverUrl(book.coverImage);
                 return (

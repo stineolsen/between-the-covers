@@ -9,10 +9,6 @@ const EditBook = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    fetchBook();
-  }, [id]);
-
   const fetchBook = async () => {
     try {
       setLoading(true);
@@ -24,6 +20,10 @@ const EditBook = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchBook();
+  }, [id]);
 
   if (loading) {
     return (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { productsApi } from "../api/productsApi";
-import { useCart } from "../contexts/CartContext";
-import { useToast } from "../contexts/ToastContext";
+import { useCart } from "../contexts/useCart";
+import { useToast } from "../contexts/useToast";
 import BookCoverFallback from "../components/common/BookCoverFallback";
 
 const Shop = () => {
@@ -32,10 +32,6 @@ const Shop = () => {
   // Tracks selected size per product: { [productId]: size }
   const [selectedSizes, setSelectedSizes] = useState({});
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -47,6 +43,10 @@ const Shop = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
   const handleAddToCart = (product) => {
     const hasSizes = product.sizes && product.sizes.length > 0;

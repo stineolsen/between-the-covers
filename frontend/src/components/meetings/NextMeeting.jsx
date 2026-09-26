@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { meetingsApi } from "../../api/meetingsApi";
 import { booksApi } from "../../api/booksApi";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../contexts/useAuth";
 
 // Compact "next meeting" card for the Home sidebar. Accepts an optional
 // `meeting` prop (Home.jsx already fetches it for the "Bokklubbens bok" hero)

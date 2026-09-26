@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { useToast } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/useAuth";
+import { useToast } from "../contexts/useToast";
 import { usersApi } from "../api/usersApi";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";

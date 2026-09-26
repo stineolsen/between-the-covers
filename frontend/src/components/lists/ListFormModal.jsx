@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useToast } from "../../contexts/ToastContext";
+import { useToast } from "../../contexts/useToast";
 import listsApi from "../../api/listsApi";
 
 const ListFormModal = ({ list, onClose, onSaved }) => {

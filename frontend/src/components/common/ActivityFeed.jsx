@@ -48,7 +48,7 @@ const ActivityItem = ({ activity }) => {
   const { type } = activity;
 
   if (type === 'review') {
-    const { user, book, rating, reviewId } = activity;
+    const { user, book, rating } = activity;
     const name = user?.displayName || user?.username || 'Ukjent';
     return (
       <div className="flex items-center gap-3">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import { useToast } from "../contexts/ToastContext";
+import { useAuth } from "../contexts/useAuth";
+import { useToast } from "../contexts/useToast";
 import listsApi from "../api/listsApi";
 import BookRankingList from "../components/lists/BookRankingList";
 import AddBookToListModal from "../components/lists/AddBookToListModal";
@@ -24,10 +24,6 @@ const ListDetail = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    fetchList();
-  }, [id]);
-
   const fetchList = async () => {
     try {
       setLoading(true);
@@ -40,6 +36,10 @@ const ListDetail = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchList();
+  }, [id]);
 
   const isOwner = user && list?.owner && list.owner._id === user._id;
   const isCollaborator = user && list?.collaborators?.some((c) => c._id === user._id);

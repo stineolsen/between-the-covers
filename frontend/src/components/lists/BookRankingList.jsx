@@ -13,7 +13,7 @@ import {
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable";
-import { useToast } from "../../contexts/ToastContext";
+import { useToast } from "../../contexts/useToast";
 import listsApi from "../../api/listsApi";
 import BookRankingRow from "./BookRankingRow";
 
