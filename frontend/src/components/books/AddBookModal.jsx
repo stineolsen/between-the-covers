@@ -283,6 +283,18 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                 <p className="text-red-500 text-sm font-semibold">{searchError}</p>
               )}
 
+              {/* Hierarchy: Hardcover → Open Library → Nasjonalbiblioteket.
+                  All three are still queried in parallel (see performSearch)
+                  — this is purely display order, not a fetch cutoff. */}
+              {hcResults.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Hardcover</p>
+                  {hcResults.map((doc) => (
+                    <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
+                  ))}
+                </div>
+              )}
+
               {olResults.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">📖 Open Library</p>
@@ -296,15 +308,6 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                 <div className="space-y-2">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇳🇴 Nasjonalbiblioteket</p>
                   {nbResults.map((doc) => (
-                    <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
-                  ))}
-                </div>
-              )}
-
-              {hcResults.length > 0 && (
-                <div className="space-y-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Hardcover</p>
-                  {hcResults.map((doc) => (
                     <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
                   ))}
                 </div>
