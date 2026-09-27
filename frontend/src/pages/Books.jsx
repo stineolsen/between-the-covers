@@ -153,16 +153,16 @@ const Books = () => {
             </p>
           </div>
 
-          <div className="flex gap-3 flex-wrap justify-end">
+          <div className="flex gap-2 sm:gap-3 flex-wrap justify-end">
             <button
               onClick={() => setShowRequestModal(true)}
-              className="btn-secondary"
+              className="btn-accent text-sm px-3 py-2 sm:text-base sm:px-7 sm:py-3"
             >
-              📬 Be om en bok
+              Be om en bok
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="btn-accent"
+              className="btn-secondary text-sm px-3 py-2 sm:text-base sm:px-7 sm:py-3"
             >
               ✨ Legg til bok
             </button>

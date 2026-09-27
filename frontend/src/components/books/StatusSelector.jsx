@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 const STATUSES = [
-  { value: "to-read", label: "Ulest" },
+  { value: "to-read", label: "TBR" },
   { value: "currently-reading", label: "Leser" },
   { value: "read", label: "Lest" },
   { value: "dnf", label: "DNF" },
