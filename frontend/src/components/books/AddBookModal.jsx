@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
+import BarcodeScannerView from "./BarcodeScannerView";
 
 const OL_COVER = (coverId) =>
   coverId ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg` : null;
@@ -75,10 +76,11 @@ const ResultRow = ({ doc, onSelect }) => (
 
 const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   const navigate = useNavigate();
-  const [step, setStep] = useState("search"); // "search" | "confirm"
+  const [step, setStep] = useState("search"); // "search" | "scan" | "confirm"
   const [query, setQuery] = useState(initialQuery);
   const [olResults, setOlResults] = useState([]);
   const [nbResults, setNbResults] = useState([]);
+  const [hcResults, setHcResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState("");
   const debounceRef = useRef(null);
@@ -106,17 +108,33 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
     return (data._embedded?.items || []).map(normalizeNbItem);
   };
 
+  const fetchHardcover = async (q) => {
+    const data = await booksApi.searchExternal(q);
+    return data.results || [];
+  };
+
   const performSearch = async (q) => {
-    if (!q.trim()) { setOlResults([]); setNbResults([]); return; }
+    if (!q.trim()) { setOlResults([]); setNbResults([]); setHcResults([]); return; }
     setSearching(true);
     setSearchError("");
-    const [ol, nb] = await Promise.allSettled([fetchOpenLibrary(q), fetchNasjonalbiblioteket(q)]);
+    const [ol, nb, hc] = await Promise.allSettled([
+      fetchOpenLibrary(q),
+      fetchNasjonalbiblioteket(q),
+      fetchHardcover(q),
+    ]);
     setOlResults(ol.status === "fulfilled" ? ol.value : []);
     setNbResults(nb.status === "fulfilled" ? nb.value : []);
+    setHcResults(hc.status === "fulfilled" ? hc.value : []);
     if (ol.status === "rejected" && nb.status === "rejected") {
       setSearchError("Greide ikke søke — sjekk internettforbindelsen.");
     }
     setSearching(false);
+  };
+
+  const handleBarcodeDetected = (isbn) => {
+    setStep("search");
+    setQuery(isbn);
+    performSearch(isbn);
   };
 
   useEffect(() => {
@@ -207,7 +225,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
         {/* Header */}
         <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b border-gray-100 flex-shrink-0">
           <div className="flex items-center gap-3">
-            {step === "confirm" && (
+            {step !== "search" && (
               <button
                 onClick={() => setStep("search")}
                 className="text-gray-400 hover:text-gray-700 font-bold text-lg transition-colors"
@@ -216,7 +234,9 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
               </button>
             )}
             <h2 className="text-2xl font-bold gradient-text">
-              {step === "search" ? "📚 Legg til bok" : "✏️ Bekreft og legg til"}
+              {step === "search" && "📚 Legg til bok"}
+              {step === "scan" && "📷 Skann strekkode"}
+              {step === "confirm" && "✏️ Bekreft og legg til"}
             </h2>
           </div>
           <button
@@ -233,20 +253,30 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
           {/* ── Step 1: Search ── */}
           {step === "search" && (
             <div className="space-y-4">
-              <div className="relative">
-                <input
-                  autoFocus
-                  type="text"
-                  value={query}
-                  onChange={handleQueryChange}
-                  placeholder="Søk etter tittel eller forfatter..."
-                  className="input-field pr-10"
-                />
-                {searching && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                )}
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    autoFocus
+                    type="text"
+                    value={query}
+                    onChange={handleQueryChange}
+                    placeholder="Søk etter tittel eller forfatter..."
+                    className="input-field pr-10"
+                  />
+                  {searching && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStep("scan")}
+                  className="btn-accent flex-shrink-0 whitespace-nowrap"
+                  title="Skann strekkoden på baksiden av boken"
+                >
+                  📷 Skann
+                </button>
               </div>
 
               {searchError && (
@@ -271,19 +301,33 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                 </div>
               )}
 
-              {!searching && query && olResults.length === 0 && nbResults.length === 0 && !searchError && (
+              {hcResults.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Hardcover</p>
+                  {hcResults.map((doc) => (
+                    <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
+                  ))}
+                </div>
+              )}
+
+              {!searching && query && olResults.length === 0 && nbResults.length === 0 && hcResults.length === 0 && !searchError && (
                 <p className="text-center text-gray-500 py-8">Ingen resultater for «{query}»</p>
               )}
 
               {!query && (
                 <p className="text-center text-gray-400 py-12">
-                  Skriv inn en tittel eller forfatter for å søke i Open Library og Nasjonalbiblioteket
+                  Skriv inn en tittel eller forfatter for å søke, eller skann strekkoden på baksiden av boken
                 </p>
               )}
             </div>
           )}
 
-          {/* ── Step 2: Confirm / Edit ── */}
+          {/* ── Step 2: Scan barcode ── */}
+          {step === "scan" && (
+            <BarcodeScannerView onDetected={handleBarcodeDetected} onCancel={() => setStep("search")} />
+          )}
+
+          {/* ── Step 3: Confirm / Edit ── */}
           {step === "confirm" && (
             <form onSubmit={handleSubmit} className="space-y-5">
               {submitError && (

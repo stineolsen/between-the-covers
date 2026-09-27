@@ -152,7 +152,6 @@ const Home = () => {
             <ListNotificationFeed />
             <MyRequestsFeed />
             <RecommendationFeed />
-            <h3 className="text-sm font-semibold mb-3 mt-2">Nylig aktivitet</h3>
             <ActivityFeed />
           </div>
         </div>

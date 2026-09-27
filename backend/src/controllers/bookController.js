@@ -3,6 +3,23 @@ const List = require("../models/List");
 const path = require("path");
 const fs = require("fs");
 const { normalizeLanguageForAtlas } = require("../utils/importHelpers");
+const { searchHardcover } = require("../utils/hardcoverHelpers");
+
+// @desc    Search Hardcover.app for book metadata (Add Book search — a third
+//          source alongside the frontend's direct Open Library / NB calls).
+//          Best-effort: always resolves, even with zero results, if
+//          HARDCOVER_API_KEY isn't configured or the request fails.
+// @route   GET /api/books/search-external?q=...
+// @access  Private
+exports.searchExternalSources = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    const results = await searchHardcover(q || "");
+    res.status(200).json({ success: true, results });
+  } catch (error) {
+    next(error);
+  }
+};
 
 // @desc    Get all books
 // @route   GET /api/books
