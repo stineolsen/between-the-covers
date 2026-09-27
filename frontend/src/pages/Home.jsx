@@ -118,7 +118,7 @@ const Home = () => {
             <NextMeeting meeting={meeting} />
             <ReadingGoalCard readCount={readThisYear} />
             {currentlyReading.length > 0 && (
-              <div className="card mb-5">
+              <div className="card p-5 rounded-2xl mb-5">
                 <h3
                   className="text-xs font-bold uppercase tracking-wide mb-3"
                   style={{ color: "var(--color-text-faint)" }}

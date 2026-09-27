@@ -53,7 +53,7 @@ const ReadingGoalCard = ({ readCount }) => {
   };
 
   return (
-    <div className="card mb-5">
+    <div className="card p-5 rounded-2xl mb-5">
       <div className="flex justify-between items-center mb-1">
         <h3
           className="text-xs font-bold uppercase tracking-wide"

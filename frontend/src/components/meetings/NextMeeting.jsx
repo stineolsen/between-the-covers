@@ -39,7 +39,7 @@ const NextMeeting = ({ meeting: meetingProp }) => {
 
   if (loading) {
     return (
-      <div className="card mb-5">
+      <div className="card p-5 rounded-2xl mb-5">
         <div className="animate-pulse h-24" />
       </div>
     );
@@ -47,7 +47,7 @@ const NextMeeting = ({ meeting: meetingProp }) => {
 
   if (!meeting) {
     return (
-      <div className="card mb-5">
+      <div className="card p-5 rounded-2xl mb-5">
         <h3
           className="text-xs font-bold uppercase tracking-wide mb-3"
           style={{ color: "var(--color-text-faint)" }}
@@ -86,7 +86,7 @@ const NextMeeting = ({ meeting: meetingProp }) => {
     (meeting.maxAttendees > 0 && attendeeCount >= meeting.maxAttendees);
 
   return (
-    <div className="card mb-5">
+    <div className="card p-5 rounded-2xl mb-5">
       <h3
         className="text-xs font-bold uppercase tracking-wide mb-3"
         style={{ color: "var(--color-text-faint)" }}
