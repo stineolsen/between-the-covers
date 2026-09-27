@@ -6,7 +6,7 @@ const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange }) =
       <div className="flex justify-center items-center py-20">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Laster inne bøker...</p>
+          <p className="text-text-muted">Laster inne bøker...</p>
         </div>
       </div>
     );
@@ -25,10 +25,10 @@ const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange }) =
     return (
       <div className="card text-center py-20">
         <div className="text-6xl mb-4">📚</div>
-        <p className="text-xl text-gray-700 font-semibold mb-2">
+        <p className="text-xl text-text-muted font-semibold mb-2">
           Ingen bøker funnet
         </p>
-        <p className="text-gray-600">Prøv å justere søk eller filtere</p>
+        <p className="text-text-muted">Prøv å justere søk eller filtere</p>
       </div>
     );
   }

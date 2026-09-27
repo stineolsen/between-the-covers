@@ -10,36 +10,40 @@ const ListCard = ({ list }) => {
   return (
     <Link
       to={`/lists/${list._id}`}
-      className="group block bg-white rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
-      style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}
+      className="group block rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
+      style={{ background: "var(--color-card)", boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}
     >
-      {/* Cover collage */}
-      <div className="grid grid-cols-4 aspect-[4/2] bg-primary-25 overflow-hidden">
+      {/* Cover row — small portrait covers, like books fanned on a shelf */}
+      <div
+        className="flex items-end gap-1.5 p-3"
+        style={{ background: "var(--color-sunken)" }}
+      >
         {covers.length > 0 ? (
           covers.map((entry, i) => (
-            <BookCoverFallback
-              key={entry.book?._id || i}
-              src={entry.book?.coverImage ? booksApi.getCoverUrl(entry.book.coverImage) : null}
-              alt={entry.book?.title}
-              className="w-full h-full object-cover"
-            />
+            <div key={entry.book?._id || i} className="w-11 aspect-[2/3] rounded-sm overflow-hidden shadow-sm flex-shrink-0">
+              <BookCoverFallback
+                src={entry.book?.coverImage ? booksApi.getCoverUrl(entry.book.coverImage) : null}
+                alt={entry.book?.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
           ))
         ) : (
-          <div className="col-span-4 flex items-center justify-center text-4xl bg-purple-50">📋</div>
+          <div className="w-full flex items-center justify-center text-4xl py-4">📋</div>
         )}
       </div>
 
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-bold text-gray-900 line-clamp-2 group-hover:text-purple-700 transition-colors">
+          <h3 className="font-bold group-hover:opacity-80 transition-opacity" style={{ color: "var(--color-text)" }}>
             {list.title}
           </h3>
           <span
             className="flex-shrink-0 text-xs px-2 py-0.5 rounded-full font-semibold"
             style={
               list.visibility === "public"
-                ? { background: "rgba(16,185,129,0.12)", color: "#059669" }
-                : { background: "rgba(107,91,149,0.12)", color: "#6b5b95" }
+                ? { background: "var(--color-sage-tint)", color: "var(--color-sage)" }
+                : { background: "var(--color-wine-tint)", color: "var(--color-primary)" }
             }
           >
             {list.visibility === "public" ? "🌍 Offentlig" : "🔒 Privat"}
@@ -47,7 +51,7 @@ const ListCard = ({ list }) => {
         </div>
 
         {list.description && (
-          <p className="text-sm text-gray-500 line-clamp-2 mb-3">{list.description}</p>
+          <p className="text-sm line-clamp-2 mb-3" style={{ color: "var(--color-text-muted)" }}>{list.description}</p>
         )}
 
         <div className="flex items-center justify-between">
@@ -56,9 +60,9 @@ const ListCard = ({ list }) => {
               user={list.owner}
               className="w-6 h-6 rounded-full text-xs font-bold flex-shrink-0"
             />
-            <span className="text-xs text-gray-600">{ownerName}</span>
+            <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>{ownerName}</span>
           </div>
-          <span className="text-xs text-gray-400 font-medium">
+          <span className="text-xs font-medium" style={{ color: "var(--color-text-faint)" }}>
             {list.books?.length || 0} {list.books?.length === 1 ? "bok" : "bøker"}
           </span>
         </div>

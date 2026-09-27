@@ -11,6 +11,7 @@ import StatusSelector from "../components/books/StatusSelector";
 import RecommendModal from "../components/books/RecommendModal";
 import AddToListMenu from "../components/books/AddToListMenu";
 import UserAvatar from "../components/common/UserAvatar";
+import BookCoverFallback from "../components/common/BookCoverFallback";
 import { normalizeAuthor } from "../utils/normalizeAuthor";
 
 const BookDetail = () => {
@@ -281,9 +282,9 @@ const BookDetail = () => {
         <div className="max-w-4xl mx-auto px-4">
           <div
             className="container-gradient text-center py-12 animate-fadeIn"
-            style={{ background: "linear-gradient(135deg, #f093fb, #f5576c)" }}
+            style={{ background: "var(--color-terracotta-tint)" }}
           >
-            <p className="text-white text-2xl font-bold mb-6">
+            <p className="text-2xl font-bold mb-6" style={{ color: "var(--color-terracotta)" }}>
               😢 {error || "Noe er feil, finner ikke boken"}
             </p>
             <Link to="/books" className="btn-accent">
@@ -298,8 +299,6 @@ const BookDetail = () => {
   const coverUrl = book.coverImage
     ? booksApi.getCoverUrl(book.coverImage)
     : null;
-  const placeholderImage =
-    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"%3E%3Crect fill="%23e5e7eb" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" font-size="24" text-anchor="middle" alignment-baseline="middle" font-family="monospace, sans-serif" fill="%239ca3af"%3ENo Cover%3C/text%3E%3C/svg%3E';
 
   return (
     <div className="min-h-screen py-8">
@@ -312,20 +311,20 @@ const BookDetail = () => {
           <span className="mr-2 md:btn-primary">←</span> Tilbake til bøker
         </Link>
 
-        {/* Light purple header card — cover + title/author/rating */}
+        {/* Header card — cover + title/author/rating */}
         <div
           className="rounded-2xl p-2 sm:p-4 mb-6 animate-fadeIn flex flex-col grid grid-cols-3 md:flex-row gap-6 items-start"
           style={{
-            background: "rgba(107, 91, 149, 0.08)",
-            border: "1px solid rgba(107, 91, 149, 0.15)",
+            background: "var(--color-wine-tint)",
+            border: "1px solid var(--color-border)",
           }}
         >
           {/* Cover */}
-          <div className="col-span-1 w-30 sm:w-36 flex-shrink-0 p-1">
-            <img
-              src={coverUrl || placeholderImage}
+          <div className="col-span-1 w-30 sm:w-36 flex-shrink-0 p-1 aspect-[2/3]">
+            <BookCoverFallback
+              src={coverUrl}
               alt={book.title}
-              className="w-full rounded-xl shadow-lg"
+              className="w-full h-full object-cover rounded-xl shadow-lg"
             />
           </div>
           {/* Title / Author / Rating / Status */}
@@ -333,7 +332,7 @@ const BookDetail = () => {
             {book.bookclubMonth && (
               <span
                 className="inline-block text-xs font-semibold px-3 py-1 rounded-full mb-3"
-                style={{ border: "1.5px solid #6B5B95", color: "#6B5B95" }}
+                style={{ border: "1.5px solid var(--color-primary)", color: "var(--color-primary)" }}
               >
                 📅 {book.bookclubMonth}
               </span>
@@ -382,8 +381,8 @@ const BookDetail = () => {
                 disabled={ownedLoading}
                 className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all disabled:opacity-50"
                 style={userOwned
-                  ? { background: "linear-gradient(135deg, #f59e0b, #d97706)", color: "white" }
-                  : { background: "rgba(245,158,11,0.1)", color: "#d97706", border: "1.5px solid #f59e0b" }
+                  ? { background: "var(--color-secondary)", color: "white" }
+                  : { background: "var(--color-gold-tint)", color: "var(--color-secondary-deep)", border: "1.5px solid var(--color-secondary)" }
                 }
               >
                 {ownedLoading ? "⏳" : userOwned ? "📖 Jeg eier denne boken" : "📖 Legg til bokhyllen"}
@@ -456,7 +455,7 @@ const BookDetail = () => {
                 <button
                   onClick={() => setShowRecommendModal(v => !v)}
                   className="w-full py-2 rounded-xl text-white font-semibold text-sm transition-all"
-                  style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+                  style={{ background: "linear-gradient(135deg, #059669, #0d9488)" }}
                 >
                   📤 Anbefal denne boken
                 </button>
@@ -496,90 +495,44 @@ const BookDetail = () => {
                 </div>
               )}
 
-              {/* Book Details Grid */}
-              <div className="grid grid-cols-2 gap-1 mb-6 p-2 rounded-xl bg-gray-50">
-                {book.series && (
-                  <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      📚 Serie
-                    </h3>
-                    <p className="text-gray-700 font-medium">
+              {/* Book Details */}
+              <div className="mb-6 border-t" style={{ borderColor: "var(--color-border)" }}>
+                {[
+                  book.series && {
+                    label: "Serie",
+                    value: (
                       <Link
                         to={`/series/${encodeURIComponent(book.series)}`}
-                        className="hover:text-purple-700 hover:underline transition-colors"
+                        className="hover:underline transition-colors"
+                        style={{ color: "inherit" }}
                       >
                         {book.series}
+                        {book.seriesNumber ? ` #${book.seriesNumber}` : ""}
                       </Link>
-                      {book.seriesNumber ? ` #${book.seriesNumber}` : ""}
-                    </p>
-                  </div>
-                )}
-                {book.isbn && (
-                  <div className="hidden sm:p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      📖 ISBN
-                    </h3>
-                    <p className="text-gray-700 font-medium">{book.isbn}</p>
-                  </div>
-                )}
-                {book.publishedYear && (
-                  <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      📅 Publisert
-                    </h3>
-                    <p className="text-gray-700 font-medium">
-                      {book.publishedYear}
-                    </p>
-                  </div>
-                )}
-                {book.pageCount && (
-                  <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      📄 Sider
-                    </h3>
-                    <p className="text-gray-700 font-medium">
-                      {book.pageCount}
-                    </p>
-                  </div>
-                )}
-                {book.publisher && (
-                  <div className="hidden sm:p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      🏢 Utgiver
-                    </h3>
-                    <p className="text-gray-700 font-medium">
-                      {book.publisher}
-                    </p>
-                  </div>
-                )}
-                {book.language && (
-                  <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      🌐 Språk
-                    </h3>
-                    <p className="text-gray-700 font-medium">{book.language}</p>
-                  </div>
-                )}
-                {book.dateAdded && (
-                  <div className="hidden sm:p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      ➕ Lagt til samling
-                    </h3>
-                    <p className="text-gray-700 font-medium">
-                      {new Date(book.dateAdded).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
-                {book.bookclubMonth && (
-                  <div className="p-3 bg-white rounded-xl">
-                    <h3 className="font-bold text-gray-900 text-sm mb-1">
-                      📅 Bokklubb bok
-                    </h3>
-                    <p className="text-gray-700 font-medium">
-                      {book.bookclubMonth}
-                    </p>
-                  </div>
-                )}
+                    ),
+                  },
+                  book.isbn && { label: "ISBN", value: book.isbn },
+                  book.publishedYear && { label: "Publisert", value: book.publishedYear },
+                  book.pageCount && { label: "Sider", value: book.pageCount },
+                  book.publisher && { label: "Utgiver", value: book.publisher },
+                  book.language && { label: "Språk", value: book.language },
+                  book.dateAdded && {
+                    label: "Lagt til samling",
+                    value: new Date(book.dateAdded).toLocaleDateString(),
+                  },
+                  book.bookclubMonth && { label: "Bokklubb bok", value: book.bookclubMonth },
+                ]
+                  .filter(Boolean)
+                  .map((row) => (
+                    <div
+                      key={row.label}
+                      className="flex justify-between items-baseline gap-4 py-2.5 text-sm border-b"
+                      style={{ borderColor: "var(--color-border)" }}
+                    >
+                      <span style={{ color: "var(--color-text-faint)" }}>{row.label}</span>
+                      <span className="font-semibold text-right">{row.value}</span>
+                    </div>
+                  ))}
               </div>
 
               {/* Genres */}
@@ -594,8 +547,8 @@ const BookDetail = () => {
                         key={index}
                         className="px-3 py-0.75 rounded-full text-sm font-semibold"
                         style={{
-                          border: "1.5px solid #6B5B95",
-                          color: "#6B5B95",
+                          border: "1.5px solid var(--color-primary)",
+                          color: "var(--color-primary)",
                         }}
                       >
                         {genre}
@@ -617,7 +570,8 @@ const BookDetail = () => {
                         key={u._id}
                         to={`/members/${u._id}`}
                         title={finishedAt ? new Date(finishedAt).toLocaleDateString("nb-NO", { day: "numeric", month: "long", year: "numeric" }) : undefined}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm text-sm font-medium hover:opacity-80 transition-opacity"
+                        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
                       >
                         <UserAvatar user={u} className="w-5 h-5 rounded-full text-xs font-bold" />
                         {u.displayName || u.username}
@@ -638,7 +592,8 @@ const BookDetail = () => {
                       <Link
                         key={u._id}
                         to={`/members/${u._id}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm text-sm font-medium hover:opacity-80 transition-opacity"
+                        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
                       >
                         <UserAvatar user={u} className="w-5 h-5 rounded-full text-xs font-bold" />
                         {u.displayName || u.username}
@@ -659,7 +614,8 @@ const BookDetail = () => {
                       <Link
                         key={u._id}
                         to={`/members/${u._id}`}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white shadow-sm border border-gray-100 text-sm font-medium text-gray-700 hover:opacity-80 transition-opacity"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-sm text-sm font-medium hover:opacity-80 transition-opacity"
+                        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)", color: "var(--color-text)" }}
                       >
                         <UserAvatar user={u} className="w-5 h-5 rounded-full text-xs font-bold" />
                         {u.displayName || u.username}

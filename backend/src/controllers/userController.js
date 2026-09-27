@@ -80,6 +80,7 @@ exports.updateProfile = async (req, res, next) => {
       notifyOnNewOrder,
       notifyOnListShared,
       notifyOnListComment,
+      readingGoal,
     } = req.body;
 
     const user = await User.findById(req.user._id);
@@ -128,6 +129,16 @@ exports.updateProfile = async (req, res, next) => {
     }
     if (notifyOnListComment !== undefined) {
       user.notifyOnListComment = notifyOnListComment;
+    }
+    if (readingGoal !== undefined) {
+      const goalNum = Number(readingGoal);
+      if (readingGoal !== null && (!Number.isFinite(goalNum) || goalNum < 1)) {
+        return res.status(400).json({
+          success: false,
+          message: "readingGoal must be a positive number",
+        });
+      }
+      user.readingGoal = readingGoal === null ? null : goalNum;
     }
 
     await user.save();

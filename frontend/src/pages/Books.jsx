@@ -27,7 +27,7 @@ const Books = () => {
     savedFilters.ebookOnly || false,
   );
   const [genre, setGenre] = useState(savedFilters.genre || "");
-  const [sort, setSort] = useState(savedFilters.sort || "newest");
+  const [sort, setSort] = useState(savedFilters.sort || "added-desc");
   const [readFilter, setReadFilter] = useState(() => {
     const saved = savedFilters.readFilter;
     if (Array.isArray(saved)) return saved;
@@ -41,6 +41,7 @@ const Books = () => {
   };
   const [ownedOnly, setOwnedOnly] = useState(savedFilters.ownedOnly || false);
   const [showHidden, setShowHidden] = useState(savedFilters.showHidden || false);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
@@ -132,7 +133,7 @@ const Books = () => {
     setOwnedOnly(false);
     setShowHidden(false);
     setGenre("");
-    setSort("newest");
+    setSort("added-desc");
     setReadFilter("all");
     sessionStorage.removeItem("bookFilters");
   };
@@ -144,247 +145,210 @@ const Books = () => {
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
             <h1 className="text-5xl font-bold gradient-text mb-3">
-              📚 Bibilotek
+              Bibilotek
             </h1>
-            <p className="text-gray-700 text-lg">
+            <p className="text-lg" style={{ color: "var(--color-text-muted)" }}>
               {books.length} {books.length === 1 ? "bok" : "bøker"} i vårt
               bibilotek
             </p>
           </div>
 
-          <div className="flex gap-3 flex-wrap justify-end">
+          <div className="flex gap-2 sm:gap-3 flex-wrap justify-end">
             <button
               onClick={() => setShowRequestModal(true)}
-              className="px-5 py-2.5 rounded-full font-bold text-sm transition-all transform hover:scale-105 shadow-md text-white"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+              className="btn-accent text-sm px-3 py-2 sm:text-base sm:px-7 sm:py-3"
             >
-              📬 Be om en bok
+              Be om en bok
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="btn-accent"
+              className="btn-secondary text-sm px-3 py-2 sm:text-base sm:px-7 sm:py-3"
             >
               ✨ Legg til bok
             </button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="container-gradient mb-8">
-          <div className="grid md:grid-cols-5 gap-1">
-            {/* Search */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                🔍 Søk etter bøker
-              </label>
-              <input
-                type="text"
-                placeholder="Søk etter tittel, forfatter eller serie..."
-                value={search}
-                onChange={handleSearchChange}
-                className="input-field"
-              />
-            </div>
-
-            {/* Bokklubb Filter */}
-            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
-              <input
-                type="checkbox"
-                id="bookclubOnly"
-                checked={bookclubOnly}
-                onChange={(e) => setBookclubOnly(e.target.checked)}
-                className="w-5 h-5 rounded cursor-pointer"
-              />
-              <label
-                htmlFor="bookclubOnly"
-                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
-              >
-                📅 Klubbens bøker
-              </label>
-            </div>
-
-            {/* Audiobook Filter */}
-            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
-              <input
-                type="checkbox"
-                id="audiobookOnly"
-                checked={audiobookOnly}
-                onChange={(e) => setAudiobookOnly(e.target.checked)}
-                className="w-5 h-5 rounded cursor-pointer"
-              />
-              <label
-                htmlFor="audiobookOnly"
-                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
-              >
-                🎧 Lydbøker
-              </label>
-            </div>
-
-            {/* Ebook Filter */}
-            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
-              <input
-                type="checkbox"
-                id="ebookOnly"
-                checked={ebookOnly}
-                onChange={(e) => setEbookOnly(e.target.checked)}
-                className="w-5 h-5 rounded cursor-pointer"
-              />
-              <label
-                htmlFor="ebookOnly"
-                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
-              >
-                📖 E-bøker
-              </label>
-            </div>
-
-            {/* Owned Filter */}
-            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
-              <input
-                type="checkbox"
-                id="ownedOnly"
-                checked={ownedOnly}
-                onChange={(e) => setOwnedOnly(e.target.checked)}
-                className="w-5 h-5 rounded cursor-pointer"
-              />
-              <label
-                htmlFor="ownedOnly"
-                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
-              >
-                📚 Eier boken
-              </label>
-            </div>
-
-            {/* Show Hidden Filter */}
-            <div className="flex items-center gap-2 p-4 rounded-xl bg-white hover:shadow-md transition-all">
-              <input
-                type="checkbox"
-                id="showHidden"
-                checked={showHidden}
-                onChange={(e) => setShowHidden(e.target.checked)}
-                className="w-5 h-5 rounded cursor-pointer"
-              />
-              <label
-                htmlFor="showHidden"
-                className="text-sm font-bold text-gray-700 cursor-pointer select-none"
-              >
-                🙈 Vis skjulte bøker
-              </label>
-            </div>
-
-            {/* Sort */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                🔄 Sorter etter
-              </label>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
-                className="input-field"
-              >
-                <option value="newest">Nyeste først</option>
-                <option value="title">Tittel A-Z</option>
-                <option value="author">Forfatter fornavn A-Z</option>
-                <option value="author-lastname">Forfatter etternavn A-Z</option>
-                <option value="rating">Høyest rated</option>
-              </select>
-            </div>
-
-            {/* Read/Unread Filter */}
-            <div className="md:col-span-5">
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                👁️ Lesestatus
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setReadFilter([])}
-                  className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
-                  style={
-                    readFilter.length === 0
-                      ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
-                      : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
-                  }
-                >
-                  Alle bøker
-                </button>
-                {[
-                  { value: "read", label: "✅ Lest" },
-                  { value: "unread", label: "📚 Ulest" },
-                  { value: "dnf", label: "🚫 DNF" },
-                ].map(({ value, label }) => (
-                  <button
-                    key={value}
-                    onClick={() => toggleReadFilter(value)}
-                    className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
-                    style={
-                      readFilter.includes(value)
-                        ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
-                        : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
-                    }
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Genre Filter */}
-            <div className="md:col-span-4">
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                🎭 Sjanger
-              </label>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setGenre("")}
-                  className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
-                  style={
-                    genre === ""
-                      ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
-                      : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
-                  }
-                >
-                  Alle sjangere
-                </button>
-                {(showAllGenres ? availableGenres : availableGenres.slice(0, GENRES_VISIBLE)).map((g) => (
-                  <button
-                    key={g.name}
-                    onClick={() => setGenre(g.name)}
-                    className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
-                    style={
-                      genre === g.name
-                        ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
-                        : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
-                    }
-                  >
-                    {g.name}
-                    <span className="ml-1 opacity-60 text-xs">({g.count})</span>
-                  </button>
-                ))}
-                {availableGenres.length > GENRES_VISIBLE && (
-                  <button
-                    onClick={() => setShowAllGenres(v => !v)}
-                    className="px-2.5 py-1 rounded-full text-sm font-semibold transition-all"
-                    style={{ background: "white", color: "#9ca3af", border: "1.5px dashed #9ca3af" }}
-                  >
-                    {showAllGenres
-                      ? "Vis færre"
-                      : `+${availableGenres.length - GENRES_VISIBLE} flere`}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Clear Filters */}
-            <div className="flex items-end">
-              <button
-                onClick={clearFilters}
-                className="text-sm font-bold px-4 py-2 rounded-full bg-white hover:shadow-md transition-all transform hover:scale-105"
-                style={{ color: "#f5576c" }}
-              >
-                ✖️ Fjern alt filtrering
-              </button>
-            </div>
+        {/* Toolbar */}
+        <div
+          className="flex flex-wrap gap-3 items-center p-3 rounded-2xl mb-3"
+          style={{ background: "var(--color-card)", border: "1px solid var(--color-border)" }}
+        >
+          <div
+            className="flex items-center gap-2 flex-1 min-w-[200px] px-3 py-2 rounded-lg"
+            style={{ background: "var(--color-sunken)" }}
+          >
+            <span style={{ color: "var(--color-text-faint)" }}>🔍</span>
+            <input
+              type="text"
+              placeholder="Søk etter tittel, forfatter eller serie..."
+              value={search}
+              onChange={handleSearchChange}
+              className="w-full bg-transparent outline-none text-sm"
+              style={{ color: "var(--color-text)" }}
+            />
           </div>
+
+          <div
+            className="flex rounded-lg overflow-hidden"
+            style={{ border: "1.5px solid var(--color-border-strong)" }}
+          >
+            <button
+              onClick={() => setReadFilter([])}
+              className="px-3 py-2 text-sm font-semibold transition-all"
+              style={
+                readFilter.length === 0
+                  ? { background: "var(--color-primary)", color: "white" }
+                  : { background: "var(--color-card)", color: "var(--color-text-muted)" }
+              }
+            >
+              Alle
+            </button>
+            {[
+              { value: "read", label: "Lest" },
+              { value: "unread", label: "Ulest" },
+              { value: "dnf", label: "DNF" },
+            ].map(({ value, label }) => (
+              <button
+                key={value}
+                onClick={() => toggleReadFilter(value)}
+                className="px-3 py-2 text-sm font-semibold transition-all"
+                style={{
+                  borderLeft: "1.5px solid var(--color-border-strong)",
+                  ...(readFilter.includes(value)
+                    ? { background: "var(--color-primary)", color: "white" }
+                    : { background: "var(--color-card)", color: "var(--color-text-muted)" }),
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="input-field"
+            style={{ width: "auto", padding: "0.5rem 0.7rem" }}
+          >
+            <optgroup label="Tittel">
+              <option value="title-asc">Tittel A-Å</option>
+              <option value="title-desc">Tittel Å-A</option>
+            </optgroup>
+            <optgroup label="Forfatter etternavn">
+              <option value="lastname-asc">Etternavn A-Å</option>
+              <option value="lastname-desc">Etternavn Å-A</option>
+            </optgroup>
+            <optgroup label="Forfatter fornavn">
+              <option value="firstname-asc">Fornavn A-Å</option>
+              <option value="firstname-desc">Fornavn Å-A</option>
+            </optgroup>
+            <optgroup label="Lagt til">
+              <option value="added-desc">Sist lagt til</option>
+              <option value="added-asc">Tidligst lagt til</option>
+            </optgroup>
+            <optgroup label="Rating">
+              <option value="rating-desc">Høyest rated</option>
+              <option value="rating-asc">Lavest rated</option>
+            </optgroup>
+            <optgroup label="Antall lest">
+              <option value="readcount-desc">Flest lest</option>
+              <option value="readcount-asc">Færrest lest</option>
+            </optgroup>
+          </select>
+
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            className="px-3 py-2 rounded-full text-sm font-semibold transition-all"
+            style={
+              showFilters
+                ? { background: "var(--color-wine-tint)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }
+                : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
+            }
+          >
+            Filter {showFilters ? "▲" : "▼"}
+          </button>
         </div>
+
+        {/* Collapsible filter row */}
+        {showFilters && (
+          <div
+            className="flex flex-wrap items-center gap-2 p-3 rounded-2xl mb-8"
+            style={{ background: "var(--color-sunken)" }}
+          >
+            {[
+              { checked: bookclubOnly, set: setBookclubOnly, label: "Klubbens bøker" },
+              { checked: audiobookOnly, set: setAudiobookOnly, label: "Lydbok" },
+              { checked: ebookOnly, set: setEbookOnly, label: "E-bok" },
+              { checked: ownedOnly, set: setOwnedOnly, label: "Eier boken" },
+              { checked: showHidden, set: setShowHidden, label: "Vis skjulte bøker" },
+            ].map(({ checked, set, label }) => (
+              <button
+                key={label}
+                onClick={() => set((v) => !v)}
+                className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+                style={
+                  checked
+                    ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                    : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
+                }
+              >
+                {label}
+              </button>
+            ))}
+
+            <span
+              className="w-px self-stretch mx-1"
+              style={{ background: "var(--color-border-strong)" }}
+            />
+
+            <button
+              onClick={() => setGenre("")}
+              className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+              style={
+                genre === ""
+                  ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                  : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
+              }
+            >
+              Alle sjangere
+            </button>
+            {(showAllGenres ? availableGenres : availableGenres.slice(0, GENRES_VISIBLE)).map((g) => (
+              <button
+                key={g.name}
+                onClick={() => setGenre(g.name)}
+                className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+                style={
+                  genre === g.name
+                    ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                    : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
+                }
+              >
+                {g.name}
+                <span className="ml-1 opacity-60 text-xs">({g.count})</span>
+              </button>
+            ))}
+            {availableGenres.length > GENRES_VISIBLE && (
+              <button
+                onClick={() => setShowAllGenres((v) => !v)}
+                className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
+                style={{ background: "transparent", color: "var(--color-text-faint)", border: "1.5px dashed var(--color-border-strong)" }}
+              >
+                {showAllGenres
+                  ? "Vis færre"
+                  : `+${availableGenres.length - GENRES_VISIBLE} flere`}
+              </button>
+            )}
+
+            <button
+              onClick={clearFilters}
+              className="ml-auto text-sm font-semibold px-3 py-1.5"
+              style={{ color: "var(--color-terracotta)" }}
+            >
+              ✖ Fjern all filtrering
+            </button>
+          </div>
+        )}
 
         {/* Books Grid */}
         <BookGrid books={books} loading={loading} error={error} userBookMap={userBookMap} onStatusChange={handleStatusChange} />

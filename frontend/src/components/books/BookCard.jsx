@@ -69,9 +69,10 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
     >
       <Link
         to={`/books/${book._id}`}
-        className="group block bg-white rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
+        className="group block rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
         style={{
-          boxShadow: showOverlay ? "0 8px 28px rgba(107, 91, 149, 0.18)" : "0 2px 12px rgba(0,0,0,0.07)",
+          background: "var(--color-card)",
+          boxShadow: showOverlay ? "0 8px 28px rgba(147, 38, 77, 0.18)" : "0 2px 12px rgba(0,0,0,0.07)",
           opacity: isHidden ? 0.35 : hasLinks ? 1 : 0.5,
         }}
       >
@@ -113,8 +114,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
                 style={
                   currentStatus === "to-read"
-                    ? { background: "linear-gradient(135deg, #667eea, #764ba2)", color: "white" }
-                    : { background: "rgba(255,255,255,0.92)", color: "#7c3aed" }
+                    ? { background: "var(--color-blue)", color: "white" }
+                    : { background: "rgba(255,255,255,0.92)", color: "var(--color-blue)" }
                 }
               >
                 {currentStatus === "to-read" ? "✓ TBR" : "+ TBR"}
@@ -125,8 +126,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
                 style={
                   currentStatus === "read"
-                    ? { background: "linear-gradient(135deg, #10b981, #14b8a6)", color: "white" }
-                    : { background: "rgba(255,255,255,0.92)", color: "#059669" }
+                    ? { background: "var(--color-sage)", color: "white" }
+                    : { background: "rgba(255,255,255,0.92)", color: "var(--color-sage)" }
                 }
               >
                 {currentStatus === "read" ? "✓ Lest" : "+ Lest"}
@@ -137,8 +138,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
                 style={
                   currentStatus === "dnf"
-                    ? { background: "linear-gradient(135deg, #6b7280, #4b5563)", color: "white" }
-                    : { background: "rgba(255,255,255,0.92)", color: "#4b5563" }
+                    ? { background: "var(--color-terracotta)", color: "white" }
+                    : { background: "rgba(255,255,255,0.92)", color: "var(--color-terracotta)" }
                 }
               >
                 {currentStatus === "dnf" ? "✓ DNF" : "+ DNF"}
@@ -162,12 +163,12 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 style={{
                   background:
                     currentStatus === "read"
-                      ? "rgba(16,185,129,0.88)"
+                      ? "var(--color-sage)"
                       : currentStatus === "to-read"
-                      ? "rgba(124,58,237,0.88)"
+                      ? "var(--color-blue)"
                       : currentStatus === "dnf"
-                      ? "rgba(75,85,99,0.88)"
-                      : "rgba(59,130,246,0.88)",
+                      ? "var(--color-terracotta)"
+                      : "var(--color-secondary)",
                 }}
               >
                 {currentStatus === "read"
@@ -218,7 +219,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 <span
                   key={index}
                   className="text-xs px-2.5 py-1 rounded-full font-medium transition-colors"
-                  style={{ border: "1.5px solid #6B5B95", color: "#6B5B95" }}
+                  style={{ border: "1.5px solid var(--color-primary)", color: "var(--color-primary)" }}
                 >
                   {genre}
                 </span>

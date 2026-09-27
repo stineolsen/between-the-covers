@@ -35,9 +35,28 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // CORS configuration
+// Vercel preview deployments (one per branch) get their own subdomain, so a
+// single FRONTEND_URL can't cover both production and whichever branch is
+// being tested at once. Allow the configured production URL plus any Vercel
+// preview URL for this project, so testing a branch never requires touching
+// production's FRONTEND_URL.
+const additionalOrigins = (process.env.ADDITIONAL_FRONTEND_URLS || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const allowedOrigins = [process.env.FRONTEND_URL || "http://localhost:5173", ...additionalOrigins];
+const vercelPreviewPattern = /^https:\/\/between-the-covers-git-[a-z0-9-]+-stine-s-projects\.vercel\.app$/;
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Non-browser requests (curl, server-to-server, same-origin) send no
+      // Origin header at all - always allow those.
+      if (!origin || allowedOrigins.includes(origin) || vercelPreviewPattern.test(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true, // Allow cookies to be sent
   }),
 );

@@ -7,6 +7,7 @@ import {
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -34,10 +35,11 @@ import Howto from "./pages/Howto";
 function App() {
   return (
     <Router>
+      <ThemeProvider>
       <AuthProvider>
         <CartProvider>
           <ToastProvider>
-            <div className="min-h-screen flex flex-col animate-fadeIn">
+            <div className="min-h-screen flex flex-col animate-fadeIn pb-16 lg:pb-0">
               <Navbar />
               <Routes>
                 {/* Public Routes */}
@@ -184,6 +186,7 @@ function App() {
           </ToastProvider>
         </CartProvider>
       </AuthProvider>
+      </ThemeProvider>
     </Router>
   );
 }

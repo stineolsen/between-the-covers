@@ -17,7 +17,7 @@ const BookCoverFallback = ({ src, alt, className = "", category = "book" }) => {
         className={`${className} flex items-center justify-center text-6xl`}
         style={{
           background:
-            "linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(251, 113, 133, 0.2))",
+            "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
         }}
       >
         {getEmoji()}

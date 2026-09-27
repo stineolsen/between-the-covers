@@ -102,6 +102,14 @@ export const booksApi = {
     return response.data;
   },
 
+  // Search Hardcover.app for book metadata (Add Book search, third source
+  // alongside the direct Open Library / NB calls — proxied server-side since
+  // it needs a secret API key).
+  searchExternal: async (q) => {
+    const response = await api.get("/api/books/search-external", { params: { q } });
+    return response.data;
+  },
+
   // Helper: Get cover image URL (handles both local filenames and external URLs)
   getCoverUrl: (coverImage) => {
     if (!coverImage) return null;

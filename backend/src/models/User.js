@@ -103,6 +103,13 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Per-user annual reading goal (book count), shown as progress on Home
+    // and Din lesehistorie. Null until the user sets one.
+    readingGoal: {
+      type: Number,
+      default: null,
+      min: [1, "Reading goal must be at least 1"],
+    },
     // Admin-set link to this member's Audiobookshelf account, used to pull
     // listening stats for the "Topp lytter" badge (see absListeningSync.js)
     absUsername: {

@@ -27,9 +27,9 @@ const ListNotificationFeed = () => {
   if (loading || notifications.length === 0) return null;
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 animate-fadeIn">
-      <h2 className="text-xl font-bold gradient-text mb-4">📋 Listevarsler</h2>
-      <div className="space-y-3">
+    <div className="max-w-4xl mx-auto mt-4 sm:mt-6 animate-fadeIn">
+      <h2 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">📋 Listevarsler</h2>
+      <div className="space-y-2 sm:space-y-3">
         {notifications.map((n) => {
           const fromName = n.from?.displayName || n.from?.username || "Ukjent";
           const list = n.list;
@@ -37,10 +37,10 @@ const ListNotificationFeed = () => {
           return (
             <div
               key={n._id}
-              className="flex items-center gap-4 rounded-2xl p-4"
+              className="flex items-center gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4"
               style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,113,133,0.14))" }}
             >
-              <UserAvatar user={n.from} className="w-10 h-10 rounded-full font-bold flex-shrink-0" />
+              <UserAvatar user={n.from} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold flex-shrink-0" />
 
               <div className="flex-1 min-w-0">
                 <Link to={`/lists/${list?._id}`} className="font-bold text-gray-800 hover:text-purple-700 transition-colors block truncate">

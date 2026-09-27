@@ -42,9 +42,9 @@ const RecommendationFeed = () => {
   if (loading || recs.length === 0) return null;
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 animate-fadeIn">
-      <h2 className="text-xl font-bold gradient-text mb-4">📬 Anbefalt til deg</h2>
-      <div className="space-y-3">
+    <div className="max-w-4xl mx-auto mt-4 sm:mt-6 animate-fadeIn">
+      <h2 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">📬 Anbefalt til deg</h2>
+      <div className="space-y-2 sm:space-y-3">
         {recs.map(rec => {
           const sender = rec.from;
           const senderName = sender?.displayName || sender?.username || 'Ukjent';
@@ -53,7 +53,7 @@ const RecommendationFeed = () => {
           return (
             <div
               key={rec._id}
-              className="flex items-center gap-4 rounded-2xl p-4"
+              className="flex items-center gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4"
               style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,113,133,0.14))' }}
             >
               {/* Book cover */}
@@ -62,11 +62,11 @@ const RecommendationFeed = () => {
                   <img
                     src={`${API_URL}/uploads/books/${book.coverImage}`}
                     alt={book.title}
-                    className="w-14 h-20 object-cover rounded-lg shadow"
+                    className="w-11 h-16 sm:w-14 sm:h-20 object-cover rounded-lg shadow"
                     onError={e => { e.target.style.display = 'none'; }}
                   />
                 ) : (
-                  <div className="w-14 h-20 rounded-lg bg-purple-100 flex items-center justify-center text-2xl">📖</div>
+                  <div className="w-11 h-16 sm:w-14 sm:h-20 rounded-lg bg-purple-100 flex items-center justify-center text-2xl">📖</div>
                 )}
               </Link>
 

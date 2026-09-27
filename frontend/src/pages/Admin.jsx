@@ -469,7 +469,7 @@ const Admin = () => {
       case "cancelled":
         return "bg-red-100 text-red-800";
       default:
-        return "bg-gray-100 text-gray-800";
+        return "bg-sunken text-text";
     }
   };
 
@@ -480,7 +480,7 @@ const Admin = () => {
           <h1 className="text-5xl font-bold gradient-text mb-2">
             Admin Dashboard
           </h1>
-          <p className="text-gray text-lg drop-shadow-lg">
+          <p className="text-text-muted text-lg">
             Rediger brukere, varer, bestillinger og mer
           </p>
         </div>
@@ -490,11 +490,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("requests")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "requests" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "requests" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "requests"
-                ? { background: "linear-gradient(135deg, #7c3aed, #db2777)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -503,11 +503,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("products")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "products" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "products" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "products"
-                ? { background: "linear-gradient(135deg, #f093fb, #f5576c)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -516,11 +516,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("orders")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "orders" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "orders" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "orders"
-                ? { background: "linear-gradient(135deg, #14b8a6, #10b981)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -529,11 +529,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("users")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "users" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "users" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "users"
-                ? { background: "linear-gradient(135deg, #667eea, #764ba2)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -542,11 +542,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("passwords")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "passwords" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "passwords" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "passwords"
-                ? { background: "linear-gradient(135deg, #f59e0b, #ef4444)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -555,11 +555,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("books")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "books" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "books" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "books"
-                ? { background: "linear-gradient(135deg, #10b981, #059669)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -568,11 +568,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("import")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "import" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "import" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "import"
-                ? { background: "linear-gradient(135deg, #0ea5e9, #6366f1)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -581,11 +581,11 @@ const Admin = () => {
           <button
             onClick={() => setActiveTab("alerts")}
             className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "alerts" ? "text-white" : "bg-white text-gray-700"
+              activeTab === "alerts" ? "text-white" : "bg-card text-text-muted"
             }`}
             style={
               activeTab === "alerts"
-                ? { background: "linear-gradient(135deg, #ec4899, #f43f5e)" }
+                ? { background: "var(--color-primary)" }
                 : {}
             }
           >
@@ -596,7 +596,7 @@ const Admin = () => {
         {error && (
           <div
             className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-            style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+            style={{ background: "var(--color-terracotta)" }}
           >
             {error}
           </div>
@@ -605,7 +605,7 @@ const Admin = () => {
         {successMessage && (
           <div
             className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-            style={{ background: "linear-gradient(135deg, #10b981, #14b8a6)" }}
+            style={{ background: "var(--color-sage)" }}
           >
             {successMessage}
           </div>
@@ -620,16 +620,16 @@ const Admin = () => {
                   className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
                   style={{
                     border: "4px solid rgba(255,255,255,0.3)",
-                    borderTopColor: "#667eea",
+                    borderTopColor: "var(--color-primary)",
                   }}
                 ></div>
-                <p className="text-gray-700 font-bold">
+                <p className="text-text-muted font-bold">
                   Later brukere til godkjenning...
                 </p>
               </div>
             ) : pendingUsers.length === 0 ? (
               <div className="container-gradient text-center py-12 animate-fadeIn">
-                <p className="text-gray-700 text-lg font-bold">
+                <p className="text-text-muted text-lg font-bold">
                   ✅ Ingen brukere til godkjenning for øyeblikket.
                 </p>
               </div>
@@ -645,16 +645,16 @@ const Admin = () => {
                         <h3 className="text-2xl font-bold gradient-text mb-1">
                           {user.displayName || user.username}
                         </h3>
-                        <p className="text-gray-600 mb-1 font-semibold">
+                        <p className="text-text-muted mb-1 font-semibold">
                           @{user.username}
                         </p>
-                        <p className="text-sm text-gray-500">{user.email}</p>
+                        <p className="text-sm text-text-faint">{user.email}</p>
                         {user.bio && (
-                          <p className="mt-2 text-gray-700 italic">
+                          <p className="mt-2 text-text-muted italic">
                             {user.bio}
                           </p>
                         )}
-                        <p className="mt-2 text-xs text-gray-500">
+                        <p className="mt-2 text-xs text-text-faint">
                           Registrert:{" "}
                           {new Date(user.joinedDate).toLocaleDateString()}
                         </p>
@@ -676,7 +676,7 @@ const Admin = () => {
                           className="px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-white"
                           style={{
                             background:
-                              "linear-gradient(135deg, #ef4444, #dc2626)",
+                              "var(--color-terracotta)",
                           }}
                         >
                           ✕ Avvis
@@ -716,16 +716,16 @@ const Admin = () => {
                       className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
                       style={{
                         border: "4px solid rgba(255,255,255,0.3)",
-                        borderTopColor: "#f093fb",
+                        borderTopColor: "var(--color-primary)",
                       }}
                     ></div>
-                    <p className="text-gray-700 font-bold">
+                    <p className="text-text-muted font-bold">
                       Laster inn varer...
                     </p>
                   </div>
                 ) : products.length === 0 ? (
                   <div className="container-gradient text-center py-12 animate-fadeIn">
-                    <p className="text-gray-700 text-lg font-bold">
+                    <p className="text-text-muted text-lg font-bold">
                       📦 Ingen varer i butikken enda. Trykk på "Legg til vare"
                       for å starte!
                     </p>
@@ -745,19 +745,19 @@ const Admin = () => {
                             className="w-full h-40 object-cover rounded-xl mb-3"
                           />
                         ) : (
-                          <div className="w-full h-40 rounded-xl mb-3 bg-purple-50 flex items-center justify-center text-4xl">
+                          <div className="w-full h-40 rounded-xl mb-3 bg-wine-tint flex items-center justify-center text-4xl">
                             🛍️
                           </div>
                         )}
                         <h3 className="text-xl font-bold gradient-text mb-2">
                           {product.name}
                         </h3>
-                        <p className="text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-text-muted mb-3 line-clamp-2">
                           {product.description}
                         </p>
 
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-2xl font-bold text-gray-800">
+                          <span className="text-2xl font-bold text-text">
                             {product.currency === "NOK"
                               ? "kr "
                               : product.currency === "USD"
@@ -785,7 +785,7 @@ const Admin = () => {
                             className="px-3 py-1 rounded-full font-bold text-white"
                             style={{
                               background:
-                                "linear-gradient(135deg, #667eea, #764ba2)",
+                                "var(--color-primary)",
                             }}
                           >
                             {product.category}
@@ -794,7 +794,7 @@ const Admin = () => {
                             className="px-3 py-1 rounded-full font-bold text-white"
                             style={{
                               background:
-                                "linear-gradient(135deg, #f093fb, #f5576c)",
+                                "var(--color-secondary)",
                             }}
                           >
                             Antall igjen i butikk: {product.stock}
@@ -802,12 +802,12 @@ const Admin = () => {
                         </div>
 
                         {product.book && (
-                          <p className="text-xs text-gray-500 mb-3">
+                          <p className="text-xs text-text-faint mb-3">
                             📚 Relatert til: {product.book.title}
                           </p>
                         )}
 
-                        <div className="flex gap-2 pt-3 border-t border-gray-200">
+                        <div className="flex gap-2 pt-3 border-t border-border">
                           <button
                             onClick={() => handleEditProduct(product)}
                             className="flex-1 btn-secondary py-2 text-sm"
@@ -819,7 +819,7 @@ const Admin = () => {
                             className="flex-1 py-2 rounded-full font-bold transition-all transform hover:scale-105 shadow-md text-sm text-white"
                             style={{
                               background:
-                                "linear-gradient(135deg, #ef4444, #dc2626)",
+                                "var(--color-terracotta)",
                             }}
                           >
                             🗑️ Slett
@@ -843,14 +843,14 @@ const Admin = () => {
                   className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
                   style={{
                     border: "4px solid rgba(255,255,255,0.3)",
-                    borderTopColor: "#14b8a6",
+                    borderTopColor: "var(--color-primary)",
                   }}
                 ></div>
-                <p className="text-gray-700 font-bold">Laster inn varer...</p>
+                <p className="text-text-muted font-bold">Laster inn varer...</p>
               </div>
             ) : orders.length === 0 ? (
               <div className="container-gradient text-center py-12 animate-fadeIn">
-                <p className="text-gray-700 text-lg font-bold">
+                <p className="text-text-muted text-lg font-bold">
                   📦 Ingen bestillinger enda.
                 </p>
               </div>
@@ -866,7 +866,7 @@ const Admin = () => {
                         <h3 className="text-2xl font-bold gradient-text mb-1">
                           Bestilling #{order._id.slice(-6).toUpperCase()}
                         </h3>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-text-faint">
                           {new Date(order.createdAt).toLocaleString()}
                         </p>
                       </div>
@@ -879,22 +879,22 @@ const Admin = () => {
 
                     <div className="grid md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <h4 className="font-bold text-gray-700 mb-2">
+                        <h4 className="font-bold text-text-muted mb-2">
                           Bestillingsdetaljer
                         </h4>
-                        <p className="text-gray-700">
+                        <p className="text-text-muted">
                           <strong>Navn:</strong> {order.customerName}
                         </p>
-                        <p className="text-gray-700">
+                        <p className="text-text-muted">
                           <strong>Epost:</strong> {order.customerEmail}
                         </p>
                         {order.customerPhone && (
-                          <p className="text-gray-700">
+                          <p className="text-text-muted">
                             <strong>Telefon:</strong> {order.customerPhone}
                           </p>
                         )}
                         {order.user && (
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-text-faint mt-1">
                             Bruker: @{order.user.username}
                           </p>
                         )}
@@ -903,20 +903,20 @@ const Admin = () => {
                       <div>
                         {order.deliveryAddress && (
                           <div className="mb-2">
-                            <h4 className="font-bold text-gray-700 mb-1">
+                            <h4 className="font-bold text-text-muted mb-1">
                               Adresse
                             </h4>
-                            <p className="text-gray-700 text-sm">
+                            <p className="text-text-muted text-sm">
                               {order.deliveryAddress}
                             </p>
                           </div>
                         )}
                         {order.notes && (
                           <div>
-                            <h4 className="font-bold text-gray-700 mb-1">
+                            <h4 className="font-bold text-text-muted mb-1">
                               Notater
                             </h4>
-                            <p className="text-gray-700 text-sm italic">
+                            <p className="text-text-muted text-sm italic">
                               {order.notes}
                             </p>
                           </div>
@@ -925,30 +925,30 @@ const Admin = () => {
                     </div>
 
                     <div className="mb-4">
-                      <h4 className="font-bold text-gray-700 mb-2">
+                      <h4 className="font-bold text-text-muted mb-2">
                         Bestillingsgjenstander
                       </h4>
                       <div className="space-y-2">
                         {order.items.map((item, idx) => (
                           <div
                             key={idx}
-                            className="flex justify-between items-center p-3 bg-white rounded-xl"
+                            className="flex justify-between items-center p-3 bg-card rounded-xl"
                           >
                             <div className="flex-1">
-                              <p className="font-semibold text-gray-800">
+                              <p className="font-semibold text-text">
                                 {item.productName}
                               </p>
                               {item.product && (
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-text-faint">
                                   {item.product.category}
                                 </p>
                               )}
                             </div>
                             <div className="text-right">
-                              <p className="text-gray-700">
+                              <p className="text-text-muted">
                                 <strong>Antall:</strong> {item.quantity}
                               </p>
-                              <p className="text-gray-700 font-bold">
+                              <p className="text-text-muted font-bold">
                                 {item.currency === "USD"
                                   ? "$"
                                   : item.currency === "EUR"
@@ -967,13 +967,13 @@ const Admin = () => {
                             "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
                         }}
                       >
-                        <p className="text-2xl font-bold text-gray-800">
+                        <p className="text-2xl font-bold text-text">
                           Total: {order.totalAmount.toFixed(2)} kr
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex gap-2 pt-4 border-t border-gray-200">
+                    <div className="flex gap-2 pt-4 border-t border-border">
                       <select
                         value={order.status}
                         onChange={(e) =>
@@ -1001,13 +1001,13 @@ const Admin = () => {
               <div className="container-gradient text-center py-12 animate-fadeIn">
                 <div
                   className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
-                  style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "#f59e0b" }}
+                  style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "var(--color-primary)" }}
                 ></div>
-                <p className="text-gray-700 font-bold">Laster brukere...</p>
+                <p className="text-text-muted font-bold">Laster brukere...</p>
               </div>
             ) : allMembers.length === 0 ? (
               <div className="container-gradient text-center py-12 animate-fadeIn">
-                <p className="text-gray-700 text-lg font-bold">Ingen godkjente brukere funnet.</p>
+                <p className="text-text-muted text-lg font-bold">Ingen godkjente brukere funnet.</p>
               </div>
             ) : (
               <div className="grid gap-4 animate-fadeIn">
@@ -1021,20 +1021,20 @@ const Admin = () => {
                         <h3 className="text-xl font-bold gradient-text mb-0.5">
                           {member.displayName || member.username}
                         </h3>
-                        <p className="text-gray-600 font-semibold text-sm">@{member.username}</p>
-                        <p className="text-gray-500 text-sm">{member.email}</p>
+                        <p className="text-text-muted font-semibold text-sm">@{member.username}</p>
+                        <p className="text-text-faint text-sm">{member.email}</p>
                       </div>
                       <button
                         onClick={() => handleAdminResetPassword(member._id, member.displayName || member.username)}
                         className="px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-white"
-                        style={{ background: "linear-gradient(135deg, #f59e0b, #ef4444)" }}
+                        style={{ background: "var(--color-secondary)" }}
                       >
                         🔑 Tilbakestill passord
                       </button>
                     </div>
 
-                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
-                      <span className="text-sm text-gray-500 flex-shrink-0">🎧 Audiobookshelf:</span>
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+                      <span className="text-sm text-text-faint flex-shrink-0">🎧 Audiobookshelf:</span>
                       <input
                         type="text"
                         placeholder="ABS-brukernavn"
@@ -1053,7 +1053,7 @@ const Admin = () => {
                         {savingAbsUsername === member._id ? "..." : "Lagre"}
                       </button>
                       {member.absUsername && (
-                        <span className="text-xs text-gray-400 flex-shrink-0">
+                        <span className="text-xs text-text-faint flex-shrink-0">
                           {member.absTotalListeningSeconds > 0
                             ? `${(member.absTotalListeningSeconds / 3600).toFixed(1)} t lyttet`
                             : "Ikke synkronisert ennå"}
@@ -1074,27 +1074,27 @@ const Admin = () => {
               <div className="container-gradient text-center py-12 animate-fadeIn">
                 <div
                   className="animate-spin rounded-full h-12 w-12 mx-auto mb-4"
-                  style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "#7c3aed" }}
+                  style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "var(--color-primary)" }}
                 ></div>
-                <p className="text-gray-700 font-bold">Laster forespørsler...</p>
+                <p className="text-text-muted font-bold">Laster forespørsler...</p>
               </div>
             ) : requests.length === 0 ? (
               <div className="container-gradient text-center py-12 animate-fadeIn">
-                <p className="text-gray-700 text-lg font-bold">📋 Ingen bokforespørsler enda.</p>
+                <p className="text-text-muted text-lg font-bold">📋 Ingen bokforespørsler enda.</p>
               </div>
             ) : (
               <>
                 <div className="flex justify-end mb-2">
                   <button
                     onClick={() => setShowArchive(prev => !prev)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80 bg-gray-100 text-gray-600"
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-80 bg-sunken text-text-muted"
                   >
                     {showArchive ? '← Vis aktive' : `🗄 Arkiv${archivedRequestsCount > 0 ? ` (${archivedRequestsCount})` : ''}`}
                   </button>
                 </div>
                 {visibleRequests.length === 0 ? (
                   <div className="container-gradient text-center py-12 animate-fadeIn">
-                    <p className="text-gray-700 text-lg font-bold">
+                    <p className="text-text-muted text-lg font-bold">
                       {showArchive ? '📦 Ingen arkiverte forespørsler.' : '📋 Ingen aktive forespørsler.'}
                     </p>
                   </div>
@@ -1105,20 +1105,20 @@ const Admin = () => {
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold gradient-text mb-0.5 truncate">{req.title}</h3>
-                        <p className="text-gray-600 font-semibold mb-2">{req.author}</p>
+                        <p className="text-text-muted font-semibold mb-2">{req.author}</p>
 
                         {req.formats && req.formats.length > 0 && (
                           <div className="flex gap-2 mb-2 flex-wrap">
                             {req.formats.map(f => (
                               <span key={f} className="px-2.5 py-0.5 rounded-full text-xs font-bold text-white"
-                                style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}>
+                                style={{ background: 'var(--color-primary)' }}>
                                 {FORMAT_LABELS[f] || f}
                               </span>
                             ))}
                           </div>
                         )}
 
-                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2 text-sm text-text-faint">
                           <span>Fra: <strong>{req.requestedBy?.displayName || req.requestedBy?.username || 'Ukjent'}</strong></span>
                           <span>·</span>
                           <span>{new Date(req.createdAt).toLocaleDateString('no-NO')}</span>
@@ -1136,7 +1136,7 @@ const Admin = () => {
                           <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Lagt til</span>
                         )}
                         {req.status === 'dismissed' && (
-                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-500">↩ Trukket tilbake</span>
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-sunken text-text-faint">↩ Trukket tilbake</span>
                         )}
                         {req.status === 'irrelevant' && (
                           <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-400">✕ Ikke relevant</span>
@@ -1146,13 +1146,13 @@ const Admin = () => {
                             <button
                               onClick={() => handleOpenLinkPicker(req)}
                               className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
-                              style={{ background: 'linear-gradient(135deg, #10b981, #14b8a6)' }}
+                              style={{ background: 'var(--color-sage)' }}
                             >
                               ✓ Marker som lagt til
                             </button>
                             <button
                               onClick={() => handleMarkAsIrrelevant(req._id)}
-                              className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500"
+                              className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-sunken text-text-muted hover:bg-red-50 hover:text-red-500"
                             >
                               ✕ Ikke relevant
                             </button>
@@ -1163,8 +1163,8 @@ const Admin = () => {
                     </div>
 
                     {linkingRequestId === req._id && (
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <p className="text-sm font-bold text-gray-700 mb-2">
+                      <div className="mt-4 pt-4 border-t border-border">
+                        <p className="text-sm font-bold text-text-muted mb-2">
                           Søk etter boken som ble lagt til (valgfritt):
                         </p>
                         <input
@@ -1176,7 +1176,7 @@ const Admin = () => {
                           autoFocus
                         />
                         {searchingBooks ? (
-                          <p className="text-sm text-gray-500">Søker...</p>
+                          <p className="text-sm text-text-faint">Søker...</p>
                         ) : bookSearchResults.length > 0 ? (
                           <div className="space-y-1 mb-3">
                             {bookSearchResults.map((b) => (
@@ -1185,8 +1185,8 @@ const Admin = () => {
                                 onClick={() => setSelectedBookForLink(b)}
                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
                                   selectedBookForLink?._id === b._id
-                                    ? "bg-purple-100 border-2 border-purple-400"
-                                    : "bg-gray-50 hover:bg-gray-100"
+                                    ? "bg-wine-tint border-2 border-primary"
+                                    : "bg-gray-50 hover:bg-sunken"
                                 }`}
                               >
                                 <strong>{b.title}</strong> — {b.author}
@@ -1204,13 +1204,13 @@ const Admin = () => {
                           </button>
                           <button
                             onClick={() => handleMarkAsAdded(req._id, null)}
-                            className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-gray-100 text-gray-600"
+                            className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-sunken text-text-muted"
                           >
                             Marker uten å lenke bok
                           </button>
                           <button
                             onClick={handleCloseLinkPicker}
-                            className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-gray-100 text-gray-600"
+                            className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-sunken text-text-muted"
                           >
                             Avbryt
                           </button>
@@ -1240,7 +1240,7 @@ const Admin = () => {
               <div className="container-gradient text-center py-12 animate-fadeIn">
                 <div className="text-6xl mb-4">📚</div>
                 <h3 className="text-2xl font-bold gradient-text mb-3">Legg til bok manuelt</h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-text-muted mb-6">
                   Fyll inn all informasjon selv — inkludert cover, lenker og bokklubbmåned.
                   <br />
                   For å redigere eller slette, gå inn på boken i biblioteket.
@@ -1262,10 +1262,10 @@ const Admin = () => {
               <h3 className="text-2xl font-bold gradient-text mb-2">
                 📚 Importer bøker (Calibre)
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-text-muted mb-4">
                 Henter nye og endrede bøker fra Calibre-Web siden datoen under.
               </p>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-text-faint mb-4">
                 Sist importert:{" "}
                 <strong>
                   {calibreImportSince
@@ -1311,7 +1311,7 @@ const Admin = () => {
               <h3 className="text-2xl font-bold gradient-text mb-2">
                 🎧 Synkroniser lydbøker (Audiobookshelf)
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-text-muted mb-4">
                 Skanner hele lydboksamlingen og fyller kun inn lydboklenker som mangler —
                 overskriver aldri eksisterende lenker.
               </p>
@@ -1343,7 +1343,7 @@ const Admin = () => {
                           {absSyncResult.unmatchedItems.map((item, i) => (
                             <li
                               key={item.absId || i}
-                              className="p-2 rounded-lg bg-white/60 flex items-center justify-between gap-3 flex-wrap"
+                              className="p-2 rounded-lg bg-sunken flex items-center justify-between gap-3 flex-wrap"
                             >
                               <div>
                                 <span className="font-semibold">{item.title}</span>
@@ -1363,14 +1363,14 @@ const Admin = () => {
                                 <button
                                   onClick={() => setMatchingAbsItem(item)}
                                   className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-                                  style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)" }}
+                                  style={{ background: "var(--color-primary)" }}
                                 >
                                   🔗 Match til bok
                                 </button>
                                 <button
                                   onClick={() => setAddingAbsItem(item)}
                                   className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-                                  style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
+                                  style={{ background: "var(--color-sage)" }}
                                 >
                                   ✨ Ny bok
                                 </button>
@@ -1389,7 +1389,7 @@ const Admin = () => {
               <h3 className="text-2xl font-bold gradient-text mb-2">
                 🎧 Lyttestatistikk (Topp lytter-merket)
               </h3>
-              <p className="text-gray-600 mb-4">
+              <p className="text-text-muted mb-4">
                 Henter total lyttetid fra Audiobookshelf for medlemmer som har fått koblet et
                 Audiobookshelf-brukernavn (under "Passord"-fanen). Kjøres automatisk hver natt kl. 03:00,
                 men kan også kjøres manuelt her. De to som har lyttet mest får "Topp lytter"-merket på profilen sin.
@@ -1415,13 +1415,13 @@ const Admin = () => {
         {activeTab === "alerts" && (
           <div className="container-gradient animate-fadeIn">
             <h3 className="text-2xl font-bold gradient-text mb-2">🔔 Send varsel</h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-text-muted mb-6">
               Sender en e-post til alle medlemmer som har skrudd på «Varsle meg om nye funksjoner» i
               profilen sin. Bruk dette til f.eks. å fortelle om nye funksjoner på siden.
             </p>
             <div className="space-y-4 mb-4">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Tittel</label>
+                <label className="block text-sm font-bold text-text-muted mb-2">Tittel</label>
                 <input
                   type="text"
                   value={alertSubject}
@@ -1431,7 +1431,7 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Melding</label>
+                <label className="block text-sm font-bold text-text-muted mb-2">Melding</label>
                 <textarea
                   value={alertMessage}
                   onChange={(e) => setAlertMessage(e.target.value)}
@@ -1465,22 +1465,22 @@ const Admin = () => {
           onClick={() => setGeneratedPassword(null)}
         >
           <div
-            className="bg-white rounded-3xl p-8 max-w-md w-full animate-fadeIn shadow-2xl"
+            className="bg-card rounded-3xl p-8 max-w-md w-full animate-fadeIn shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-2xl font-bold gradient-text mb-2">
               🔑 Passord tilbakestilt
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p className="text-text-muted mb-6">
               Nytt passord for <strong>{generatedPassword.username}</strong>:
             </p>
             <div
               className="p-4 rounded-2xl text-center font-mono text-2xl font-bold tracking-widest mb-6 select-all"
-              style={{ background: "linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.1))", border: "2px dashed #f59e0b" }}
+              style={{ background: "var(--color-gold-tint)", border: "2px dashed var(--color-secondary)" }}
             >
               {generatedPassword.password}
             </div>
-            <p className="text-sm text-gray-500 mb-6 text-center">
+            <p className="text-sm text-text-faint mb-6 text-center">
               Kopier passordet og del det med brukeren. Det vises bare én gang.
             </p>
             <button
@@ -1496,7 +1496,7 @@ const Admin = () => {
             <button
               onClick={() => setGeneratedPassword(null)}
               className="w-full py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
-              style={{ background: "linear-gradient(135deg, #9ca3af, #6b7280)", color: "white" }}
+              style={{ background: "var(--color-text-faint)", color: "white" }}
             >
               Lukk
             </button>

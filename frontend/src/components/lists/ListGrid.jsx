@@ -6,7 +6,7 @@ const ListGrid = ({ lists, loading, error }) => {
       <div className="flex justify-center items-center py-20">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Laster lister...</p>
+          <p className="text-text-muted">Laster lister...</p>
         </div>
       </div>
     );
@@ -25,8 +25,8 @@ const ListGrid = ({ lists, loading, error }) => {
     return (
       <div className="card text-center py-20">
         <div className="text-6xl mb-4">📋</div>
-        <p className="text-xl text-gray-700 font-semibold mb-2">Ingen lister funnet</p>
-        <p className="text-gray-600">Opprett en ny liste for å komme i gang</p>
+        <p className="text-xl text-text-muted font-semibold mb-2">Ingen lister funnet</p>
+        <p className="text-text-muted">Opprett en ny liste for å komme i gang</p>
       </div>
     );
   }

@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { userBooksApi } from "../api/userBooksApi";
 import { booksApi } from "../api/booksApi";
+import BookCoverFallback from "../components/common/BookCoverFallback";
+import ReadingGoalCard from "../components/common/ReadingGoalCard";
+import { countReadInYear } from "../utils/readingGoal";
 
 const toDisplayDate = (dateStr) => {
   if (!dateStr) return "";
@@ -47,21 +50,22 @@ const DateEditor = ({ initialDate, onSave, onCancel }) => {
         placeholder="dd.mm.åååå"
         onKeyDown={handleKey}
         onChange={() => setError(false)}
-        className={`w-28 border rounded px-2 py-0.5 text-sm focus:outline-none ${
-          error ? "border-red-400" : "border-purple-300 focus:border-purple-500"
-        }`}
+        className="w-28 border rounded px-2 py-0.5 text-sm focus:outline-none"
+        style={{ borderColor: error ? "var(--color-terracotta)" : "var(--color-border-strong)" }}
         autoFocus
       />
       <button
         onClick={handleSave}
-        className="text-green-500 hover:text-green-700 font-bold text-lg leading-none"
+        className="font-bold text-lg leading-none"
+        style={{ color: "var(--color-sage)" }}
         title="Lagre"
       >
         ✓
       </button>
       <button
         onClick={onCancel}
-        className="text-gray-400 hover:text-red-500 font-bold text-lg leading-none"
+        className="font-bold text-lg leading-none"
+        style={{ color: "var(--color-text-faint)" }}
         title="Avbryt"
       >
         ✕
@@ -70,10 +74,7 @@ const DateEditor = ({ initialDate, onSave, onCancel }) => {
   );
 };
 
-const PLACEHOLDER =
-  'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="300" height="450" viewBox="0 0 300 450"%3E%3Crect fill="%23e5e7eb" width="300" height="450"/%3E%3Ctext x="50%25" y="50%25" font-size="24" text-anchor="middle" alignment-baseline="middle" font-family="monospace, sans-serif" fill="%239ca3af"%3ENo Cover%3C/text%3E%3C/svg%3E';
-
-const BookCard = ({ userBook, badge, badgeStyle, footer }) => {
+const BookCard = ({ userBook, badge, badgeColor, footer }) => {
   const book = userBook.book;
   if (!book) return null;
   const coverUrl = book.coverImage ? booksApi.getCoverUrl(book.coverImage) : null;
@@ -81,15 +82,15 @@ const BookCard = ({ userBook, badge, badgeStyle, footer }) => {
   return (
     <div className="container-gradient group transform transition-all hover:scale-105 px-5 py-5">
       <Link to={`/books/${book._id}`} className="block">
-        <div className="relative mb-4 overflow-hidden rounded-2xl">
-          <img
-            src={coverUrl || PLACEHOLDER}
+        <div className="relative mb-4 aspect-[2/3] overflow-hidden rounded-2xl">
+          <BookCoverFallback
+            src={coverUrl}
             alt={book.title}
-            className="w-full h-64 object-cover transform transition-transform group-hover:scale-110"
+            className="w-full h-full object-cover transform transition-transform group-hover:scale-110"
           />
           <div
             className="absolute top-2 right-2 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg"
-            style={badgeStyle}
+            style={{ background: badgeColor }}
           >
             {badge}
           </div>
@@ -97,21 +98,21 @@ const BookCard = ({ userBook, badge, badgeStyle, footer }) => {
         <h3 className="text-lg font-bold gradient-text mb-1 line-clamp-2 group-hover:underline">
           {book.title}
         </h3>
-        <p className="text-gray-600 text-sm mb-3">{book.author}</p>
+        <p className="text-sm mb-3" style={{ color: "var(--color-text-muted)" }}>{book.author}</p>
       </Link>
       {footer}
       {book.averageRating > 0 && (
         <div className="flex items-center gap-2 text-sm mt-1">
-          <div className="flex text-yellow-400">
+          <div className="flex" style={{ color: "var(--color-secondary)" }}>
             {"★".repeat(Math.round(book.averageRating))}
             {"☆".repeat(5 - Math.round(book.averageRating))}
           </div>
-          <span className="text-gray-600">{book.averageRating.toFixed(1)}</span>
+          <span style={{ color: "var(--color-text-muted)" }}>{book.averageRating.toFixed(1)}</span>
         </div>
       )}
       {userBook.notes && (
-        <div className="mt-3 p-3 rounded-xl bg-white/50">
-          <p className="text-xs text-gray-700 italic line-clamp-2">"{userBook.notes}"</p>
+        <div className="mt-3 p-3 rounded-xl" style={{ background: "var(--color-sunken)" }}>
+          <p className="text-xs italic line-clamp-2" style={{ color: "var(--color-text-muted)" }}>"{userBook.notes}"</p>
         </div>
       )}
     </div>
@@ -194,24 +195,21 @@ const ReadingHistory = () => {
   }, {});
   const years = Object.keys(booksByYear).sort((a, b) => b - a);
 
-  const tabStyle = (tab) =>
-    activeTab === tab
-      ? { background: "linear-gradient(135deg, #667eea, #764ba2)", color: "white" }
-      : {};
-  const tabClass = (tab) =>
-    `px-6 py-2 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-      activeTab === tab ? "text-white" : "bg-white text-gray-700 hover:shadow-xl"
-    }`;
+  const pillStyle = (active) =>
+    active
+      ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+      : { background: "var(--color-card)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" };
+  const pillClass = "px-4 py-2 rounded-full font-semibold text-sm transition-all";
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center animate-fadeIn">
           <div
-            className="animate-spin rounded-full h-20 w-20 mx-auto mb-4"
-            style={{ border: "4px solid rgba(255,255,255,0.3)", borderTopColor: "white" }}
+            className="animate-spin rounded-full h-16 w-16 mx-auto mb-4"
+            style={{ border: "4px solid var(--color-wine-tint)", borderTopColor: "var(--color-primary)" }}
           />
-          <p className="text-white text-xl font-bold drop-shadow-lg">✨ Laster lesehistorikk...</p>
+          <p className="text-lg font-bold" style={{ color: "var(--color-text-muted)" }}>Laster lesehistorikk...</p>
         </div>
       </div>
     );
@@ -221,91 +219,59 @@ const ReadingHistory = () => {
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-8 animate-fadeIn">
-          <h1 className="text-5xl font-bold gradient-text mb-3 drop-shadow-lg">📚 Historikk</h1>
-          <p className="hidden sm:block text-xl text-gray-600 font-medium max-w-2xl mx-auto">
-            Her kan du holde styr på bøker du har lest, både i bokklubben og ellers.
+        <div className="mb-6 animate-fadeIn">
+          <h1 className="text-3xl font-semibold mb-1">Din lesehistorie</h1>
+          <p style={{ color: "var(--color-text-muted)" }}>
+            Bøker du har lest, lytter til nå, eller vil komme tilbake til.
           </p>
         </div>
 
-        {/* Stat cards — clickable to switch tab */}
+        <div className="max-w-xs mb-6">
+          <ReadingGoalCard readCount={countReadInYear(readBooks)} />
+        </div>
+
+        {/* Stat tiles — clickable to switch tab */}
         {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 animate-fadeIn">
-            <button
-              onClick={() => setActiveTab("read")}
-              className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105 text-left"
-              style={{
-                background: "linear-gradient(135deg, #10b981, #14b8a6)",
-                outline: activeTab === "read" ? "3px solid white" : "none",
-              }}
-            >
-              <div className="text-4xl mb-2">✅</div>
-              <div className="text-4xl font-bold mb-1">{stats.read || 0}</div>
-              <div className="text-lg font-medium">Bøker lest</div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("currently-reading")}
-              className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105 text-left"
-              style={{
-                background: "linear-gradient(135deg, #f093fb, #f5576c)",
-                outline: activeTab === "currently-reading" ? "3px solid white" : "none",
-              }}
-            >
-              <div className="text-4xl mb-2">📖</div>
-              <div className="text-4xl font-bold mb-1">{stats["currently-reading"] || 0}</div>
-              <div className="text-lg font-medium">Leser nå</div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("to-read")}
-              className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105 text-left"
-              style={{
-                background: "linear-gradient(135deg, #667eea, #764ba2)",
-                outline: activeTab === "to-read" ? "3px solid white" : "none",
-              }}
-            >
-              <div className="text-4xl mb-2">📚</div>
-              <div className="text-4xl font-bold mb-1">{stats["to-read"] || 0}</div>
-              <div className="text-lg font-medium">TBR</div>
-            </button>
-
-            <button
-              onClick={() => setActiveTab("dnf")}
-              className="p-6 rounded-2xl text-white shadow-lg transform transition-all hover:scale-105 text-left"
-              style={{
-                background: "linear-gradient(135deg, #6b7280, #4b5563)",
-                outline: activeTab === "dnf" ? "3px solid white" : "none",
-              }}
-            >
-              <div className="text-4xl mb-2">🚫</div>
-              <div className="text-4xl font-bold mb-1">{stats.dnf || 0}</div>
-              <div className="text-lg font-medium">DNF</div>
-            </button>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 animate-fadeIn">
+            {[
+              { tab: "read", label: "Lest", value: stats.read || 0, color: "var(--color-sage)" },
+              { tab: "currently-reading", label: "Leser nå", value: stats["currently-reading"] || 0, color: "var(--color-secondary)" },
+              { tab: "to-read", label: "TBR", value: stats["to-read"] || 0, color: "var(--color-blue)" },
+              { tab: "dnf", label: "DNF", value: stats.dnf || 0, color: "var(--color-terracotta)" },
+            ].map((tile) => (
+              <button
+                key={tile.tab}
+                onClick={() => setActiveTab(tile.tab)}
+                className="card text-left p-4"
+                style={{
+                  borderBottom: `3px solid ${activeTab === tile.tab ? tile.color : "transparent"}`,
+                }}
+              >
+                <div
+                  className="font-semibold"
+                  style={{ fontFamily: "'Fraunces', serif", fontSize: "1.9rem", lineHeight: 1, color: tile.color }}
+                >
+                  {tile.value}
+                </div>
+                <div className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>{tile.label}</div>
+              </button>
+            ))}
           </div>
         )}
 
         {/* Tab buttons */}
-        <div className="flex justify-center gap-4 mb-6 animate-fadeIn">
-          <button onClick={() => setActiveTab("read")} className={tabClass("read")} style={tabStyle("read")}>
-            ✅ Lest
-          </button>
-          <button onClick={() => setActiveTab("currently-reading")} className={tabClass("currently-reading")} style={tabStyle("currently-reading")}>
-            📖 Leser nå
-          </button>
-          <button onClick={() => setActiveTab("to-read")} className={tabClass("to-read")} style={tabStyle("to-read")}>
-            📚 TBR
-          </button>
-          <button onClick={() => setActiveTab("dnf")} className={tabClass("dnf")} style={tabStyle("dnf")}>
-            🚫 DNF
-          </button>
+        <div className="flex flex-wrap gap-2 mb-6 animate-fadeIn">
+          <button onClick={() => setActiveTab("read")} className={pillClass} style={pillStyle(activeTab === "read")}>Lest</button>
+          <button onClick={() => setActiveTab("currently-reading")} className={pillClass} style={pillStyle(activeTab === "currently-reading")}>Leser nå</button>
+          <button onClick={() => setActiveTab("to-read")} className={pillClass} style={pillStyle(activeTab === "to-read")}>TBR</button>
+          <button onClick={() => setActiveTab("dnf")} className={pillClass} style={pillStyle(activeTab === "dnf")}>DNF</button>
         </div>
 
         {/* Date error */}
         {dateError && (
           <div
-            className="mb-4 p-3 rounded-xl text-white text-center font-bold animate-fadeIn"
-            style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+            className="mb-4 p-3 rounded-xl text-center font-bold animate-fadeIn"
+            style={{ background: "var(--color-terracotta)", color: "white" }}
           >
             {dateError}
           </div>
@@ -314,7 +280,7 @@ const ReadingHistory = () => {
         {/* READ TAB — year filter + timeline */}
         {activeTab === "read" && (
           <>
-            <div className="flex justify-center gap-3 mb-8 animate-fadeIn flex-wrap">
+            <div className="flex gap-2 mb-8 animate-fadeIn flex-wrap">
               {[
                 { value: "all", label: "All tid" },
                 { value: "this-year", label: String(new Date().getFullYear()) },
@@ -324,8 +290,8 @@ const ReadingHistory = () => {
                 <button
                   key={value}
                   onClick={() => setYearFilter(value)}
-                  className={tabClass(yearFilter === value ? "read" : "")}
-                  style={yearFilter === value ? { background: "linear-gradient(135deg, #667eea, #764ba2)", color: "white" } : {}}
+                  className={pillClass}
+                  style={pillStyle(yearFilter === value)}
                 >
                   {label}
                 </button>
@@ -336,7 +302,7 @@ const ReadingHistory = () => {
               <div className="container-gradient text-center py-20 animate-fadeIn">
                 <div className="text-6xl mb-4">📚</div>
                 <h2 className="text-3xl font-bold gradient-text mb-3">Ingen bøker lest enda</h2>
-                <p className="text-gray-600 text-lg mb-6">
+                <p className="text-lg mb-6" style={{ color: "var(--color-text-muted)" }}>
                   Begynn din leseferd i dag! Marker bøker som lest for å se dem her.
                 </p>
                 <Link to="/books" className="btn-primary inline-block">Sjekk ut bøkene</Link>
@@ -348,12 +314,15 @@ const ReadingHistory = () => {
                     <div className="flex items-center gap-4 mb-6">
                       <div
                         className="text-white px-6 py-1 rounded-full font-bold text-2xl shadow-lg"
-                        style={{ background: "linear-gradient(135deg, #f093fb, #f5576c)" }}
+                        style={{ background: "var(--color-primary)" }}
                       >
                         {year}
                       </div>
-                      <div className="flex-1 h-1 rounded" style={{ background: "linear-gradient(90deg, #667eea, transparent)" }} />
-                      <div className="text-gray-300 font-bold text-lg bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm">
+                      <div className="flex-1 h-px" style={{ background: "var(--color-border)" }} />
+                      <div
+                        className="font-bold text-sm px-4 py-2 rounded-full"
+                        style={{ background: "var(--color-sunken)", color: "var(--color-text-muted)" }}
+                      >
                         {booksByYear[year].length} {booksByYear[year].length === 1 ? "bok" : "bøker"}
                       </div>
                     </div>
@@ -363,9 +332,9 @@ const ReadingHistory = () => {
                           key={userBook._id}
                           userBook={userBook}
                           badge="✓ Lest"
-                          badgeStyle={{ background: "linear-gradient(135deg, #10b981, #14b8a6)" }}
+                          badgeColor="var(--color-sage)"
                           footer={
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                            <div className="flex items-center gap-2 text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>
                               <span>📅</span>
                               {editingDateId === userBook._id ? (
                                 <DateEditor
@@ -382,7 +351,8 @@ const ReadingHistory = () => {
                                   </span>
                                   <button
                                     onClick={() => setEditingDateId(userBook._id)}
-                                    className="text-gray-400 hover:text-purple-600 transition-colors"
+                                    className="transition-colors"
+                                    style={{ color: "var(--color-text-faint)" }}
                                     title="Endre dato"
                                   >
                                     ✏️
@@ -402,10 +372,10 @@ const ReadingHistory = () => {
             {readBooks.length > 0 && (
               <div
                 className="mt-12 p-8 rounded-2xl text-center animate-fadeIn"
-                style={{ background: "linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1))" }}
+                style={{ background: "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))" }}
               >
                 <h3 className="text-2xl font-bold gradient-text mb-3">🎉 Fortsett lesing!</h3>
-                <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed text-lg">
+                <p className="max-w-3xl mx-auto leading-relaxed text-lg" style={{ color: "var(--color-text-muted)" }}>
                   Du har lest {readBooks.length} {readBooks.length === 1 ? "bok" : "bøker"}! Fortsett det gode arbeidet!
                 </p>
               </div>
@@ -420,7 +390,7 @@ const ReadingHistory = () => {
               <div className="container-gradient text-center py-20 animate-fadeIn">
                 <div className="text-6xl mb-4">📖</div>
                 <h2 className="text-3xl font-bold gradient-text mb-3">Ingen bøker pågår</h2>
-                <p className="text-gray-600 text-lg mb-6">Finn en bok og start lesingen!</p>
+                <p className="text-lg mb-6" style={{ color: "var(--color-text-muted)" }}>Finn en bok og start lesingen!</p>
                 <Link to="/books" className="btn-primary inline-block">Sjekk ut bøkene</Link>
               </div>
             ) : (
@@ -430,7 +400,7 @@ const ReadingHistory = () => {
                     key={userBook._id}
                     userBook={userBook}
                     badge="📖 Leser"
-                    badgeStyle={{ background: "linear-gradient(135deg, #f093fb, #f5576c)" }}
+                    badgeColor="var(--color-secondary)"
                     footer={null}
                   />
                 ))}
@@ -446,7 +416,7 @@ const ReadingHistory = () => {
               <div className="container-gradient text-center py-20 animate-fadeIn">
                 <div className="text-6xl mb-4">📚</div>
                 <h2 className="text-3xl font-bold gradient-text mb-3">TBR-listen er tom</h2>
-                <p className="text-gray-600 text-lg mb-6">Legg til bøker du vil lese!</p>
+                <p className="text-lg mb-6" style={{ color: "var(--color-text-muted)" }}>Legg til bøker du vil lese!</p>
                 <Link to="/books" className="btn-primary inline-block">Sjekk ut bøkene</Link>
               </div>
             ) : (
@@ -456,7 +426,7 @@ const ReadingHistory = () => {
                     key={userBook._id}
                     userBook={userBook}
                     badge="📚 TBR"
-                    badgeStyle={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+                    badgeColor="var(--color-blue)"
                     footer={null}
                   />
                 ))}
@@ -472,7 +442,7 @@ const ReadingHistory = () => {
               <div className="container-gradient text-center py-20 animate-fadeIn">
                 <div className="text-6xl mb-4">🚫</div>
                 <h2 className="text-3xl font-bold gradient-text mb-3">Ingen DNF-bøker</h2>
-                <p className="text-gray-600 text-lg mb-6">Bøker du gir opp underveis havner her.</p>
+                <p className="text-lg mb-6" style={{ color: "var(--color-text-muted)" }}>Bøker du gir opp underveis havner her.</p>
                 <Link to="/books" className="btn-primary inline-block">Sjekk ut bøkene</Link>
               </div>
             ) : (
@@ -482,7 +452,7 @@ const ReadingHistory = () => {
                     key={userBook._id}
                     userBook={userBook}
                     badge="🚫 DNF"
-                    badgeStyle={{ background: "linear-gradient(135deg, #6b7280, #4b5563)" }}
+                    badgeColor="var(--color-terracotta)"
                     footer={null}
                   />
                 ))}

@@ -26,13 +26,13 @@ const MyRequestsFeed = () => {
   if (loading || requests.length === 0) return null;
 
   return (
-    <div className="max-w-4xl mx-auto mt-6 animate-fadeIn">
-      <h2 className="text-xl font-bold gradient-text mb-4">📋 Dine bokforespørsler</h2>
-      <div className="space-y-3">
+    <div className="max-w-4xl mx-auto mt-4 sm:mt-6 animate-fadeIn">
+      <h2 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">📋 Dine bokforespørsler</h2>
+      <div className="space-y-2 sm:space-y-3">
         {requests.map(req => (
           <div
             key={req._id}
-            className="flex items-center justify-between gap-4 rounded-2xl p-4"
+            className="flex items-center justify-between gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4"
             style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.07), rgba(251,113,133,0.12))' }}
           >
             <div className="flex-1 min-w-0">
