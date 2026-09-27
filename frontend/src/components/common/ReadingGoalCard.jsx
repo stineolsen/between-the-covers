@@ -2,7 +2,28 @@ import { useState } from "react";
 import { usersApi } from "../../api/usersApi";
 import { useAuth } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
-import { goalProgress } from "../../utils/readingGoal";
+import { goalProgress, getPaceStatus } from "../../utils/readingGoal";
+
+const PACE_STYLES = {
+  done: { label: "🎉 Mål nådd!", background: "var(--color-sage-tint)", color: "var(--color-sage)" },
+  ahead: (diff) => ({
+    label: `🔥 ${diff} ${diff === 1 ? "bok" : "bøker"} foran skjema`,
+    background: "var(--color-sage-tint)",
+    color: "var(--color-sage)",
+  }),
+  "on-track": { label: "I rute", background: "var(--color-gold-tint)", color: "var(--color-secondary)" },
+  behind: (diff) => ({
+    label: `${diff} ${diff === 1 ? "bok" : "bøker"} bak skjema`,
+    background: "var(--color-terracotta-tint)",
+    color: "var(--color-terracotta)",
+  }),
+};
+
+const paceBadge = (pace) => {
+  if (!pace) return null;
+  const style = PACE_STYLES[pace.state];
+  return typeof style === "function" ? style(pace.diff) : style;
+};
 
 // "Din leseframgang" — shows progress toward a per-user, per-year reading
 // goal (user.readingGoal) and lets the user set/change it inline.
@@ -15,6 +36,7 @@ const ReadingGoalCard = ({ readCount }) => {
 
   const goal = user?.readingGoal;
   const pct = goalProgress(readCount, goal);
+  const pace = paceBadge(getPaceStatus(readCount, goal));
 
   const handleSave = async () => {
     const goalNum = Math.max(1, parseInt(value, 10) || 1);
@@ -103,15 +125,25 @@ const ReadingGoalCard = ({ readCount }) => {
           >
             <div
               className="h-full rounded-full transition-all"
-              style={{ width: `${pct}%`, background: "var(--color-sage)" }}
+              style={{
+                width: `${pct}%`,
+                background: pace?.color === "var(--color-terracotta)" ? "var(--color-terracotta)" : "var(--color-sage)",
+              }}
             />
           </div>
-          <p
-            className="text-xs mt-1.5"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            {pct} % oppnådd
-          </p>
+          <div className="flex items-center justify-between mt-1.5">
+            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>
+              {pct} % oppnådd
+            </p>
+            {pace && (
+              <span
+                className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: pace.background, color: pace.color }}
+              >
+                {pace.label}
+              </span>
+            )}
+          </div>
         </>
       ) : (
         <p
