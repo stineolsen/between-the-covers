@@ -54,18 +54,18 @@ const ActivityItem = ({ activity }) => {
       <div className="flex items-center gap-3">
         <Avatar user={user} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-800 leading-snug">
+          <p className="text-sm text-text leading-snug">
             <span className="font-semibold">{name}</span>
             {' ga '}
             <Stars rating={rating} />
             {' til '}
             {book ? (
-              <Link to={`/books/${book._id}`} className="font-semibold text-purple-700 hover:underline">
+              <Link to={`/books/${book._id}`} className="font-semibold text-primary hover:underline">
                 {book.title}
               </Link>
             ) : 'en bok'}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{relativeTime(activity.date)}</p>
+          <p className="text-xs text-text-faint mt-0.5">{relativeTime(activity.date)}</p>
         </div>
         <BookThumb book={book} />
       </div>
@@ -85,17 +85,17 @@ const ActivityItem = ({ activity }) => {
       <div className="flex items-center gap-3">
         <Avatar user={user} />
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-800 leading-snug">
+          <p className="text-sm text-text leading-snug">
             <span className="font-semibold">{name}</span>
             {` ${verb} `}
             {book ? (
-              <Link to={`/books/${book._id}`} className="font-semibold text-purple-700 hover:underline">
+              <Link to={`/books/${book._id}`} className="font-semibold text-primary hover:underline">
                 {book.title}
               </Link>
             ) : 'en bok'}
             {suffix}
           </p>
-          <p className="text-xs text-gray-400 mt-0.5">{relativeTime(activity.date)}</p>
+          <p className="text-xs text-text-faint mt-0.5">{relativeTime(activity.date)}</p>
         </div>
         <BookThumb book={book} />
       </div>
@@ -114,11 +114,11 @@ const ActivityItem = ({ activity }) => {
           📅
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm text-gray-800 leading-snug font-semibold truncate">
+          <p className="text-sm text-text leading-snug font-semibold truncate">
             {meeting?.title}
-            {bookTitle && <span className="font-normal text-gray-600"> — {bookTitle}</span>}
+            {bookTitle && <span className="font-normal text-text-muted"> — {bookTitle}</span>}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">
+          <p className="text-xs text-text-faint mt-0.5">
             {count > 0
               ? `${count} deltaker${count !== 1 ? 'e' : ''} · `
               : ''}
@@ -137,7 +137,7 @@ const ActivityItem = ({ activity }) => {
                 />
               ))}
               {count > 5 && (
-                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-xs font-bold">
+                <div className="w-6 h-6 rounded-full bg-sunken flex items-center justify-center text-text-muted text-xs font-bold">
                   +{count - 5}
                 </div>
               )}
@@ -174,7 +174,7 @@ const ActivityFeed = () => {
             <div className="w-8 h-8 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
           </div>
         ) : activities.length === 0 ? (
-          <p className="text-center text-gray-500 py-6">Ingen aktivitet ennå 🌱</p>
+          <p className="text-center text-text-faint py-6">Ingen aktivitet ennå 🌱</p>
         ) : (
           activities.map((activity, i) => (
             <div key={i}>
