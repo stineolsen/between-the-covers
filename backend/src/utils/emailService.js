@@ -22,7 +22,7 @@ function getFrontendUrl() {
 // styles - no flexbox/grid, and gradients are unreliable, so we use solid
 // brand colors instead of the site's CSS gradients.
 function renderEmailLayout({ heading, bodyHtml, frontendUrl }) {
-  const logoUrl = frontendUrl ? `${frontendUrl}/logo_croppped.png` : null;
+  const logoUrl = frontendUrl ? `${frontendUrl}/logo_croppped_blue.png` : null;
 
   return `
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6; padding:32px 16px; font-family:Arial, Helvetica, sans-serif;">

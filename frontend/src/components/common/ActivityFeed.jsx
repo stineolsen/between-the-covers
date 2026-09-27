@@ -164,7 +164,7 @@ const ActivityFeed = () => {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 animate-fadeIn">
-      <h2 className="text-xl font-bold gradient-text mb-4">📰 Siste aktivitet</h2>
+      <h2 className="text-xl font-bold gradient-text mb-4">Siste aktivitet</h2>
       <div
         className="rounded-2xl p-4 sm:p-6 space-y-4"
         style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.07), rgba(251,113,133,0.12))' }}

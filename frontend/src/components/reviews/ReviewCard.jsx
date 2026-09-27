@@ -41,7 +41,7 @@ const ReviewCard = ({
 
           {/* User Info */}
           <div>
-            <p className="font-bold text-gray-900">
+            <p className="font-bold" style={{ color: "var(--color-text)" }}>
               {review.user?.displayName || review.user?.username || "Anonymous"}
             </p>
             <p className="text-sm text-gray-600">
@@ -57,7 +57,7 @@ const ReviewCard = ({
               onClick={() => onEdit(review)}
               className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110"
               style={{
-                background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+                background: "var(--color-blue)",
                 color: "white",
               }}
             >
@@ -69,7 +69,7 @@ const ReviewCard = ({
               onClick={() => onDelete(review._id)}
               className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110"
               style={{
-                background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                background: "var(--color-terracotta)",
                 color: "white",
               }}
             >
@@ -86,19 +86,16 @@ const ReviewCard = ({
 
       {/* Title */}
       {review.title && (
-        <h3 className="text-xl font-bold text-gray-900 mb-3">{review.title}</h3>
+        <h3 className="text-xl font-bold mb-3" style={{ color: "var(--color-text)" }}>{review.title}</h3>
       )}
 
       {/* Spoiler Warning */}
       {review.spoilers && !showFullContent && (
         <div
           className="p-4 rounded-2xl mb-4 text-center"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1))",
-          }}
+          style={{ background: "var(--color-terracotta-tint)" }}
         >
-          <p className="text-red-700 font-bold mb-2">
+          <p className="font-bold mb-2" style={{ color: "var(--color-terracotta)" }}>
             ⚠️ Denne anmeldelsen inneholder spoilere!
           </p>
           <button onClick={handleToggleSpoilers} className="btn-accent">
@@ -110,14 +107,15 @@ const ReviewCard = ({
       {/* Content */}
       {showFullContent && (
         <>
-          <div className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
+          <div className="leading-relaxed mb-4 whitespace-pre-line" style={{ color: "var(--color-text-muted)" }}>
             {review.content}
           </div>
 
           {review.spoilers && (
             <button
               onClick={handleToggleSpoilers}
-              className="text-sm text-gray-600 hover:text-gray-900 font-medium mb-4"
+              className="text-sm font-medium mb-4"
+              style={{ color: "var(--color-text-muted)" }}
             >
               Skjul spoilere
             </button>
@@ -127,24 +125,22 @@ const ReviewCard = ({
 
       {/* Reading Date */}
       {review.readingDate && (
-        <p className="text-sm text-gray-600 mb-4">
+        <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
           📅 Lesedato {formatDate(review.readingDate)}
         </p>
       )}
 
       {/* Footer - Like Button */}
-      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+      <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: "var(--color-border)" }}>
         <button
           onClick={() => onLike && onLike(review._id)}
           className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110 ${
-            isLiked
-              ? "text-white"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            isLiked ? "text-white" : ""
           }`}
           style={
             isLiked
-              ? { background: "linear-gradient(135deg, #f093fb, #f5576c)" }
-              : {}
+              ? { background: "linear-gradient(135deg, var(--color-primary), var(--color-secondary))" }
+              : { background: "var(--color-sunken)", color: "var(--color-text-muted)" }
           }
         >
           <span className="text-xl">{isLiked ? "❤️" : "🤍"}</span>

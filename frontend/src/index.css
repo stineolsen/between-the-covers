@@ -1,18 +1,94 @@
 @import "tailwindcss";
 
 @theme {
-  /* Simplified bookclub-inspired color palette */
-  --color-primary: #6b5b95; /* Sophisticated purple - bookish and elegant */
-  --color-secondary: #d44aa84d; /* Burnt orange - warm accent */
-  --color-background: #faf8f5; /* Warm cream background */
-  --color-card: #ffffff; /* Pure white cards */
-  --color-text: #2d3748; /* Charcoal text */
-  --color-text-muted: #718096; /* Medium gray for secondary text */
-  --color-border: #e2e8f0; /* Subtle borders */
+  /* Lesesalongen palette — warm paper + wine, retains legacy token names so
+     every existing var(--color-*) call site retints automatically. */
+  --color-primary: #93264d; /* Wine — primary accent */
+  --color-primary-deep: #6b1938; /* Wine, deeper — hovers/active */
+  --color-secondary: #c08a2e; /* Gold — secondary accent */
+  --color-secondary-deep: #96631d; /* Gold, deeper — hovers/active */
+  --color-background: #f6f1e7; /* Warm paper background */
+  --color-sunken: #efe7d6; /* Recessed surfaces (toolbars, filter rows) */
+  --color-card: #ffffff; /* Card surface */
+  --color-text: #2a2321; /* Ink */
+  --color-text-muted: #756558; /* Muted ink */
+  --color-text-faint: #9c8e80; /* Faint ink (captions, counts) */
+  --color-border: #e4dacb; /* Hairline border */
+  --color-border-strong: #d3c4a6; /* Stronger border (chips, segmented controls) */
+
+  /* Status semantics — read/reading/tbr/dnf, used consistently everywhere */
+  --color-sage: #2f7a50; /* Read */
+  --color-sage-tint: #dcefe0;
+  --color-blue: #1e7a93; /* To-read / TBR */
+  --color-blue-tint: #d9eef2;
+  --color-terracotta: #c1502a; /* DNF */
+  --color-terracotta-tint: #f6e0d2;
+  --color-gold-tint: #f7e7c9; /* Currently-reading tint (pairs with --color-secondary) */
+  --color-wine-tint: #f6dfe6; /* Wine tint (pairs with --color-primary) */
+
+  /* Navigation chrome */
+  --color-nav-bg: #6b1938;
+  --color-nav-text: #fbeee2;
+  --color-nav-text-muted: rgba(251, 238, 226, 0.68);
 
   /* Minimal gradient for special elements only */
-  --gradient-primary: linear-gradient(135deg, #6b5b95 0%, #544179 100%);
-  --gradient-secondary: linear-gradient(135deg, #d44aa87d 0%, #6b5b957d 100%);
+  --gradient-primary: linear-gradient(135deg, #93264d 0%, #6b1938 100%);
+  --gradient-secondary: linear-gradient(135deg, #93264d33 0%, #c08a2e33 100%);
+}
+
+/* Dark mode — same token names, redefined. Two layers so an explicit toggle
+   (data-theme) always wins over the OS setting in both directions. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-primary: #e8799f;
+    --color-primary-deep: #b85178;
+    --color-secondary: #e0ac52;
+    --color-secondary-deep: #b8863e;
+    --color-background: #221a1c;
+    --color-sunken: #1a1416;
+    --color-card: #2c2224;
+    --color-text: #f1e6dc;
+    --color-text-muted: #bba99a;
+    --color-text-faint: #8b7a6d;
+    --color-border: #3d3134;
+    --color-border-strong: #4c3d41;
+    --color-sage: #59c08a;
+    --color-sage-tint: #173424;
+    --color-blue: #4fc1de;
+    --color-blue-tint: #123642;
+    --color-terracotta: #e8825a;
+    --color-terracotta-tint: #3a2721;
+    --color-gold-tint: #3a3122;
+    --color-wine-tint: #3b2229;
+    --color-nav-bg: #3a1a28;
+    --color-nav-text: #f6dce6;
+    --color-nav-text-muted: rgba(246, 220, 230, 0.68);
+  }
+}
+:root[data-theme="dark"] {
+  --color-primary: #e8799f;
+  --color-primary-deep: #b85178;
+  --color-secondary: #e0ac52;
+  --color-secondary-deep: #b8863e;
+  --color-background: #221a1c;
+  --color-sunken: #1a1416;
+  --color-card: #2c2224;
+  --color-text: #f1e6dc;
+  --color-text-muted: #bba99a;
+  --color-text-faint: #8b7a6d;
+  --color-border: #3d3134;
+  --color-border-strong: #4c3d41;
+  --color-sage: #59c08a;
+  --color-sage-tint: #173424;
+  --color-blue: #4fc1de;
+  --color-blue-tint: #123642;
+  --color-terracotta: #e8825a;
+  --color-terracotta-tint: #3a2721;
+  --color-gold-tint: #3a3122;
+  --color-wine-tint: #3b2229;
+  --color-nav-bg: #3a1a28;
+  --color-nav-text: #f6dce6;
+  --color-nav-text-muted: rgba(246, 220, 230, 0.68);
 }
 
 /* Keyframe animations */
@@ -70,12 +146,12 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(107, 91, 149, 0.2);
+    box-shadow: 0 2px 8px rgba(147, 38, 77, 0.2);
   }
 
   .btn-primary:hover {
-    background: #544179;
-    box-shadow: 0 4px 12px rgba(107, 91, 149, 0.3);
+    background: var(--color-primary-deep);
+    box-shadow: 0 4px 12px rgba(147, 38, 77, 0.3);
   }
 
   .btn-primary:active {
@@ -96,12 +172,12 @@
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(206, 68, 25, 0.2);
+    box-shadow: 0 2px 8px rgba(192, 138, 46, 0.2);
   }
 
   .btn-secondary:hover {
-    background: #b33915;
-    box-shadow: 0 4px 12px rgba(206, 68, 25, 0.3);
+    background: var(--color-secondary-deep);
+    box-shadow: 0 4px 12px rgba(192, 138, 46, 0.3);
   }
 
   .btn-secondary:active {
@@ -109,7 +185,7 @@
   }
 
   .btn-accent {
-    background: white;
+    background: var(--color-card);
     color: var(--color-primary);
     padding: 0.75rem 1.75rem;
     border-radius: 8px;
@@ -145,15 +221,15 @@
   /* Primary colored card variant */
   .card-gradient {
     background: var(--gradient-secondary);
-    color: white;
+    color: var(--color-text);
     border-radius: 12px;
     padding: 2rem;
-    box-shadow: 0 2px 8px rgba(107, 91, 149, 0.2);
+    box-shadow: 0 2px 8px rgba(147, 38, 77, 0.15);
     transition: box-shadow 0.2s ease;
   }
 
   .card-gradient:hover {
-    box-shadow: 0 4px 16px rgba(107, 91, 149, 0.3);
+    box-shadow: 0 4px 16px rgba(147, 38, 77, 0.25);
   }
 
   /* Interactive section */
@@ -175,11 +251,12 @@
     font-size: 1rem;
     transition: all 0.2s ease;
     background: var(--color-card);
+    color: var(--color-text);
   }
 
   .input-field:focus {
     border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px rgba(107, 91, 149, 0.1);
+    box-shadow: 0 0 0 3px rgba(147, 38, 77, 0.12);
   }
 
   /* Simplified container */
@@ -202,10 +279,27 @@
 body {
   background: var(--color-background);
   color: var(--color-text);
-  font-family: Charter, "Bitstream Charter", "Sitka Text", Cambria, serif;
-  /*'Segoe UI', Tahoma, Geneva, Verdana, sans-serif*/
+  font-family:
+    "Public Sans",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   margin: 0;
   min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+.font-display,
+.gradient-text {
+  font-family: "Fraunces", Georgia, "Bitstream Charter", serif;
+}
+
+/* Comfortable long-form reading (book descriptions, reviews) */
+.font-read {
+  font-family: "Source Serif 4", Georgia, "Bitstream Charter", serif;
 }
 
 /* Utility animation classes */

@@ -36,8 +36,8 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
         <div
           className="animate-spin rounded-full h-16 w-16 mx-auto mb-4"
           style={{
-            border: "4px solid rgba(102, 126, 234, 0.3)",
-            borderTopColor: "#667eea",
+            border: "4px solid var(--color-wine-tint)",
+            borderTopColor: "var(--color-primary)",
           }}
         ></div>
         <p className="text-gray-600 font-medium">Laster anmeldelser...</p>
@@ -51,7 +51,7 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
         className="text-center py-12 rounded-2xl"
         style={{
           background:
-            "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(240, 147, 251, 0.1))",
+            "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
         }}
       >
         <p className="text-3xl mb-3">📝</p>
@@ -70,7 +70,7 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
       {/* Sort Controls */}
       <div
         className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl"
-        style={{ background: "rgba(255, 255, 255, 0.7)" }}
+        style={{ background: "var(--color-sunken)" }}
       >
         <div className="flex items-center gap-3">
           <label className="text-sm font-bold text-gray-700">
@@ -96,7 +96,7 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
             checked={showSpoilers}
             onChange={(e) => setShowSpoilers(e.target.checked)}
             className="w-5 h-5 rounded cursor-pointer"
-            style={{ accentColor: "#667eea" }}
+            style={{ accentColor: "var(--color-primary)" }}
           />
           <label
             htmlFor="showSpoilers"

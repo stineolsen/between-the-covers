@@ -39,7 +39,7 @@ const Lists = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center mb-8 animate-fadeIn">
           <div>
-            <h1 className="text-5xl font-bold gradient-text mb-3">📋 Lister</h1>
+            <h1 className="text-5xl font-bold gradient-text mb-3">Lister</h1>
             <p className="text-gray-700 text-lg">
               {lists.length} {lists.length === 1 ? "liste" : "lister"}
             </p>
@@ -58,7 +58,7 @@ const Lists = () => {
             style={
               tab === "public"
                 ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
-                : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
+                : { background: "var(--color-card)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }
             }
           >
             🌍 Offentlige lister
@@ -69,7 +69,7 @@ const Lists = () => {
             style={
               tab === "mine"
                 ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
-                : { background: "white", color: "#6B5B95", border: "1.5px solid #6B5B95" }
+                : { background: "var(--color-card)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }
             }
           >
             👤 Mine lister

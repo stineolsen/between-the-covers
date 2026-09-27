@@ -189,12 +189,12 @@ const Profile = () => {
 
         <div className="container-gradient">
           {/* Avatar Section */}
-          <div className="flex flex-col items-center mb-8 pb-8 border-b border-gray-200">
+          <div className="flex flex-col items-center mb-8 pb-8 border-b border-border">
             <div className="relative group">
               <div
                 className="w-40 h-40 rounded-full overflow-hidden shadow-xl mb-4"
                 style={{
-                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                  background: "var(--color-primary)",
                 }}
               >
                 {getDisplayAvatar() ? (
@@ -215,21 +215,21 @@ const Profile = () => {
                 onClick={() => setShowAvatarModal(true)}
                 className="absolute bottom-4 right-0 bg-white rounded-full p-3 shadow-lg transform hover:scale-110 transition-transform"
                 style={{
-                  background: "linear-gradient(135deg, #667eea, #764ba2)",
+                  background: "var(--color-primary)",
                 }}
               >
                 <span className="text-white text-xl">📷</span>
               </button>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-1">
+            <h2 className="text-2xl font-bold text-text mb-1">
               {user?.displayName}
             </h2>
-            <p className="text-gray-600">@{user?.username}</p>
+            <p className="text-text-muted">@{user?.username}</p>
             <div className="flex gap-2 mt-2">
               <span
                 className="px-3 py-1 rounded-full text-sm font-bold text-white"
                 style={{
-                  background: "linear-gradient(135deg, #f093fb, #f5576c)",
+                  background: "var(--color-primary)",
                 }}
               >
                 {user?.role}
@@ -239,8 +239,8 @@ const Profile = () => {
                 style={{
                   background:
                     user?.status === "approved"
-                      ? "linear-gradient(135deg, #0ba360, #3cba92)"
-                      : "linear-gradient(135deg, #6b7280, #4b5563)",
+                      ? "var(--color-sage)"
+                      : "var(--color-text-faint)",
                   color: "white",
                 }}
               >
@@ -253,7 +253,7 @@ const Profile = () => {
           {isEditing ? (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Visningsnavn
                 </label>
                 <input
@@ -267,7 +267,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Bio
                 </label>
                 <textarea
@@ -281,7 +281,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Favorittsjangere
                 </label>
                 <input
@@ -295,7 +295,7 @@ const Profile = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   📧 Varsle meg om nye bøker og lydbøker
                 </label>
                 <select
@@ -323,7 +323,7 @@ const Profile = () => {
                   }
                   className="w-5 h-5"
                 />
-                <label htmlFor="notifyOnRequestFulfilled" className="text-sm font-bold text-gray-700">
+                <label htmlFor="notifyOnRequestFulfilled" className="text-sm font-bold text-text-muted">
                   📬 Varsle meg med en gang når en bok jeg har bedt om blir lagt til
                 </label>
               </div>
@@ -338,7 +338,7 @@ const Profile = () => {
                   }
                   className="w-5 h-5"
                 />
-                <label htmlFor="notifyOnFeatureAlerts" className="text-sm font-bold text-gray-700">
+                <label htmlFor="notifyOnFeatureAlerts" className="text-sm font-bold text-text-muted">
                   🔔 Varsle meg om nye funksjoner på siden
                 </label>
               </div>
@@ -353,7 +353,7 @@ const Profile = () => {
                   }
                   className="w-5 h-5"
                 />
-                <label htmlFor="notifyOnListShared" className="text-sm font-bold text-gray-700">
+                <label htmlFor="notifyOnListShared" className="text-sm font-bold text-text-muted">
                   📋 Varsle meg når noen deler en liste med meg
                 </label>
               </div>
@@ -368,14 +368,14 @@ const Profile = () => {
                   }
                   className="w-5 h-5"
                 />
-                <label htmlFor="notifyOnListComment" className="text-sm font-bold text-gray-700">
+                <label htmlFor="notifyOnListComment" className="text-sm font-bold text-text-muted">
                   💬 Varsle meg om nye kommentarer på listene mine
                 </label>
               </div>
 
               {user?.role === "admin" && (
-                <div className="space-y-3 p-4 rounded-2xl bg-purple-50">
-                  <p className="text-xs font-bold text-purple-700 uppercase tracking-wide">Admin-varsler</p>
+                <div className="space-y-3 p-4 rounded-2xl bg-wine-tint">
+                  <p className="text-xs font-bold text-primary uppercase tracking-wide">Admin-varsler</p>
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
@@ -386,7 +386,7 @@ const Profile = () => {
                       }
                       className="w-5 h-5"
                     />
-                    <label htmlFor="notifyOnNewRequest" className="text-sm font-bold text-gray-700">
+                    <label htmlFor="notifyOnNewRequest" className="text-sm font-bold text-text-muted">
                       📋 Varsle meg om nye bokforespørsler
                     </label>
                   </div>
@@ -400,7 +400,7 @@ const Profile = () => {
                       }
                       className="w-5 h-5"
                     />
-                    <label htmlFor="notifyOnNewOrder" className="text-sm font-bold text-gray-700">
+                    <label htmlFor="notifyOnNewOrder" className="text-sm font-bold text-text-muted">
                       🛍️ Varsle meg om nye bestillinger
                     </label>
                   </div>
@@ -430,7 +430,7 @@ const Profile = () => {
                   }}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
                   style={{
-                    background: "linear-gradient(135deg, #9ca3af, #6b7280)",
+                    background: "var(--color-text-faint)",
                     color: "white",
                   }}
                 >
@@ -441,18 +441,18 @@ const Profile = () => {
           ) : (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Email
                 </label>
-                <p className="text-lg text-gray-900">{user?.email}</p>
+                <p className="text-lg text-text">{user?.email}</p>
               </div>
 
               {user?.bio && (
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-text-muted mb-2">
                     Bio
                   </label>
-                  <p className="text-lg text-gray-900 whitespace-pre-line">
+                  <p className="text-lg text-text whitespace-pre-line">
                     {user.bio}
                   </p>
                 </div>
@@ -460,7 +460,7 @@ const Profile = () => {
 
               {user?.favoriteGenres && user.favoriteGenres.length > 0 && (
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label className="block text-sm font-bold text-text-muted mb-2">
                     Favorite Genres
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -470,7 +470,7 @@ const Profile = () => {
                         className="px-4 py-2 rounded-full text-sm font-bold text-white"
                         style={{
                           background:
-                            "linear-gradient(135deg, #667eea, #764ba2)",
+                            "var(--color-primary)",
                         }}
                       >
                         {genre}
@@ -494,8 +494,8 @@ const Profile = () => {
           <div className="container-gradient mt-6">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1">🔔 Push-varsler</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-lg font-bold text-text mb-1">🔔 Push-varsler</h3>
+                <p className="text-text-muted text-sm">
                   Få varsler direkte på enheten din når nye bøker legges til, noen deler en
                   liste med deg, eller kommenterer på listene dine.
                 </p>
@@ -507,8 +507,8 @@ const Profile = () => {
                 style={{
                   background:
                     pushState === "subscribed"
-                      ? "linear-gradient(135deg, #9ca3af, #6b7280)"
-                      : "linear-gradient(135deg, #6b5b95, #8b6bb5)",
+                      ? "var(--color-text-faint)"
+                      : "var(--color-primary)",
                 }}
               >
                 {pushBusy
@@ -527,7 +527,7 @@ const Profile = () => {
               setShowPasswordForm(!showPasswordForm);
               setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
             }}
-            className="w-full flex items-center justify-between font-bold text-gray-700"
+            className="w-full flex items-center justify-between font-bold text-text-muted"
           >
             <span>🔒 Bytt passord</span>
             <span>{showPasswordForm ? "▲" : "▼"}</span>
@@ -536,7 +536,7 @@ const Profile = () => {
           {showPasswordForm && (
             <form onSubmit={handlePasswordChange} className="mt-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Nåværende passord
                 </label>
                 <input
@@ -549,7 +549,7 @@ const Profile = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Nytt passord
                 </label>
                 <input
@@ -562,7 +562,7 @@ const Profile = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-text-muted mb-2">
                   Bekreft nytt passord
                 </label>
                 <input
@@ -586,7 +586,7 @@ const Profile = () => {
                   type="button"
                   onClick={() => setShowPasswordForm(false)}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
-                  style={{ background: "linear-gradient(135deg, #9ca3af, #6b7280)", color: "white" }}
+                  style={{ background: "var(--color-text-faint)", color: "white" }}
                 >
                   Avbryt
                 </button>
@@ -606,7 +606,7 @@ const Profile = () => {
               <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : ownedBooks.length === 0 ? (
-            <p className="text-gray-500 text-sm text-center py-6">
+            <p className="text-text-faint text-sm text-center py-6">
               Du har ikke lagt til noen bøker i bokhyllen din enda.<br />
               Åpne en bok og trykk «Legg til bokhyllen».
             </p>
@@ -627,8 +627,8 @@ const Profile = () => {
                         <img src={cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center p-2"
-                          style={{ background: "linear-gradient(135deg, #667eea22, #764ba222)" }}>
-                          <span className="text-xs text-center text-gray-500 font-medium line-clamp-3 leading-tight">
+                          style={{ background: "var(--color-wine-tint)" }}>
+                          <span className="text-xs text-center text-text-faint font-medium line-clamp-3 leading-tight">
                             {book.title}
                           </span>
                         </div>
@@ -649,7 +649,7 @@ const Profile = () => {
           onClick={() => setShowAvatarModal(false)}
         >
           <div
-            className="bg-white rounded-3xl p-8 max-w-2xl w-full animate-fadeIn shadow-2xl"
+            className="bg-card rounded-3xl p-8 max-w-2xl w-full animate-fadeIn shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="text-2xl font-bold gradient-text mb-6">
@@ -657,8 +657,8 @@ const Profile = () => {
             </h3>
 
             {/* Upload Custom Avatar */}
-            <div className="mb-6 pb-6 border-b border-gray-200">
-              <h4 className="text-lg font-bold text-gray-900 mb-3">
+            <div className="mb-6 pb-6 border-b border-border">
+              <h4 className="text-lg font-bold text-text mb-3">
                 📤 Last opp egen avatar/bilde
               </h4>
               <input
@@ -675,14 +675,14 @@ const Profile = () => {
               >
                 {isUploading ? "⏳ Laster opp..." : "📁 Velg fil"}
               </button>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-text-faint mt-2">
                 Maks filstørrelse: 5MB. Støttede formater: JPG, PNG, GIF, WebP
               </p>
             </div>
 
             {/* Default Avatars */}
             <div>
-              <h4 className="text-lg font-bold text-gray-900 mb-3">
+              <h4 className="text-lg font-bold text-text mb-3">
                 🎨 Default avatarer
               </h4>
               <div className="grid grid-cols-3 gap-4 mb-6">
@@ -691,14 +691,14 @@ const Profile = () => {
                     key={avatar.name}
                     onClick={() => handleSelectDefaultAvatar(avatar.name)}
                     disabled={isUploading}
-                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-gray-200 hover:border-purple-500 transition-all transform hover:scale-105 disabled:opacity-50"
+                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-border hover:border-purple-500 transition-all transform hover:scale-105 disabled:opacity-50"
                   >
                     <img
                       src={usersApi.getAvatarUrl(avatar.name)}
                       alt={avatar.label}
                       className="w-20 h-20 rounded-full shadow-lg"
                     />
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-text-muted">
                       {avatar.label}
                     </span>
                   </button>
@@ -708,12 +708,12 @@ const Profile = () => {
 
             {/* Delete Avatar */}
             {user?.avatar && (
-              <div className="pt-6 border-t border-gray-200">
+              <div className="pt-6 border-t border-border">
                 <button
                   onClick={handleDeleteAvatar}
                   className="w-full py-3 rounded-full font-bold text-white transition-all transform hover:scale-105 shadow-lg"
                   style={{
-                    background: "linear-gradient(135deg, #ef4444, #dc2626)",
+                    background: "var(--color-terracotta)",
                   }}
                 >
                   🗑️ Fjern avatar
@@ -726,7 +726,7 @@ const Profile = () => {
               onClick={() => setShowAvatarModal(false)}
               className="mt-4 w-full py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
               style={{
-                background: "linear-gradient(135deg, #9ca3af, #6b7280)",
+                background: "var(--color-text-faint)",
                 color: "white",
               }}
             >
