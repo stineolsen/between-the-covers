@@ -55,7 +55,7 @@ const CommentThread = ({ listId, bookId }) => {
   if (loading) {
     return (
       <div className="flex justify-center py-6">
-        <div className="w-7 h-7 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+        <div className="w-7 h-7 border-4 border-[var(--color-wine-tint)] border-t-[var(--color-primary)] rounded-full animate-spin" />
       </div>
     );
   }
@@ -63,7 +63,7 @@ const CommentThread = ({ listId, bookId }) => {
   return (
     <div className="space-y-3">
       {comments.length === 0 ? (
-        <p className="text-sm text-gray-500 py-2">Ingen kommentarer ennå. Bli den første!</p>
+        <p className="text-sm py-2" style={{ color: "var(--color-text-faint)" }}>Ingen kommentarer ennå. Bli den første!</p>
       ) : (
         comments.map((comment) => (
           <CommentCard key={comment._id} comment={comment} onEdit={handleEdit} onDelete={handleDelete} />
@@ -82,8 +82,7 @@ const CommentThread = ({ listId, bookId }) => {
         <button
           type="submit"
           disabled={posting || !content.trim()}
-          className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all disabled:opacity-50"
-          style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)" }}
+          className="btn-primary px-4 py-2 text-sm"
         >
           {posting ? "..." : "Send"}
         </button>

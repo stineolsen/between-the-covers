@@ -37,11 +37,15 @@ const ListFormModal = ({ list, onClose, onSaved }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
       <div
         className="w-full max-w-lg rounded-2xl p-6 animate-fadeIn shadow-2xl"
-        style={{ background: "linear-gradient(135deg, #fff 80%, rgba(124,58,237,0.06))" }}
+        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)" }}
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold gradient-text">{isEditing ? "✏️ Rediger liste" : "📋 Ny liste"}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">
+          <button
+            onClick={onClose}
+            className="text-xl font-bold leading-none hover:opacity-70 transition-opacity"
+            style={{ color: "var(--color-text-faint)" }}
+          >
             ✕
           </button>
         </div>
@@ -88,11 +92,12 @@ const ListFormModal = ({ list, onClose, onSaved }) => {
             <label className="block text-sm font-semibold text-gray-700 mb-2">Synlighet</label>
             <div className="flex gap-3">
               <label
-                className={`flex-1 flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer border-2 transition-all text-sm font-medium select-none ${
+                className="flex-1 flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer border-2 transition-all text-sm font-medium select-none"
+                style={
                   visibility === "private"
-                    ? "border-purple-500 bg-purple-50 text-purple-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-purple-300"
-                }`}
+                    ? { borderColor: "var(--color-primary)", background: "var(--color-wine-tint)", color: "var(--color-primary)" }
+                    : { borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text-muted)" }
+                }
               >
                 <input
                   type="radio"
@@ -103,11 +108,12 @@ const ListFormModal = ({ list, onClose, onSaved }) => {
                 🔒 Privat
               </label>
               <label
-                className={`flex-1 flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer border-2 transition-all text-sm font-medium select-none ${
+                className="flex-1 flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer border-2 transition-all text-sm font-medium select-none"
+                style={
                   visibility === "public"
-                    ? "border-purple-500 bg-purple-50 text-purple-700"
-                    : "border-gray-200 bg-white text-gray-600 hover:border-purple-300"
-                }`}
+                    ? { borderColor: "var(--color-primary)", background: "var(--color-wine-tint)", color: "var(--color-primary)" }
+                    : { borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text-muted)" }
+                }
               >
                 <input
                   type="radio"
@@ -118,24 +124,20 @@ const ListFormModal = ({ list, onClose, onSaved }) => {
                 🌍 Offentlig
               </label>
             </div>
-            <p className="text-xs text-gray-500 mt-1.5">
+            <p className="text-xs mt-1.5" style={{ color: "var(--color-text-faint)" }}>
               Offentlige lister kan sees av alle godkjente medlemmer.
             </p>
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={saving}
-              className="flex-1 py-2.5 rounded-xl text-white font-bold transition-all disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)" }}
-            >
+            <button type="submit" disabled={saving} className="btn-primary flex-1">
               {saving ? "Lagrer..." : isEditing ? "Lagre endringer" : "Opprett liste"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50"
+              className="px-4 py-2.5 rounded-xl border font-medium transition-colors hover:bg-[var(--color-sunken)]"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
             >
               Avbryt
             </button>

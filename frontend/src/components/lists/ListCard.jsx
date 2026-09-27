@@ -5,7 +5,10 @@ import UserAvatar from "../common/UserAvatar";
 
 const ListCard = ({ list }) => {
   const ownerName = list.owner?.displayName || list.owner?.username || "Ukjent";
-  const covers = (list.books || []).slice(0, 4);
+  // Render more covers than any card width could show, then let the card's
+  // own overflow-hidden clip whatever doesn't fit — fills wide cards instead
+  // of stopping at 4 and leaving blank space.
+  const covers = (list.books || []).slice(0, 12);
 
   return (
     <Link

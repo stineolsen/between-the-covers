@@ -91,6 +91,20 @@
   --color-nav-text-muted: rgba(246, 220, 230, 0.68);
 }
 
+/* Legacy hardcoded Tailwind gray text (e.g. section headings like
+   "Anmeldelser" / "Biblioteklenker") predate the token system above and
+   stayed unreadably dark in dark mode. Retint them to the ink tokens so they
+   follow the theme like everything else. */
+.text-gray-700 {
+  color: var(--color-text-muted);
+}
+.text-gray-800 {
+  color: var(--color-text);
+}
+.text-gray-900 {
+  color: var(--color-text);
+}
+
 /* Keyframe animations */
 @keyframes fadeIn {
   from {

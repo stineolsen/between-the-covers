@@ -21,13 +21,18 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
   };
 
   return (
-    <div ref={setNodeRef} style={{ ...style, boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }} className="bg-white rounded-2xl overflow-hidden">
+    <div
+      ref={setNodeRef}
+      style={{ ...style, background: "var(--color-card)", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}
+      className="rounded-2xl overflow-hidden"
+    >
       <div className="flex items-center gap-3 p-3">
         {canEdit && (
           <button
             {...attributes}
             {...listeners}
-            className="cursor-grab active:cursor-grabbing text-gray-300 hover:text-gray-500 text-xl leading-none flex-shrink-0 touch-none"
+            className="cursor-grab active:cursor-grabbing hover:opacity-70 transition-opacity text-xl leading-none flex-shrink-0 touch-none"
+            style={{ color: "var(--color-text-faint)" }}
             title="Dra for å endre rekkefølge"
           >
             ⠿
@@ -50,15 +55,20 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
         </Link>
 
         <div className="flex-1 min-w-0">
-          <Link to={`/books/${book._id}`} className="font-bold text-sm text-gray-900 hover:text-purple-700 transition-colors block truncate">
+          <Link
+            to={`/books/${book._id}`}
+            className="font-bold text-sm hover:text-[var(--color-primary)] transition-colors block truncate"
+            style={{ color: "var(--color-text)" }}
+          >
             {book.title}
           </Link>
-          <p className="text-xs text-gray-500 truncate">{book.author}</p>
+          <p className="text-xs truncate" style={{ color: "var(--color-text-faint)" }}>{book.author}</p>
         </div>
 
         <button
           onClick={() => setShowComments((v) => !v)}
-          className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-all"
+          className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-[var(--color-sunken)] transition-all"
+          style={{ color: "var(--color-text-muted)" }}
         >
           💬 {showComments ? "Skjul" : "Kommenter"}
         </button>
@@ -75,7 +85,7 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
       </div>
 
       {showComments && (
-        <div className="px-4 pb-4 pt-1 border-t border-gray-100">
+        <div className="px-4 pb-4 pt-1 border-t" style={{ borderColor: "var(--color-border)" }}>
           <CommentThread listId={listId} bookId={book._id} />
         </div>
       )}
