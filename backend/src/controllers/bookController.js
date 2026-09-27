@@ -136,23 +136,40 @@ exports.getBooks = async (req, res, next) => {
       }
     }
 
-    // Sort options
+    // Sort options - each criterion supports both directions.
     let sortOptions = {};
     switch (sort) {
-      case "title":
+      case "title-asc":
         sortOptions = { title: 1 };
         break;
-      case "author":
+      case "title-desc":
+        sortOptions = { title: -1 };
+        break;
+      case "firstname-asc":
         sortOptions = { author: 1 };
         break;
-      case "author-lastname":
-        sortOptions = null; // handled in JS below
+      case "firstname-desc":
+        sortOptions = { author: -1 };
         break;
-      case "rating":
+      case "lastname-asc":
+      case "lastname-desc":
+        sortOptions = null; // handled in JS below (last name isn't its own field)
+        break;
+      case "rating-asc":
+        sortOptions = { averageRating: 1 };
+        break;
+      case "rating-desc":
         sortOptions = { averageRating: -1 };
         break;
-      case "newest":
+      case "added-asc":
+        sortOptions = { dateAdded: 1 };
+        break;
+      case "added-desc":
         sortOptions = { dateAdded: -1 };
+        break;
+      case "readcount-asc":
+      case "readcount-desc":
+        sortOptions = { dateAdded: -1 }; // re-sorted in JS below, order here is irrelevant
         break;
       default:
         sortOptions = { dateAdded: -1 };
@@ -162,13 +179,31 @@ exports.getBooks = async (req, res, next) => {
       .sort(sortOptions || { title: 1 })
       .populate("addedBy", "username displayName");
 
-    if (sort === "author-lastname") {
+    if (sort === "lastname-asc" || sort === "lastname-desc") {
       const lastName = (name) => {
         if (!name) return "";
         const parts = name.trim().split(/\s+/);
         return parts[parts.length - 1].toLowerCase();
       };
-      books = [...books].sort((a, b) => lastName(a.author).localeCompare(lastName(b.author), "nb"));
+      const dir = sort === "lastname-desc" ? -1 : 1;
+      books = [...books].sort(
+        (a, b) => dir * lastName(a.author).localeCompare(lastName(b.author), "nb"),
+      );
+    }
+
+    if (sort === "readcount-asc" || sort === "readcount-desc") {
+      const UserBook = require("../models/UserBook");
+      const counts = await UserBook.aggregate([
+        { $match: { status: "read" } },
+        { $group: { _id: "$book", count: { $sum: 1 } } },
+      ]);
+      const countMap = new Map(counts.map((c) => [c._id.toString(), c.count]));
+      const dir = sort === "readcount-asc" ? 1 : -1;
+      books = [...books].sort(
+        (a, b) =>
+          dir *
+          ((countMap.get(a._id.toString()) || 0) - (countMap.get(b._id.toString()) || 0)),
+      );
     }
 
     res.status(200).json({

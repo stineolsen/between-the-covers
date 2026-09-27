@@ -149,14 +149,14 @@ const Navbar = () => {
                     title="Bytt lys/mørk modus"
                     aria-label="Bytt lys/mørk modus"
                   >
-                    <Icon name={theme === "dark" ? "sun" : "moon"} className="w-6 h-6" />
+                    <Icon name={theme === "dark" ? "sun" : "moon"} className="w-4 h-4" />
                   </button>
 
                   {/* Secondary-pages menu (Møter/Butikk/Admin/Logg ut) */}
                   <div className="relative">
                     <button
                       onClick={() => setMenuOpen((v) => !v)}
-                      className="w-10 h-10 rounded-lg flex items-center justify-center text-2xl font-bold"
+                      className="w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold"
                       style={{
                         color: "var(--color-nav-text)",
                         background: "rgba(255,255,255,0.08)",

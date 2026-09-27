@@ -28,7 +28,7 @@ const Stars = ({ rating }) => {
 };
 
 const Avatar = ({ user }) => (
-  <UserAvatar user={user} className="w-9 h-9 rounded-full font-bold text-sm flex-shrink-0" />
+  <UserAvatar user={user} className="w-7 h-7 sm:w-9 sm:h-9 rounded-full font-bold text-sm flex-shrink-0" />
 );
 
 const BookThumb = ({ book }) => {
@@ -108,7 +108,7 @@ const ActivityItem = ({ activity }) => {
     return (
       <div className="flex items-center gap-3">
         <div
-          className="w-9 h-9 rounded-full flex items-center justify-center text-lg flex-shrink-0"
+          className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-base sm:text-lg flex-shrink-0"
           style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(251,113,133,0.3))' }}
         >
           📅
@@ -163,10 +163,10 @@ const ActivityFeed = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 animate-fadeIn">
-      <h2 className="text-xl font-bold gradient-text mb-4">Siste aktivitet</h2>
+    <div className="max-w-4xl mx-auto mt-6 sm:mt-10 animate-fadeIn">
+      <h2 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">Siste aktivitet</h2>
       <div
-        className="rounded-2xl p-4 sm:p-6 space-y-4"
+        className="rounded-2xl p-3 sm:p-6 space-y-3 sm:space-y-4"
         style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.07), rgba(251,113,133,0.12))' }}
       >
         {loading ? (

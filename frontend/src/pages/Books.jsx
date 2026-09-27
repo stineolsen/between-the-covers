@@ -27,7 +27,7 @@ const Books = () => {
     savedFilters.ebookOnly || false,
   );
   const [genre, setGenre] = useState(savedFilters.genre || "");
-  const [sort, setSort] = useState(savedFilters.sort || "newest");
+  const [sort, setSort] = useState(savedFilters.sort || "added-desc");
   const [readFilter, setReadFilter] = useState(() => {
     const saved = savedFilters.readFilter;
     if (Array.isArray(saved)) return saved;
@@ -133,7 +133,7 @@ const Books = () => {
     setOwnedOnly(false);
     setShowHidden(false);
     setGenre("");
-    setSort("newest");
+    setSort("added-desc");
     setReadFilter("all");
     sessionStorage.removeItem("bookFilters");
   };
@@ -231,11 +231,30 @@ const Books = () => {
             className="input-field"
             style={{ width: "auto", padding: "0.5rem 0.7rem" }}
           >
-            <option value="newest">Nyeste først</option>
-            <option value="title">Tittel A-Z</option>
-            <option value="author">Forfatter fornavn A-Z</option>
-            <option value="author-lastname">Forfatter etternavn A-Z</option>
-            <option value="rating">Høyest rated</option>
+            <optgroup label="Tittel">
+              <option value="title-asc">Tittel A-Å</option>
+              <option value="title-desc">Tittel Å-A</option>
+            </optgroup>
+            <optgroup label="Forfatter etternavn">
+              <option value="lastname-asc">Etternavn A-Å</option>
+              <option value="lastname-desc">Etternavn Å-A</option>
+            </optgroup>
+            <optgroup label="Forfatter fornavn">
+              <option value="firstname-asc">Fornavn A-Å</option>
+              <option value="firstname-desc">Fornavn Å-A</option>
+            </optgroup>
+            <optgroup label="Lagt til">
+              <option value="added-desc">Sist lagt til</option>
+              <option value="added-asc">Tidligst lagt til</option>
+            </optgroup>
+            <optgroup label="Rating">
+              <option value="rating-desc">Høyest rated</option>
+              <option value="rating-asc">Lavest rated</option>
+            </optgroup>
+            <optgroup label="Antall lest">
+              <option value="readcount-desc">Flest lest</option>
+              <option value="readcount-asc">Færrest lest</option>
+            </optgroup>
           </select>
 
           <button
