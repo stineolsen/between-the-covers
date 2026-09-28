@@ -54,7 +54,7 @@ const RecommendationFeed = () => {
             <div
               key={rec._id}
               className="flex items-center gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4"
-              style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,113,133,0.14))' }}
+              style={{ background: 'var(--gradient-secondary)' }}
             >
               {/* Book cover */}
               <Link to={`/books/${book?._id}`} className="flex-shrink-0">
@@ -66,30 +66,30 @@ const RecommendationFeed = () => {
                     onError={e => { e.target.style.display = 'none'; }}
                   />
                 ) : (
-                  <div className="w-11 h-16 sm:w-14 sm:h-20 rounded-lg bg-purple-100 flex items-center justify-center text-2xl">📖</div>
+                  <div className="w-11 h-16 sm:w-14 sm:h-20 rounded-lg flex items-center justify-center text-2xl" style={{ background: "var(--color-sunken)" }}>📖</div>
                 )}
               </Link>
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <Link to={`/books/${book?._id}`} className="font-bold text-gray-800 hover:text-purple-700 transition-colors block truncate">
+                <Link to={`/books/${book?._id}`} className="font-bold text-gray-800 hover:text-[var(--color-primary)] transition-colors block truncate">
                   {book?.title || 'Ukjent bok'}
                 </Link>
                 {book?.author && (
-                  <p className="text-sm text-gray-500 truncate">{book.author}</p>
+                  <p className="text-sm truncate" style={{ color: "var(--color-text-faint)" }}>{book.author}</p>
                 )}
 
                 {/* Sender */}
                 <div className="flex items-center gap-2 mt-2">
                   <UserAvatar user={sender} className="w-6 h-6 rounded-full text-xs font-bold flex-shrink-0" />
-                  <span className="text-xs text-gray-600">
+                  <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>
                     <span className="font-semibold">{senderName}</span> anbefaler denne
                   </span>
                 </div>
 
                 {/* Message */}
                 {rec.message && (
-                  <p className="text-xs text-gray-500 italic mt-1 line-clamp-2">
+                  <p className="text-xs italic mt-1 line-clamp-2" style={{ color: "var(--color-text-faint)" }}>
                     "{rec.message}"
                   </p>
                 )}
@@ -100,7 +100,7 @@ const RecommendationFeed = () => {
                     onClick={() => handleAddToList(rec)}
                     disabled={addingId === rec._id}
                     className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-all disabled:opacity-50"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+                    style={{ background: 'var(--color-primary-solid)' }}
                   >
                     {addingId === rec._id ? '...' : '+ Legg til leserlisten'}
                   </button>
@@ -110,7 +110,8 @@ const RecommendationFeed = () => {
               {/* Dismiss */}
               <button
                 onClick={() => handleDismiss(rec._id)}
-                className="flex-shrink-0 text-gray-300 hover:text-red-400 transition-colors text-xl font-bold leading-none self-start"
+                className="flex-shrink-0 transition-colors text-xl font-bold leading-none self-start hover:opacity-70"
+                style={{ color: "var(--color-text-faint)" }}
                 title="Avvis"
               >
                 ✕

@@ -185,7 +185,7 @@ const Meetings = () => {
                         ? "No Upcoming Meetings"
                         : "No Past Meetings"}
                     </h2>
-                    <p className="text-gray-600 text-lg">
+                    <p className="text-text-muted text-lg">
                       {activeTab === "upcoming"
                         ? "Check back later for our next bookclub gathering!"
                         : "No meeting history yet. Stay tuned!"}

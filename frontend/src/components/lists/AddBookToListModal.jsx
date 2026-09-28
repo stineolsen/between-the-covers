@@ -54,7 +54,7 @@ const AddBookToListModal = ({ listId, existingBookIds, onClose, onAdded }) => {
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold gradient-text">➕ Legg til bok</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">
+          <button onClick={onClose} className="text-xl font-bold leading-none hover:opacity-70 transition-opacity" style={{ color: "var(--color-text-faint)" }}>
             ✕
           </button>
         </div>
@@ -71,16 +71,16 @@ const AddBookToListModal = ({ listId, existingBookIds, onClose, onAdded }) => {
         <div className="overflow-y-auto flex-1 space-y-2">
           {loading ? (
             <div className="flex justify-center py-6">
-              <div className="w-7 h-7 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+              <div className="w-7 h-7 border-4 border-[var(--color-wine-tint)] border-t-[var(--color-primary)] rounded-full animate-spin" />
             </div>
           ) : books.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-gray-500 mb-3">Ingen bøker funnet</p>
+              <p className="mb-3" style={{ color: "var(--color-text-faint)" }}>Ingen bøker funnet</p>
               {search.trim() && (
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="text-sm font-semibold px-4 py-2 rounded-lg text-white transition-all"
-                  style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)" }}
+                  style={{ background: "var(--color-primary-solid)" }}
                 >
                   🌐 Ikke i biblioteket? Legg til fra Open Library
                 </button>
@@ -101,7 +101,7 @@ const AddBookToListModal = ({ listId, existingBookIds, onClose, onAdded }) => {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-gray-900 truncate">{book.title}</p>
-                    <p className="text-xs text-gray-500 truncate">{book.author}</p>
+                    <p className="text-xs truncate" style={{ color: "var(--color-text-faint)" }}>{book.author}</p>
                   </div>
                   <button
                     onClick={() => handleAdd(book._id)}

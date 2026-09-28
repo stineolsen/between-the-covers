@@ -100,7 +100,7 @@ const PublicProfile = () => {
           <h2 className="text-2xl font-bold text-gray-900 mb-1">
             {user.displayName}
           </h2>
-          <p className="text-gray-600 mb-3">@{user.username}</p>
+          <p className="mb-3" style={{ color: "var(--color-text-muted)" }}>@{user.username}</p>
 
           {/* Tags */}
           {tags && tags.length > 0 && (
@@ -161,7 +161,7 @@ const PublicProfile = () => {
                     title={`${book.title} — ${book.author}`}
                     className="group block"
                   >
-                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md bg-gray-100 group-hover:shadow-xl transition-shadow">
+                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow" style={{ background: "var(--color-sunken)" }}>
                       {cover ? (
                         <img
                           src={cover}
@@ -173,7 +173,7 @@ const PublicProfile = () => {
                           className="w-full h-full flex items-center justify-center p-2"
                           style={{ background: "linear-gradient(135deg, #667eea22, #764ba222)" }}
                         >
-                          <span className="text-xs text-center text-gray-500 font-medium line-clamp-3 leading-tight">
+                          <span className="text-xs text-center font-medium line-clamp-3 leading-tight" style={{ color: "var(--color-text-faint)" }}>
                             {book.title}
                           </span>
                         </div>
@@ -203,7 +203,7 @@ const PublicProfile = () => {
                     title={`${book.title} — ${book.author}`}
                     className="group block"
                   >
-                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md bg-gray-100 group-hover:shadow-xl transition-shadow">
+                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow" style={{ background: "var(--color-sunken)" }}>
                       {cover ? (
                         <img
                           src={cover}
@@ -215,7 +215,7 @@ const PublicProfile = () => {
                           className="w-full h-full flex items-center justify-center p-2"
                           style={{ background: "linear-gradient(135deg, #667eea22, #764ba222)" }}
                         >
-                          <span className="text-xs text-center text-gray-500 font-medium line-clamp-3 leading-tight">
+                          <span className="text-xs text-center font-medium line-clamp-3 leading-tight" style={{ color: "var(--color-text-faint)" }}>
                             {book.title}
                           </span>
                         </div>

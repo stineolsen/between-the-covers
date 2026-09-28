@@ -65,22 +65,18 @@ const AddToListMenu = ({ book }) => {
 
   return (
     <div className="relative w-full" ref={menuRef}>
-      <button
-        onClick={handleToggle}
-        className="w-full py-2 rounded-xl text-white font-semibold text-sm transition-all"
-        style={{ background: "linear-gradient(135deg, #059669, #0d9488)" }}
-      >
+      <button onClick={handleToggle} className="btn-primary w-full py-2 text-sm">
         📋 Legg til i liste
       </button>
 
       {open && (
         <div
           className="absolute z-40 mt-2 w-64 rounded-2xl shadow-2xl p-3 animate-fadeIn"
-          style={{ background: "linear-gradient(135deg, #fff 80%, rgba(16,185,129,0.06))" }}
+          style={{ background: "var(--color-card)", border: "1px solid var(--color-border)" }}
         >
           {loading ? (
             <div className="flex justify-center py-4">
-              <div className="w-6 h-6 border-4 border-emerald-300 border-t-emerald-600 rounded-full animate-spin" />
+              <div className="w-6 h-6 border-4 border-[var(--color-wine-tint)] border-t-[var(--color-primary)] rounded-full animate-spin" />
             </div>
           ) : lists && lists.length > 0 ? (
             <div className="space-y-1 max-h-56 overflow-y-auto mb-2">
@@ -91,7 +87,7 @@ const AddToListMenu = ({ book }) => {
                     key={list._id}
                     onClick={() => !already && handleAdd(list._id)}
                     disabled={already || addingId === list._id}
-                    className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-left text-sm font-medium hover:bg-emerald-50 transition-colors disabled:hover:bg-transparent"
+                    className="w-full flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-left text-sm font-medium hover:bg-[var(--color-sunken)] transition-colors disabled:hover:bg-transparent"
                   >
                     <span className="truncate text-gray-800">{list.title}</span>
                     <span className="flex-shrink-0 text-xs">
@@ -102,7 +98,7 @@ const AddToListMenu = ({ book }) => {
               })}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 text-center py-3">Du har ingen lister ennå</p>
+            <p className="text-sm text-center py-3" style={{ color: "var(--color-text-faint)" }}>Du har ingen lister ennå</p>
           )}
 
           <button
@@ -110,7 +106,8 @@ const AddToListMenu = ({ book }) => {
               setOpen(false);
               setShowFormModal(true);
             }}
-            className="w-full text-xs font-bold px-3 py-2 rounded-xl text-emerald-700 hover:bg-emerald-50 transition-colors border-t border-gray-100 mt-1 pt-2"
+            className="w-full text-xs font-bold px-3 py-2 rounded-xl hover:bg-[var(--color-sunken)] transition-colors border-t mt-1 pt-2"
+            style={{ color: "var(--color-primary)", borderColor: "var(--color-border)" }}
           >
             ✨ Ny liste
           </button>

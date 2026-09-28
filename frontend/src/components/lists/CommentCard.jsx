@@ -47,7 +47,8 @@ const CommentCard = ({ comment, onEdit, onDelete }) => {
             )}
             <button
               onClick={() => onDelete(comment._id)}
-              className="text-xs px-2 py-1 rounded-full font-semibold text-red-600 hover:bg-red-50 transition-all"
+              className="text-xs px-2 py-1 rounded-full font-semibold hover:bg-[var(--color-terracotta-tint)] transition-all"
+              style={{ color: "var(--color-terracotta)" }}
             >
               🗑️
             </button>

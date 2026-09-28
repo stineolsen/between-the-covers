@@ -43,7 +43,7 @@ const LoginForm = () => {
           <h2 className="text-5xl font-bold gradient-text mb-3">
             ✨ Velkommen tilbake!
           </h2>
-          <p className="mt-2 text-gray-600 text-lg font-medium">
+          <p className="mt-2 text-lg font-medium" style={{ color: "var(--color-text-muted)" }}>
             Logg inn på bokklubb-kontoen din
           </p>
         </div>
@@ -51,7 +51,7 @@ const LoginForm = () => {
         {error && (
           <div
             className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-            style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+            style={{ background: "var(--color-terracotta-solid)" }}
           >
             {error}
           </div>
@@ -61,7 +61,8 @@ const LoginForm = () => {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-bold text-gray-700 mb-2"
+              className="block text-sm font-bold mb-2"
+              style={{ color: "var(--color-text-muted)" }}
             >
               📧 E-postadresse
             </label>
@@ -80,7 +81,8 @@ const LoginForm = () => {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-bold text-gray-700 mb-2"
+              className="block text-sm font-bold mb-2"
+              style={{ color: "var(--color-text-muted)" }}
             >
               🔒 Passord
             </label>
@@ -107,14 +109,14 @@ const LoginForm = () => {
 
         <div
           className="mt-8 text-center p-4 rounded-2xl"
-          style={{ background: "rgba(102, 126, 234, 0.1)" }}
+          style={{ background: "var(--color-sunken)" }}
         >
-          <p className="text-gray-700 font-medium">
+          <p className="font-medium" style={{ color: "var(--color-text-muted)" }}>
             Har du ikke en konto?{" "}
             <Link
               to="/register"
               className="font-bold hover:underline"
-              style={{ color: "#f5576c" }}
+              style={{ color: "var(--color-primary)" }}
             >
               Registrer deg her ✨
             </Link>

@@ -167,11 +167,11 @@ const ActivityFeed = () => {
       <h2 className="text-lg sm:text-xl font-bold gradient-text mb-3 sm:mb-4">Siste aktivitet</h2>
       <div
         className="rounded-2xl p-3 sm:p-6 space-y-3 sm:space-y-4"
-        style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.07), rgba(251,113,133,0.12))' }}
+        style={{ background: 'var(--gradient-secondary)' }}
       >
         {loading ? (
           <div className="flex justify-center py-8">
-            <div className="w-8 h-8 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+            <div className="w-8 h-8 border-4 border-[var(--color-wine-tint)] border-t-[var(--color-primary)] rounded-full animate-spin" />
           </div>
         ) : activities.length === 0 ? (
           <p className="text-center text-text-faint py-6">Ingen aktivitet ennå 🌱</p>
@@ -180,7 +180,7 @@ const ActivityFeed = () => {
             <div key={i}>
               <ActivityItem activity={activity} />
               {i < activities.length - 1 && (
-                <div className="border-b border-purple-100 mt-4" />
+                <div className="border-b mt-4" style={{ borderColor: "var(--color-border)" }} />
               )}
             </div>
           ))

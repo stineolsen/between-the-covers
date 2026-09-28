@@ -145,7 +145,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         {/* Product Name */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Varenavn <span className="text-red-500">*</span>
+            Varenavn <span style={{ color: "var(--color-terracotta)" }}>*</span>
           </label>
           <input
             type="text"
@@ -177,7 +177,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Pris <span className="text-red-500">*</span>
+              Pris <span style={{ color: "var(--color-terracotta)" }}>*</span>
             </label>
             <input
               type="number"
@@ -263,7 +263,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
             Link varer til en bok dersom de henger sammen (e.g., merch til en
             bok i bibiloteket)
           </p>
@@ -311,7 +311,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
               + Legg til
             </button>
           </div>
-          <p className="text-xs text-gray-500 mt-1">Trykk Enter eller klikk "+ Legg til" for å legge til en størrelse</p>
+          <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>Trykk Enter eller klikk "+ Legg til" for å legge til en størrelse</p>
         </div>
 
         {/* Product Image */}
@@ -320,7 +320,8 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
             🖼️ Produktbilde
           </label>
           <div
-            className="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer border-2 border-dashed border-purple-300 hover:border-purple-500 transition-all flex items-center justify-center bg-purple-50"
+            className="relative w-full h-48 rounded-2xl overflow-hidden cursor-pointer border-2 border-dashed transition-all flex items-center justify-center hover:border-[var(--color-primary)]"
+            style={{ borderColor: "var(--color-border-strong)", background: "var(--color-sunken)" }}
             onClick={() => fileInputRef.current?.click()}
           >
             {imagePreview ? (
@@ -335,7 +336,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
                 </div>
               </>
             ) : (
-              <div className="text-center text-purple-400">
+              <div className="text-center" style={{ color: "var(--color-text-faint)" }}>
                 <div className="text-4xl mb-2">📷</div>
                 <p className="text-sm font-semibold">Klikk for å laste opp bilde</p>
                 <p className="text-xs mt-1">PNG, JPG, WEBP — maks 5MB</p>
@@ -352,7 +353,7 @@ const ProductForm = ({ product = null, onSuccess, onCancel }) => {
         </div>
 
         {/* Availability */}
-        <div className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50">
+        <div className="flex items-center gap-3 p-4 rounded-xl" style={{ background: "var(--gradient-secondary)" }}>
           <input
             type="checkbox"
             id="isAvailable"

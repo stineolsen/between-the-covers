@@ -14,7 +14,7 @@ const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange }) =
 
   if (error) {
     return (
-      <div className="card bg-red-50 border border-red-200 text-red-700 text-center py-12">
+      <div className="card text-center py-12" style={{ background: "var(--color-terracotta-tint)", border: "1px solid var(--color-terracotta)", color: "var(--color-terracotta)" }}>
         <p className="text-lg font-semibold mb-2">Greide ikke laste bøker</p>
         <p>{error}</p>
       </div>

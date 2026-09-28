@@ -77,21 +77,21 @@ const ShareListModal = ({ list, onClose, onShared }) => {
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-lg gradient-text">Del «{list.title}» med...</h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">
+          <button onClick={onClose} className="text-xl font-bold leading-none hover:opacity-70 transition-opacity" style={{ color: "var(--color-text-faint)" }}>
             ✕
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-xs mb-4" style={{ color: "var(--color-text-faint)" }}>
           Personer du deler med kan redigere listen, legge til/fjerne bøker og invitere andre.
         </p>
 
         {loading ? (
           <div className="flex justify-center py-6">
-            <div className="w-7 h-7 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+            <div className="w-7 h-7 border-4 border-[var(--color-wine-tint)] border-t-[var(--color-primary)] rounded-full animate-spin" />
           </div>
         ) : members.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">Ingen flere medlemmer å dele med.</p>
+          <p className="text-center py-4" style={{ color: "var(--color-text-faint)" }}>Ingen flere medlemmer å dele med.</p>
         ) : (
           <>
             <label className="flex items-center gap-2 mb-3 cursor-pointer select-none">
@@ -99,9 +99,9 @@ const ShareListModal = ({ list, onClose, onShared }) => {
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleAll}
-                className="w-4 h-4 accent-purple-600"
+                className="w-4 h-4 accent-[var(--color-primary)]"
               />
-              <span className="font-semibold text-gray-700 text-sm">Alle</span>
+              <span className="font-semibold text-sm" style={{ color: "var(--color-text-muted)" }}>Alle</span>
             </label>
 
             <div className="space-y-2 max-h-52 overflow-y-auto mb-4 pr-1">
@@ -116,13 +116,13 @@ const ShareListModal = ({ list, onClose, onShared }) => {
                       type="checkbox"
                       checked={selected.has(member._id)}
                       onChange={() => toggleMember(member._id)}
-                      className="w-4 h-4 accent-purple-600 flex-shrink-0"
+                      className="w-4 h-4 accent-[var(--color-primary)] flex-shrink-0"
                     />
                     <UserAvatar
                       user={member}
                       className="w-8 h-8 rounded-full font-bold text-sm flex-shrink-0"
                     />
-                    <span className="text-gray-800 text-sm font-medium">{name}</span>
+                    <span className="text-sm font-medium" style={{ color: "var(--color-text)" }}>{name}</span>
                   </label>
                 );
               })}
@@ -143,13 +143,14 @@ const ShareListModal = ({ list, onClose, onShared }) => {
                 onClick={handleSend}
                 disabled={sending || selected.size === 0}
                 className="flex-1 py-2 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)" }}
+                style={{ background: "var(--color-primary-solid)" }}
               >
                 {sending ? "Deler..." : `Del med ${selected.size > 0 ? selected.size : ""} ${selected.size === 1 ? "person" : "personer"}`}
               </button>
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50"
+                className="px-4 py-2 rounded-xl border text-sm font-medium transition-colors hover:bg-[var(--color-sunken)]"
+                style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
               >
                 Avbryt
               </button>

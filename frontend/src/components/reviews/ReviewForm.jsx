@@ -57,7 +57,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       {error && (
         <div
           className="p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-          style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+          style={{ background: "var(--color-terracotta-solid)" }}
         >
           {error}
         </div>
@@ -66,10 +66,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
       {/* Rating */}
       <div
         className="p-5 rounded-2xl"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.15))",
-        }}
+        style={{ background: "var(--color-gold-tint)" }}
       >
         <label className="block text-lg font-bold text-gray-900 mb-3">
           ⭐ Din vurdering
@@ -111,7 +108,7 @@ const ReviewForm = ({ bookId, initialData = null, onSubmit, onCancel }) => {
           className="input-field resize-vertical"
           placeholder="Share your thoughts about this book... What did you love? What could have been better?"
         />
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
           {formData.content.length}/5000 tegn
         </p>
       </div>

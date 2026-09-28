@@ -65,23 +65,24 @@ const RecommendModal = ({ book, onClose }) => {
   return (
     <div
       className="rounded-2xl p-6 mt-4 animate-fadeIn"
-      style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,113,133,0.14))' }}
+      style={{ background: 'var(--gradient-secondary)' }}
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-lg gradient-text">Anbefal denne boken til...</h3>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none"
+          className="text-xl font-bold leading-none hover:opacity-70 transition-opacity"
+          style={{ color: "var(--color-text-faint)" }}
           title="Lukk"
         >✕</button>
       </div>
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <div className="w-7 h-7 border-4 border-purple-300 border-t-purple-600 rounded-full animate-spin" />
+          <div className="w-7 h-7 border-4 border-[var(--color-wine-tint)] border-t-[var(--color-primary)] rounded-full animate-spin" />
         </div>
       ) : members.length === 0 ? (
-        <p className="text-gray-500 text-center py-4">Ingen andre medlemmer å anbefale til.</p>
+        <p className="text-center py-4" style={{ color: "var(--color-text-faint)" }}>Ingen andre medlemmer å anbefale til.</p>
       ) : (
         <>
           {/* Select all */}
@@ -90,7 +91,7 @@ const RecommendModal = ({ book, onClose }) => {
               type="checkbox"
               checked={allSelected}
               onChange={toggleAll}
-              className="w-4 h-4 accent-purple-600"
+              className="w-4 h-4 accent-[var(--color-primary)]"
             />
             <span className="font-semibold text-gray-700 text-sm">Alle</span>
           </label>
@@ -108,7 +109,7 @@ const RecommendModal = ({ book, onClose }) => {
                     type="checkbox"
                     checked={selected.has(member._id)}
                     onChange={() => toggleMember(member._id)}
-                    className="w-4 h-4 accent-purple-600 flex-shrink-0"
+                    className="w-4 h-4 accent-[var(--color-primary)] flex-shrink-0"
                   />
                   <UserAvatar
                     user={member}
@@ -136,14 +137,14 @@ const RecommendModal = ({ book, onClose }) => {
             <button
               onClick={handleSend}
               disabled={sending || selected.size === 0}
-              className="flex-1 py-2 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
+              className="btn-primary flex-1 py-2 text-sm disabled:cursor-not-allowed"
             >
               {sending ? 'Sender...' : `Send til ${selected.size > 0 ? selected.size : ''} ${selected.size === 1 ? 'person' : 'personer'}`}
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50"
+              className="px-4 py-2 rounded-xl border text-sm font-medium transition-colors hover:bg-[var(--color-sunken)]"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
             >
               Avbryt
             </button>

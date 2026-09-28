@@ -7,7 +7,7 @@ const AddBook = () => {
       <div className="max-w-7xl mx-auto px-4">
         <Link
           to="/books"
-          className="inline-flex items-center text-gray-600 hover:text-primary mb-6"
+          className="inline-flex items-center text-text-muted hover:text-primary mb-6"
         >
           <span className="mr-2 btn-primary">←</span> Tilbake til bøker
         </Link>

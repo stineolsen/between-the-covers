@@ -92,19 +92,20 @@ const AuthorDetail = () => {
               />
             )}
             <div className="min-w-0">
-              {bio.birthDate && <p className="text-sm text-gray-500 mb-1">Født {bio.birthDate}</p>}
+              {bio.birthDate && <p className="text-sm mb-1" style={{ color: "var(--color-text-faint)" }}>Født {bio.birthDate}</p>}
               <p className="text-gray-700 leading-relaxed whitespace-pre-line">{bio.bio}</p>
               {bio.link && (
                 <a
                   href={bio.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block mt-3 text-sm font-semibold text-purple-600 hover:text-purple-800"
+                  className="inline-block mt-3 text-sm font-semibold hover:opacity-80"
+                  style={{ color: "var(--color-primary)" }}
                 >
                   🔗 Offisiell nettside
                 </a>
               )}
-              <p className="text-xs text-gray-400 mt-3">Hentet fra Open Library</p>
+              <p className="text-xs mt-3" style={{ color: "var(--color-text-faint)" }}>Hentet fra Open Library</p>
             </div>
           </div>
         )}

@@ -83,7 +83,7 @@ const ListDetail = () => {
   if (error || !list) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20">
-        <div className="card bg-red-50 border border-red-200 text-red-700 text-center py-12">
+        <div className="card text-center py-12" style={{ background: "var(--color-terracotta-tint)", border: "1px solid var(--color-terracotta)", color: "var(--color-terracotta)" }}>
           <p className="text-lg font-semibold mb-2">Greide ikke laste listen</p>
           <p>{error || "Listen ble ikke funnet"}</p>
         </div>
@@ -106,21 +106,21 @@ const ListDetail = () => {
                   className="text-xs px-2 py-0.5 rounded-full font-semibold"
                   style={
                     list.visibility === "public"
-                      ? { background: "rgba(16,185,129,0.12)", color: "#059669" }
-                      : { background: "rgba(107,91,149,0.12)", color: "#6b5b95" }
+                      ? { background: "var(--color-sage-tint)", color: "var(--color-sage)" }
+                      : { background: "var(--color-wine-tint)", color: "var(--color-primary)" }
                   }
                 >
                   {list.visibility === "public" ? "🌍 Offentlig" : "🔒 Privat"}
                 </span>
               </div>
-              {list.description && <p className="text-gray-700">{list.description}</p>}
+              {list.description && <p style={{ color: "var(--color-text-muted)" }}>{list.description}</p>}
             </div>
           </div>
 
           {list.notes && (
             <div className="mt-4 p-4 rounded-xl" style={{ background: "var(--color-sunken)" }}>
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Notater</p>
-              <p className="text-sm text-gray-700 whitespace-pre-line">{list.notes}</p>
+              <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: "var(--color-text-faint)" }}>Notater</p>
+              <p className="text-sm whitespace-pre-line" style={{ color: "var(--color-text-muted)" }}>{list.notes}</p>
             </div>
           )}
 
@@ -128,18 +128,19 @@ const ListDetail = () => {
           <div className="flex items-center gap-2 flex-wrap mt-4">
             <div className="flex items-center gap-1.5" title={`Eier: ${ownerName}`}>
               <UserAvatar user={list.owner} className="w-7 h-7 rounded-full text-xs font-bold" />
-              <span className="text-xs text-gray-600 font-medium">{ownerName} (eier)</span>
+              <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>{ownerName} (eier)</span>
             </div>
             {(list.collaborators || []).map((c) => {
               const name = c.displayName || c.username;
               return (
                 <div key={c._id} className="flex items-center gap-1.5 rounded-full pl-1 pr-2 py-0.5" style={{ background: "var(--color-sunken)" }}>
                   <UserAvatar user={c} className="w-7 h-7 rounded-full text-xs font-bold" />
-                  <span className="text-xs text-gray-600 font-medium">{name}</span>
+                  <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>{name}</span>
                   {canEdit && (
                     <button
                       onClick={() => handleRemoveCollaborator(c._id)}
-                      className="text-gray-400 hover:text-red-500 text-xs font-bold leading-none ml-1"
+                      className="text-xs font-bold leading-none ml-1 hover:opacity-80 transition-opacity"
+                      style={{ color: "var(--color-text-faint)" }}
                       title="Fjern samarbeidspartner"
                     >
                       ✕
@@ -154,10 +155,10 @@ const ListDetail = () => {
           <div className="flex gap-2 flex-wrap mt-5">
             {canEdit && (
               <>
-                <button onClick={() => setShowEditModal(true)} className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-105" style={{ background: "linear-gradient(135deg, #3b82f6, #6366f1)", color: "white" }}>
+                <button onClick={() => setShowEditModal(true)} className="btn-primary text-sm px-4 py-2 transform hover:scale-105">
                   ✏️ Rediger
                 </button>
-                <button onClick={() => setShowShareModal(true)} className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-105" style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)", color: "white" }}>
+                <button onClick={() => setShowShareModal(true)} className="btn-secondary text-sm px-4 py-2 transform hover:scale-105">
                   🤝 Del
                 </button>
               </>
@@ -166,8 +167,8 @@ const ListDetail = () => {
               <button
                 onClick={handleDelete}
                 disabled={deleting}
-                className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-105 disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)", color: "white" }}
+                className="text-sm px-4 py-2 rounded-full font-bold text-white transition-all transform hover:scale-105 disabled:opacity-50"
+                style={{ background: "var(--color-terracotta-solid)" }}
               >
                 {deleting ? "Sletter..." : "🗑️ Slett liste"}
               </button>

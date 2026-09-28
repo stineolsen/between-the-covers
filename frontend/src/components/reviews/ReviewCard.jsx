@@ -43,7 +43,7 @@ const ReviewCard = ({
             <p className="font-bold" style={{ color: "var(--color-text)" }}>
               {review.user?.displayName || review.user?.username || "Anonymous"}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
               {formatDate(review.createdAt)}
             </p>
           </div>
@@ -149,7 +149,7 @@ const ReviewCard = ({
         </button>
 
         {review.updatedAt && review.updatedAt !== review.createdAt && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs" style={{ color: "var(--color-text-faint)" }}>
             Redigert {formatDate(review.updatedAt)}
           </p>
         )}

@@ -55,18 +55,18 @@ const normalizeNbItem = (item) => {
 const ResultRow = ({ doc, onSelect }) => (
   <button
     onClick={() => onSelect(doc)}
-    className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-purple-50 transition-colors text-left"
+    className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-[var(--color-sunken)] transition-colors text-left"
   >
-    <div className="w-10 h-14 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+    <div className="w-10 h-14 rounded-lg overflow-hidden flex-shrink-0" style={{ background: "var(--color-sunken)" }}>
       {doc.coverUrl ? (
         <img src={doc.coverUrl} alt={doc.title} className="w-full h-full object-cover" />
       ) : (
-        <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">📖</div>
+        <div className="w-full h-full flex items-center justify-center text-xs" style={{ color: "var(--color-text-faint)" }}>📖</div>
       )}
     </div>
     <div className="flex-1 min-w-0">
       <p className="font-bold text-gray-900 truncate">{doc.title}</p>
-      <p className="text-sm text-gray-500 truncate">
+      <p className="text-sm truncate" style={{ color: "var(--color-text-faint)" }}>
         {doc.author}
         {doc.year ? ` · ${doc.year}` : ""}
       </p>
@@ -224,12 +224,13 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b border-gray-100 flex-shrink-0">
+        <div className="flex items-center justify-between px-8 pt-8 pb-4 border-b flex-shrink-0" style={{ borderColor: "var(--color-border)" }}>
           <div className="flex items-center gap-3">
             {step !== "search" && (
               <button
                 onClick={() => setStep("search")}
-                className="text-gray-400 hover:text-gray-700 font-bold text-lg transition-colors"
+                className="font-bold text-lg transition-colors hover:opacity-70"
+                style={{ color: "var(--color-text-faint)" }}
               >
                 ←
               </button>
@@ -242,7 +243,8 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-700 font-bold text-2xl transition-colors"
+            className="font-bold text-2xl transition-colors hover:opacity-70"
+            style={{ color: "var(--color-text-faint)" }}
           >
             ×
           </button>
@@ -266,7 +268,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                   />
                   {searching && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-[var(--color-primary)] border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
@@ -281,7 +283,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
               </div>
 
               {searchError && (
-                <p className="text-red-500 text-sm font-semibold">{searchError}</p>
+                <p className="text-sm font-semibold" style={{ color: "var(--color-terracotta)" }}>{searchError}</p>
               )}
 
               {/* Hierarchy: Hardcover → Open Library → Nasjonalbiblioteket.
@@ -289,7 +291,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                   — this is purely display order, not a fetch cutoff. */}
               {hcResults.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Hardcover</p>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--color-text-faint)" }}>Hardcover</p>
                   {hcResults.map((doc) => (
                     <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
                   ))}
@@ -298,7 +300,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
 
               {olResults.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">📖 Open Library</p>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--color-text-faint)" }}>📖 Open Library</p>
                   {olResults.map((doc) => (
                     <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
                   ))}
@@ -307,7 +309,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
 
               {nbResults.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">🇳🇴 Nasjonalbiblioteket</p>
+                  <p className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--color-text-faint)" }}>🇳🇴 Nasjonalbiblioteket</p>
                   {nbResults.map((doc) => (
                     <ResultRow key={doc.key} doc={doc} onSelect={handleSelect} />
                   ))}
@@ -315,11 +317,11 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
               )}
 
               {!searching && query && olResults.length === 0 && nbResults.length === 0 && hcResults.length === 0 && !searchError && (
-                <p className="text-center text-gray-500 py-8">Ingen resultater for «{query}»</p>
+                <p className="text-center py-8" style={{ color: "var(--color-text-faint)" }}>Ingen resultater for «{query}»</p>
               )}
 
               {!query && (
-                <p className="text-center text-gray-400 py-12">
+                <p className="text-center py-12" style={{ color: "var(--color-text-faint)" }}>
                   Skriv inn en tittel eller forfatter for å søke, eller skann strekkoden på baksiden av boken
                 </p>
               )}
@@ -335,7 +337,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
           {step === "confirm" && (
             <form onSubmit={handleSubmit} className="space-y-5">
               {submitError && (
-                <div className="p-3 rounded-xl bg-red-50 text-red-600 font-semibold text-sm">
+                <div className="p-3 rounded-xl font-semibold text-sm" style={{ background: "var(--color-terracotta-tint)", color: "var(--color-terracotta)" }}>
                   {submitError}
                 </div>
               )}
@@ -417,10 +419,10 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {form.genres.map((g) => (
-                    <span key={g} className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold text-white"
-                      style={{ background: "linear-gradient(135deg, #f093fb, #f5576c)" }}>
+                    <span key={g} className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold"
+                      style={{ background: "var(--color-wine-tint)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }}>
                       {g}
-                      <button type="button" onClick={() => removeGenre(g)} className="hover:text-red-200 font-bold">×</button>
+                      <button type="button" onClick={() => removeGenre(g)} className="font-bold hover:opacity-70">×</button>
                     </span>
                   ))}
                 </div>
@@ -436,7 +438,8 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                   {submitting ? "⏳ Legger til..." : "✨ Legg til i biblioteket"}
                 </button>
                 <button type="button" onClick={onClose}
-                  className="px-6 py-3 rounded-full font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                  className="px-6 py-3 rounded-full font-bold transition-colors hover:bg-[var(--color-border)]"
+                  style={{ background: "var(--color-sunken)", color: "var(--color-text-muted)" }}>
                   Avbryt
                 </button>
               </div>

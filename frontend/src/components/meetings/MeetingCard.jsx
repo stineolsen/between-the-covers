@@ -113,7 +113,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
 
       {/* Description */}
       {meeting.description && (
-        <p className="text-gray-600 mb-4 line-clamp-3">{meeting.description}</p>
+        <p className="mb-4 line-clamp-3" style={{ color: "var(--color-text-muted)" }}>{meeting.description}</p>
       )}
 
       {/* Book (if linked) */}
@@ -128,7 +128,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
               />
             )}
             <div>
-              <p className="text-sm text-gray-600 font-semibold">
+              <p className="text-sm font-semibold" style={{ color: "var(--color-text-muted)" }}>
                 📚 Diskuterer:
               </p>
               <Link
@@ -137,7 +137,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
               >
                 {meeting.book.title}
               </Link>
-              <p className="text-gray-600 text-sm">by {meeting.book.author}</p>
+              <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>by {meeting.book.author}</p>
             </div>
           </div>
         </div>
@@ -154,7 +154,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
             </span>
           </div>
           {meeting.maxAttendees > 0 && (
-            <span className="text-gray-600 text-sm">
+            <span className="text-sm" style={{ color: "var(--color-text-muted)" }}>
               (Maks: {meeting.maxAttendees})
             </span>
           )}
@@ -272,7 +272,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
 
       {/* Created by */}
       {meeting.createdBy && (
-        <div className="mt-4 text-sm text-gray-500 text-center">
+        <div className="mt-4 text-sm text-center" style={{ color: "var(--color-text-faint)" }}>
           Opprettet av{" "}
           {meeting.createdBy.displayName || meeting.createdBy.username}
         </div>

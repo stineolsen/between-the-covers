@@ -962,10 +962,7 @@ const Admin = () => {
                       </div>
                       <div
                         className="mt-3 p-3 rounded-xl text-right"
-                        style={{
-                          background:
-                            "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
-                        }}
+                        style={{ background: "var(--gradient-secondary)" }}
                       >
                         <p className="text-2xl font-bold text-text">
                           Total: {order.totalAmount.toFixed(2)} kr
@@ -1125,7 +1122,7 @@ const Admin = () => {
                         </div>
 
                         {req.status === 'added' && req.addedBook && (
-                          <p className="mt-2 text-sm text-green-700">
+                          <p className="mt-2 text-sm" style={{ color: "var(--color-sage)" }}>
                             → Lenket til: <strong>{req.addedBook.title}</strong> ({req.addedBook.author})
                           </p>
                         )}
@@ -1133,30 +1130,30 @@ const Admin = () => {
 
                       <div className="flex-shrink-0 flex flex-col items-end gap-2">
                         {req.status === 'added' && (
-                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">✅ Lagt til</span>
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>✅ Lagt til</span>
                         )}
                         {req.status === 'dismissed' && (
                           <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-sunken text-text-faint">↩ Trukket tilbake</span>
                         )}
                         {req.status === 'irrelevant' && (
-                          <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-400">✕ Ikke relevant</span>
+                          <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-terracotta-tint)", color: "var(--color-terracotta)" }}>✕ Ikke relevant</span>
                         )}
                         {req.status === 'pending' && (
                           <>
                             <button
                               onClick={() => handleOpenLinkPicker(req)}
                               className="px-4 py-2 rounded-xl text-white text-sm font-bold transition-all hover:opacity-90"
-                              style={{ background: 'var(--color-sage)' }}
+                              style={{ background: 'var(--color-sage-solid)' }}
                             >
                               ✓ Marker som lagt til
                             </button>
                             <button
                               onClick={() => handleMarkAsIrrelevant(req._id)}
-                              className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-sunken text-text-muted hover:bg-red-50 hover:text-red-500"
+                              className="px-4 py-2 rounded-xl text-sm font-bold transition-all hover:opacity-90 bg-sunken text-text-muted hover:bg-[var(--color-terracotta-tint)] hover:text-[var(--color-terracotta)]"
                             >
                               ✕ Ikke relevant
                             </button>
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">Venter</span>
+                            <span className="px-3 py-1 rounded-full text-xs font-bold" style={{ background: "var(--color-gold-tint)", color: "var(--color-secondary)" }}>Venter</span>
                           </>
                         )}
                       </div>
@@ -1186,7 +1183,7 @@ const Admin = () => {
                                 className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all ${
                                   selectedBookForLink?._id === b._id
                                     ? "bg-wine-tint border-2 border-primary"
-                                    : "bg-gray-50 hover:bg-sunken"
+                                    : "bg-card hover:bg-sunken"
                                 }`}
                               >
                                 <strong>{b.title}</strong> — {b.author}
@@ -1295,7 +1292,7 @@ const Admin = () => {
                 </button>
               </div>
               {calibreImportResult && (
-                <div className="p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                <div className="p-4 rounded-xl text-sm" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
                   Sett gjennom {calibreImportResult.scanned} bøker —{" "}
                   {calibreImportResult.inserted} nye, {calibreImportResult.modified} oppdatert
                   {(calibreImportResult.matchedExact > 0 || calibreImportResult.matchedFuzzy > 0) &&
@@ -1323,7 +1320,7 @@ const Admin = () => {
                 {runningAbsSync ? "Synkroniserer..." : "✨ Synkroniser lydbøker"}
               </button>
               {absSyncResult && (
-                <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                <div className="mt-4 p-4 rounded-xl text-sm" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
                   Sett gjennom {absSyncResult.scanned} lydbøker —{" "}
                   {absSyncResult.updated} lenker lagt til ({absSyncResult.matchedIsbn} via ISBN,{" "}
                   {absSyncResult.matchedExact} eksakt, {absSyncResult.matchedFuzzy} fuzzy),{" "}
@@ -1347,7 +1344,7 @@ const Admin = () => {
                             >
                               <div>
                                 <span className="font-semibold">{item.title}</span>
-                                {item.author && <span className="text-green-700"> — {item.author}</span>}
+                                {item.author && <span style={{ color: "var(--color-sage)" }}> — {item.author}</span>}
                                 {item.audiobookUrl && (
                                   <a
                                     href={item.audiobookUrl}
@@ -1402,7 +1399,7 @@ const Admin = () => {
                 {runningAbsListeningSync ? "Synkroniserer..." : "✨ Oppdater lyttestatistikk"}
               </button>
               {absListeningSyncResult && (
-                <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+                <div className="mt-4 p-4 rounded-xl text-sm" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
                   Sjekket {absListeningSyncResult.checked} koblede medlemmer —{" "}
                   {absListeningSyncResult.matched} oppdatert, {absListeningSyncResult.unmatched} uten
                   treff i Audiobookshelf.
@@ -1449,7 +1446,7 @@ const Admin = () => {
               {sendingAlert ? "Sender..." : "✨ Send varsel"}
             </button>
             {alertResult && (
-              <div className="mt-4 p-4 rounded-xl bg-green-50 text-green-800 text-sm">
+              <div className="mt-4 p-4 rounded-xl text-sm" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
                 Sendt til {alertResult.sent} av {alertResult.recipients} mottakere
                 {alertResult.failed > 0 && ` (${alertResult.failed} feilet)`}.
               </div>

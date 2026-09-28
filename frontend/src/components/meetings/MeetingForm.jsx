@@ -116,7 +116,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
         {/* Title */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Møtetittel <span className="text-red-500">*</span>
+            Møtetittel <span style={{ color: "var(--color-terracotta)" }}>*</span>
           </label>
           <input
             type="text"
@@ -133,7 +133,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Dato <span className="text-red-500">*</span>
+              Dato <span style={{ color: "var(--color-terracotta)" }}>*</span>
             </label>
             <input
               type="date"
@@ -207,7 +207,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
               </option>
             ))}
           </select>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
             Link this meeting to a specific book we'll be discussing
           </p>
         </div>

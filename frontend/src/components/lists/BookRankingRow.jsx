@@ -76,7 +76,8 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
         {canEdit && (
           <button
             onClick={() => onRemove(book._id)}
-            className="flex-shrink-0 text-xs font-semibold px-2 py-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-all"
+            className="flex-shrink-0 text-xs font-semibold px-2 py-1.5 rounded-lg hover:bg-[var(--color-terracotta-tint)] transition-all"
+            style={{ color: "var(--color-terracotta)" }}
             title="Fjern fra listen"
           >
             🗑️

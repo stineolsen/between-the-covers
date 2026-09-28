@@ -46,7 +46,7 @@ const RequestBookModal = ({ onClose }) => {
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold gradient-text">📬 Be om en bok</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold leading-none">✕</button>
+          <button onClick={onClose} className="text-xl font-bold leading-none hover:opacity-70 transition-opacity" style={{ color: "var(--color-text-faint)" }}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,11 +82,12 @@ const RequestBookModal = ({ onClose }) => {
               {FORMAT_OPTIONS.map(opt => (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer border-2 transition-all text-sm font-medium select-none ${
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl cursor-pointer border-2 transition-all text-sm font-medium select-none"
+                  style={
                     formats.includes(opt.value)
-                      ? 'border-purple-500 bg-purple-50 text-purple-700'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-purple-300'
-                  }`}
+                      ? { borderColor: "var(--color-primary)", background: "var(--color-wine-tint)", color: "var(--color-primary)" }
+                      : { borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text-muted)" }
+                  }
                 >
                   <input
                     type="checkbox"
@@ -101,18 +102,14 @@ const RequestBookModal = ({ onClose }) => {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={sending}
-              className="flex-1 py-2.5 rounded-xl text-white font-bold transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
-            >
+            <button type="submit" disabled={sending} className="btn-primary flex-1">
               {sending ? 'Sender...' : 'Send forespørsel'}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-medium hover:bg-gray-50"
+              className="px-4 py-2.5 rounded-xl border font-medium transition-colors hover:bg-[var(--color-sunken)]"
+              style={{ borderColor: "var(--color-border)", color: "var(--color-text-muted)" }}
             >
               Avbryt
             </button>

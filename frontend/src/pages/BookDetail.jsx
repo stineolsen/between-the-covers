@@ -306,7 +306,7 @@ const BookDetail = () => {
         {/* Back Button */}
         <Link
           to="/books"
-          className="inline-flex items-center text-gray-600 hover:text-purple-700 mb-3 font-semibold transition-colors"
+          className="inline-flex items-center text-text-muted hover:text-primary mb-3 font-semibold transition-colors"
         >
           <span className="mr-2 md:btn-primary">←</span> Tilbake til bøker
         </Link>
@@ -340,11 +340,11 @@ const BookDetail = () => {
             <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
               {book.title}
             </h1>
-            <p className="text-md md:text-lg text-gray-500 mb-4">
+            <p className="text-md md:text-lg mb-4" style={{ color: "var(--color-text-faint)" }}>
               av{" "}
               <Link
                 to={`/authors/${encodeURIComponent(normalizeAuthor(book.author))}`}
-                className="hover:text-purple-700 hover:underline transition-colors"
+                className="hover:text-[var(--color-primary)] hover:underline transition-colors"
               >
                 {book.author}
               </Link>
@@ -354,11 +354,11 @@ const BookDetail = () => {
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-yellow-400 text-xl tracking-tight">
                   {"★".repeat(Math.round(book.averageRating))}
-                  <span className="text-gray-300">
+                  <span style={{ color: "var(--color-border-strong)" }}>
                     {"★".repeat(5 - Math.round(book.averageRating))}
                   </span>
                 </span>
-                <span className="text-gray-500 text-sm">
+                <span className="text-sm" style={{ color: "var(--color-text-faint)" }}>
                   {book.averageRating.toFixed(1)} ({book.reviewCount}{" "}
                   {book.reviewCount === 1 ? "anmeldelse" : "anmeldelser"})
                 </span>
@@ -478,7 +478,7 @@ const BookDetail = () => {
                   <h2 className="text-lg font-bold text-gray-700 mb-2 uppercase tracking-wide text-sm">
                     Beskrivelse
                   </h2>
-                  <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                  <p className="leading-relaxed whitespace-pre-line" style={{ color: "var(--color-text-muted)" }}>
                     {descExpanded || book.description.length <= 300
                       ? book.description
                       : book.description.slice(0, 300).trimEnd() + "…"}
@@ -626,7 +626,7 @@ const BookDetail = () => {
               )}
 
               {/* Reviews Section */}
-              <div className="pt-6 mt-6 border-t border-gray-100">
+              <div className="pt-6 mt-6 border-t" style={{ borderColor: "var(--color-border)" }}>
                 <h2 className="text-xl font-bold text-gray-800 mb-6">
                   Anmeldelser
                 </h2>

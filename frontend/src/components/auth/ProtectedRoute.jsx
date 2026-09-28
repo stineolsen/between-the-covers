@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Laster...</p>
+          <p className="mt-4" style={{ color: "var(--color-text-muted)" }}>Laster...</p>
         </div>
       </div>
     );
@@ -23,10 +23,10 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="card text-center max-w-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
+          <h2 className="text-2xl font-bold mb-4" style={{ color: "var(--color-terracotta)" }}>
             Access Denied
           </h2>
-          <p className="text-gray-600">
+          <p style={{ color: "var(--color-text-muted)" }}>
             Du har ikke rettigheter til denne siden.
           </p>
         </div>
@@ -42,11 +42,11 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
           <h2 className="text-2xl font-bold text-secondary mb-4">
             Bruker til godkjenning
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="mb-4" style={{ color: "var(--color-text-muted)" }}>
             Din bruker venter på godkjenning. Du kan bruke bokklubben sin
             nettside etter du har blitt godkjent av en admin.
           </p>
-          <p className="text-sm text-gray-500">Kom tilbake senere!</p>
+          <p className="text-sm" style={{ color: "var(--color-text-faint)" }}>Kom tilbake senere!</p>
         </div>
       </div>
     );

@@ -30,7 +30,7 @@ const EditBook = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Laster inn bokdata...</p>
+          <p className="text-text-muted">Laster inn bokdata...</p>
         </div>
       </div>
     );
@@ -40,8 +40,8 @@ const EditBook = () => {
     return (
       <div className="min-h-screen bg-background py-12">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="card bg-red-50 border border-red-200 text-center py-12">
-            <p className="text-red-700 text-lg mb-4">
+          <div className="card text-center py-12" style={{ background: "var(--color-terracotta-tint)", border: "1px solid var(--color-terracotta)" }}>
+            <p className="text-lg mb-4" style={{ color: "var(--color-terracotta)" }}>
               {error || "Noe er feil, finner ikke boken"}
             </p>
             <Link to="/books" className="btn-primary">
@@ -58,7 +58,7 @@ const EditBook = () => {
       <div className="max-w-7xl mx-auto px-4">
         <Link
           to={`/books/${id}`}
-          className="inline-flex items-center text-gray-600 hover:text-primary mb-6"
+          className="inline-flex items-center text-text-muted hover:text-primary mb-6"
         >
           <span className="mr-2 btn-primary">←</span> Tilbake til bøker
         </Link>

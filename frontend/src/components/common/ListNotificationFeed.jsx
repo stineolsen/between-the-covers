@@ -38,15 +38,15 @@ const ListNotificationFeed = () => {
             <div
               key={n._id}
               className="flex items-center gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4"
-              style={{ background: "linear-gradient(135deg, rgba(124,58,237,0.08), rgba(251,113,133,0.14))" }}
+              style={{ background: "var(--gradient-secondary)" }}
             >
               <UserAvatar user={n.from} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full font-bold flex-shrink-0" />
 
               <div className="flex-1 min-w-0">
-                <Link to={`/lists/${list?._id}`} className="font-bold text-gray-800 hover:text-purple-700 transition-colors block truncate">
+                <Link to={`/lists/${list?._id}`} className="font-bold text-gray-800 hover:text-[var(--color-primary)] transition-colors block truncate">
                   {list?.title || "Ukjent liste"}
                 </Link>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
                   {n.type === "shared" ? (
                     <>
                       <span className="font-semibold">{fromName}</span> delte denne listen med deg
@@ -58,16 +58,17 @@ const ListNotificationFeed = () => {
                   )}
                 </p>
                 {n.type === "shared" && n.message && (
-                  <p className="text-xs text-gray-500 italic mt-1 line-clamp-2">"{n.message}"</p>
+                  <p className="text-xs italic mt-1 line-clamp-2" style={{ color: "var(--color-text-faint)" }}>"{n.message}"</p>
                 )}
                 {n.type === "comment" && n.comment?.content && (
-                  <p className="text-xs text-gray-500 italic mt-1 line-clamp-2">"{n.comment.content}"</p>
+                  <p className="text-xs italic mt-1 line-clamp-2" style={{ color: "var(--color-text-faint)" }}>"{n.comment.content}"</p>
                 )}
               </div>
 
               <button
                 onClick={() => handleDismiss(n._id)}
-                className="flex-shrink-0 text-gray-300 hover:text-red-400 transition-colors text-xl font-bold leading-none self-start"
+                className="flex-shrink-0 transition-colors text-xl font-bold leading-none self-start hover:opacity-70"
+                style={{ color: "var(--color-text-faint)" }}
                 title="Avvis"
               >
                 ✕

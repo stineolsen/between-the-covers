@@ -213,7 +213,7 @@ const Profile = () => {
               </div>
               <button
                 onClick={() => setShowAvatarModal(true)}
-                className="absolute bottom-4 right-0 bg-white rounded-full p-3 shadow-lg transform hover:scale-110 transition-transform"
+                className="absolute bottom-4 right-0 rounded-full p-3 shadow-lg transform hover:scale-110 transition-transform"
                 style={{
                   background: "var(--color-primary-solid)",
                 }}
@@ -602,7 +602,7 @@ const Profile = () => {
 
           {ownedLoading ? (
             <div className="flex justify-center py-6">
-              <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--color-wine-tint)", borderTopColor: "transparent" }} />
             </div>
           ) : ownedBooks.length === 0 ? (
             <p className="text-text-faint text-sm text-center py-6">
@@ -621,7 +621,7 @@ const Profile = () => {
                     title={`${book.title} — ${book.author}`}
                     className="group block"
                   >
-                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md bg-gray-100 group-hover:shadow-xl transition-shadow">
+                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow" style={{ background: "var(--color-sunken)" }}>
                       {cover ? (
                         <img src={cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
@@ -690,7 +690,7 @@ const Profile = () => {
                     key={avatar.name}
                     onClick={() => handleSelectDefaultAvatar(avatar.name)}
                     disabled={isUploading}
-                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-border hover:border-purple-500 transition-all transform hover:scale-105 disabled:opacity-50"
+                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-border hover:border-[var(--color-primary)] transition-all transform hover:scale-105 disabled:opacity-50"
                   >
                     <img
                       src={usersApi.getAvatarUrl(avatar.name)}

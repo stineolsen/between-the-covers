@@ -70,7 +70,7 @@ const StarRating = ({
         </button>
       ))}
       {!readOnly && hoverRating > 0 && (
-        <span className="ml-2 text-gray-600 font-medium text-sm">
+        <span className="ml-2 text-text-muted font-medium text-sm">
           {formatRating(hoverRating)} {hoverRating === 1 ? "stjerne" : "stjerner"}
         </span>
       )}

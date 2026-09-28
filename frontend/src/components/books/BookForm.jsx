@@ -174,7 +174,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
         {error && (
           <div
             className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-            style={{ background: "linear-gradient(135deg, #ef4444, #dc2626)" }}
+            style={{ background: "var(--color-terracotta-solid)" }}
           >
             {error}
           </div>
@@ -201,9 +201,10 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-solid file:text-white hover:file:bg-primary-solid-deep"
+                  className="block w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-solid file:text-white hover:file:bg-primary-solid-deep"
+                  style={{ color: "var(--color-text-muted)" }}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
                   Anbefalt: 300x450px, maks 5MB (JPG, PNG, GIF, WebP)
                 </p>
               </div>
@@ -214,7 +215,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
           <div className="grid md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Tittel <span className="text-red-500">*</span>
+                Tittel <span style={{ color: "var(--color-terracotta)" }}>*</span>
               </label>
               <input
                 type="text"
@@ -229,7 +230,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
             <div>
               <label className="block text-sm font-bold text-gray-700 mb-2">
-                Forfatter <span className="text-red-500">*</span>
+                Forfatter <span style={{ color: "var(--color-terracotta)" }}>*</span>
               </label>
               <input
                 type="text"
@@ -429,7 +430,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                 return options.reverse(); // Most recent first
               })()}
             </select>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
               Velg måned/år denne boken ble/vil bli lest av bokklubben, eller la
               være tom
             </p>
@@ -463,16 +464,18 @@ const BookForm = ({ bookId = null, initialData = null }) => {
               {formData.genres.map((genre, index) => (
                 <span
                   key={index}
-                  className="text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg transition-all transform hover:scale-110"
+                  className="px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all transform hover:scale-110"
                   style={{
-                    background: "linear-gradient(135deg, #f093fb, #f5576c)",
+                    background: "var(--color-wine-tint)",
+                    color: "var(--color-primary)",
+                    border: "1.5px solid var(--color-primary)",
                   }}
                 >
                   {genre}
                   <button
                     type="button"
                     onClick={() => handleRemoveGenre(genre)}
-                    className="text-white hover:text-red-200 font-bold text-lg"
+                    className="font-bold text-lg hover:opacity-70"
                   >
                     ×
                   </button>

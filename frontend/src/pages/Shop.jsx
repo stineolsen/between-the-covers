@@ -144,8 +144,7 @@ const Shop = () => {
           {/* Cart Button */}
           <button
             onClick={() => setShowCart(!showCart)}
-            className="relative px-6 py-4 rounded-full font-bold text-white shadow-lg transition-all transform hover:scale-105"
-            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}
+            className="btn-primary relative px-6 py-4 shadow-lg transform hover:scale-105"
           >
             🛒 Handlekurv ({getTotalItems()})
             {getTotalItems() > 0 && (
@@ -166,7 +165,8 @@ const Shop = () => {
                 </h2>
                 <button
                   onClick={() => setShowCart(false)}
-                  className="text-3xl text-gray-600 hover:text-gray-900"
+                  className="text-3xl hover:opacity-70 transition-opacity"
+                  style={{ color: "var(--color-text-muted)" }}
                 >
                   ×
                 </button>
@@ -175,7 +175,7 @@ const Shop = () => {
               {cart.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🛒</div>
-                  <p className="text-gray-600">Din handlekurv er tom</p>
+                  <p className="text-text-muted">Din handlekurv er tom</p>
                 </div>
               ) : (
                 <>
@@ -183,7 +183,7 @@ const Shop = () => {
                     {cart.map((item) => (
                       <div
                         key={`${item.product._id}-${item.size}`}
-                        className="flex gap-4 p-4 rounded-xl bg-gray-50"
+                        className="flex gap-4 p-4 rounded-xl" style={{ background: "var(--color-sunken)" }}
                       >
                         <div className="flex-1">
                           <h3 className="font-bold text-gray-900 mb-0.5">
@@ -191,18 +191,18 @@ const Shop = () => {
                           </h3>
                           {item.size && (
                             <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-1 text-white"
-                              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}>
+                              style={{ background: 'var(--color-primary-solid)' }}>
                               {item.size}
                             </span>
                           )}
-                          <p className="text-gray-600">
+                          <p className="text-text-muted">
                             kr {item.product.price.toFixed(2)}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => updateQuantity(item.product._id, item.quantity - 1, item.size)}
-                            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 font-bold"
+                            className="w-8 h-8 rounded-full font-bold hover:bg-[var(--color-border-strong)]" style={{ background: "var(--color-border)" }}
                           >
                             -
                           </button>
@@ -211,13 +211,14 @@ const Shop = () => {
                           </span>
                           <button
                             onClick={() => updateQuantity(item.product._id, item.quantity + 1, item.size)}
-                            className="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 font-bold"
+                            className="w-8 h-8 rounded-full font-bold hover:bg-[var(--color-border-strong)]" style={{ background: "var(--color-border)" }}
                           >
                             +
                           </button>
                           <button
                             onClick={() => removeFromCart(item.product._id, item.size)}
-                            className="ml-2 text-red-500 hover:text-red-700 font-bold"
+                            className="ml-2 font-bold hover:opacity-70 transition-opacity"
+                            style={{ color: "var(--color-terracotta)" }}
                           >
                             🗑️
                           </button>
@@ -226,7 +227,7 @@ const Shop = () => {
                     ))}
                   </div>
 
-                  <div className="border-t pt-4 mb-6">
+                  <div className="border-t pt-4 mb-6" style={{ borderColor: "var(--color-border)" }}>
                     <div className="flex justify-between text-xl font-bold mb-4">
                       <span>Total:</span>
                       <span className="gradient-text">
@@ -236,9 +237,7 @@ const Shop = () => {
                     <button
                       onClick={() => setShowCheckout(true)}
                       className="w-full py-4 rounded-full font-bold text-white shadow-lg"
-                      style={{
-                        background: "linear-gradient(135deg, #10b981, #14b8a6)",
-                      }}
+                      style={{ background: "var(--color-sage-solid)" }}
                     >
                       Fortsett til utsjekk
                     </button>
@@ -257,7 +256,8 @@ const Shop = () => {
                 <h2 className="text-3xl font-bold gradient-text">Utsjekk</h2>
                 <button
                   onClick={() => setShowCheckout(false)}
-                  className="text-3xl text-gray-600 hover:text-gray-900"
+                  className="text-3xl hover:opacity-70 transition-opacity"
+                  style={{ color: "var(--color-text-muted)" }}
                 >
                   ×
                 </button>
@@ -275,7 +275,7 @@ const Shop = () => {
                     onChange={(e) =>
                       setCheckoutForm({ ...checkoutForm, name: e.target.value })
                     }
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:border-[var(--color-primary)]" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
                   />
                 </div>
 
@@ -293,7 +293,7 @@ const Shop = () => {
                         email: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:border-[var(--color-primary)]" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
                   />
                 </div>
 
@@ -310,7 +310,7 @@ const Shop = () => {
                         phone: e.target.value,
                       })
                     }
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:border-[var(--color-primary)]" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
                   />
                 </div>
 
@@ -327,7 +327,7 @@ const Shop = () => {
                       })
                     }
                     rows="3"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:border-[var(--color-primary)]" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
                   />
                 </div>
 
@@ -344,12 +344,12 @@ const Shop = () => {
                       })
                     }
                     rows="2"
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none"
+                    className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:border-[var(--color-primary)]" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
                     placeholder="Any special requests?"
                   />
                 </div>
 
-                <div className="border-t pt-4">
+                <div className="border-t pt-4" style={{ borderColor: "var(--color-border)" }}>
                   <h3 className="font-bold text-lg mb-4">
                     Bestilling oppsummering
                   </h3>
@@ -366,7 +366,7 @@ const Shop = () => {
                       </span>
                     </div>
                   ))}
-                  <div className="border-t pt-2 mt-2 flex justify-between text-xl font-bold">
+                  <div className="border-t pt-2 mt-2 flex justify-between text-xl font-bold" style={{ borderColor: "var(--color-border)" }}>
                     <span>Totalt:</span>
                     <span className="gradient-text">
                       kr {getTotalPrice().toFixed(2)}
@@ -378,14 +378,12 @@ const Shop = () => {
                   type="submit"
                   disabled={submitting}
                   className="w-full py-4 rounded-full font-bold text-white shadow-lg disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg, #10b981, #14b8a6)",
-                  }}
+                  style={{ background: "var(--color-sage-solid)" }}
                 >
                   {submitting ? "Submitting..." : "Submit Order"}
                 </button>
 
-                <p className="text-sm text-gray-600 text-center">
+                <p className="text-sm text-center" style={{ color: "var(--color-text-muted)" }}>
                   Du vil bli kontaktet ang din bestilling (betaling og
                   levering).
                 </p>
@@ -398,16 +396,13 @@ const Shop = () => {
         {products.length === 0 ? (
           <div
             className="container-gradient text-center py-20 animate-fadeIn"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))",
-            }}
+            style={{ background: "var(--gradient-secondary)" }}
           >
             <div className="text-6xl mb-4">🛍️</div>
             <h2 className="text-3xl font-bold gradient-text mb-3">
               Ingen varer tilgjendelig
             </h2>
-            <p className="text-gray-600 text-lg">
+            <p className="text-lg" style={{ color: "var(--color-text-muted)" }}>
               Kom tilbake senere for nye varer!
             </p>
           </div>
@@ -435,7 +430,7 @@ const Shop = () => {
                   {product.name}
                 </h3>
                 {product.description && (
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                  <p className="text-sm mb-3 line-clamp-2" style={{ color: "var(--color-text-muted)" }}>
                     {product.description}
                   </p>
                 )}
@@ -443,7 +438,7 @@ const Shop = () => {
                 {/* Size selector */}
                 {product.sizes && product.sizes.length > 0 && (
                   <div className="mb-3">
-                    <p className="text-xs font-bold text-gray-600 mb-1.5">Størrelse</p>
+                    <p className="text-xs font-bold mb-1.5" style={{ color: "var(--color-text-muted)" }}>Størrelse</p>
                     <div className="flex flex-wrap gap-1.5">
                       {product.sizes.map(size => {
                         const isSelected = selectedSizes[product._id] === size;
@@ -457,8 +452,8 @@ const Shop = () => {
                             }))}
                             className="px-3 py-1 rounded-lg text-xs font-bold border-2 transition-all"
                             style={isSelected
-                              ? { background: 'linear-gradient(135deg, #7c3aed, #db2777)', color: 'white', borderColor: 'transparent' }
-                              : { background: 'white', color: '#7c3aed', borderColor: '#7c3aed' }
+                              ? { background: 'var(--color-primary-solid)', color: 'white', borderColor: 'transparent' }
+                              : { background: 'var(--color-card)', color: 'var(--color-primary)', borderColor: 'var(--color-primary)' }
                             }
                           >
                             {size}
@@ -475,11 +470,11 @@ const Shop = () => {
                     kr {product.price.toFixed(2)}
                   </span>
                   {product.inStock ? (
-                    <span className="text-green-600 text-sm font-bold">
+                    <span className="text-sm font-bold" style={{ color: "var(--color-sage)" }}>
                       ✓ På lager
                     </span>
                   ) : (
-                    <span className="text-red-600 text-sm font-bold">
+                    <span className="text-sm font-bold" style={{ color: "var(--color-terracotta)" }}>
                       Ikke på lager
                     </span>
                   )}
@@ -489,10 +484,7 @@ const Shop = () => {
                 <button
                   onClick={() => handleAddToCart(product)}
                   disabled={!product.inStock}
-                  className="w-full py-3 rounded-full font-bold text-white shadow-lg transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: "linear-gradient(135deg, #667eea, #764ba2)",
-                  }}
+                  className="btn-primary w-full py-3 shadow-lg transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {product.inStock
                     ? "🛒 Legg til i handlekurven"

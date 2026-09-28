@@ -40,7 +40,7 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
             borderTopColor: "var(--color-primary)",
           }}
         ></div>
-        <p className="text-gray-600 font-medium">Laster anmeldelser...</p>
+        <p className="text-text-muted font-medium">Laster anmeldelser...</p>
       </div>
     );
   }
@@ -55,10 +55,10 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
         }}
       >
         <p className="text-3xl mb-3">📝</p>
-        <p className="text-gray-700 font-bold text-lg">
+        <p className="font-bold text-lg" style={{ color: "var(--color-text)" }}>
           Ingen anmeldelser ennå
         </p>
-        <p className="text-gray-600 mt-2">
+        <p className="mt-2" style={{ color: "var(--color-text-faint)" }}>
           Bli den første til å dele dine tanker!
         </p>
       </div>
@@ -108,7 +108,7 @@ const ReviewList = ({ reviews, loading, onLike, onEdit, onDelete }) => {
       </div>
 
       {/* Review Count */}
-      <p className="text-gray-600 font-medium">
+      <p className="text-text-muted font-medium">
         {reviews.length} {reviews.length === 1 ? "anmeldelse" : "anmeldelser"}
       </p>
 

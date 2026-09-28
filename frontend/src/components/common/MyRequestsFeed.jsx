@@ -33,15 +33,15 @@ const MyRequestsFeed = () => {
           <div
             key={req._id}
             className="flex items-center justify-between gap-3 sm:gap-4 rounded-2xl p-3 sm:p-4"
-            style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.07), rgba(251,113,133,0.12))' }}
+            style={{ background: 'var(--gradient-secondary)' }}
           >
             <div className="flex-1 min-w-0">
               <p className="font-bold text-gray-800 truncate">{req.title}</p>
-              <p className="text-sm text-gray-500 truncate">{req.author}</p>
+              <p className="text-sm truncate" style={{ color: "var(--color-text-faint)" }}>{req.author}</p>
               {req.formats && req.formats.length > 0 && (
                 <div className="flex gap-1.5 mt-1 flex-wrap">
                   {req.formats.map(f => (
-                    <span key={f} className="text-xs px-2 py-0.5 rounded-full font-semibold bg-purple-100 text-purple-700">
+                    <span key={f} className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: "var(--color-wine-tint)", color: "var(--color-primary)" }}>
                       {FORMAT_LABELS[f] || f}
                     </span>
                   ))}
@@ -51,18 +51,19 @@ const MyRequestsFeed = () => {
 
             <div className="flex-shrink-0 flex items-center gap-2">
               {req.status === 'added' ? (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
                   ✅ Lagt til i biblioteket
                 </span>
               ) : (
                 <>
-                  <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-gold-tint)", color: "var(--color-secondary)" }}>
                     ⏳ Venter på svar
                   </span>
                   <button
                     onClick={() => handleDismiss(req._id)}
                     title="Trekk tilbake forespørsel"
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-[var(--color-terracotta-tint)] hover:text-[var(--color-terracotta)] transition-colors"
+                    style={{ color: "var(--color-text-faint)" }}
                   >
                     ✕
                   </button>

@@ -122,14 +122,15 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
         <button
           type="button"
           onClick={onCancel}
-          className="text-gray-400 hover:text-gray-700 font-bold text-2xl transition-colors"
+          className="font-bold text-2xl transition-colors hover:opacity-70"
+          style={{ color: "var(--color-text-faint)" }}
         >
           ×
         </button>
       </div>
 
       {error && (
-        <div className="p-3 rounded-xl bg-red-50 text-red-600 font-semibold text-sm">
+        <div className="p-3 rounded-xl font-semibold text-sm" style={{ background: "var(--color-terracotta-tint)", color: "var(--color-terracotta)" }}>
           {error}
         </div>
       )}
@@ -146,7 +147,7 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
             />
           )}
           <label className="cursor-pointer px-4 py-2 rounded-full font-bold text-white text-sm shadow transition-all hover:scale-105"
-            style={{ background: "linear-gradient(135deg, #667eea, #764ba2)" }}>
+            style={{ background: "var(--color-primary-solid)" }}>
             {coverPreview ? "Bytt bilde" : "Last opp bilde"}
             <input
               type="file"
@@ -232,15 +233,15 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
         <label className="block text-sm font-bold text-gray-700 mb-2">🔗 Lenker</label>
         <div className="space-y-2">
           <div>
-            <label className="block text-xs text-gray-500 mb-1">🎧 Lydbok (URL)</label>
+            <label className="block text-xs mb-1" style={{ color: "var(--color-text-faint)" }}>🎧 Lydbok (URL)</label>
             <input name="audiobookLink" type="url" value={form.audiobookLink} onChange={handleChange} className="input-field" placeholder="https://..." />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">📱 E-bok (URL)</label>
+            <label className="block text-xs mb-1" style={{ color: "var(--color-text-faint)" }}>📱 E-bok (URL)</label>
             <input name="ebookLink" type="url" value={form.ebookLink} onChange={handleChange} className="input-field" placeholder="https://..." />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 mb-1">📥 Calibre nedlasting (URL)</label>
+            <label className="block text-xs mb-1" style={{ color: "var(--color-text-faint)" }}>📥 Calibre nedlasting (URL)</label>
             <input name="calibreDownloadLink" type="url" value={form.calibreDownloadLink} onChange={handleChange} className="input-field" placeholder="https://..." />
           </div>
         </div>
@@ -264,11 +265,11 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
           {form.genres.map((g) => (
             <span
               key={g}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold text-white"
-              style={{ background: "linear-gradient(135deg, #f093fb, #f5576c)" }}
+              className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold"
+              style={{ background: "var(--color-wine-tint)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }}
             >
               {g}
-              <button type="button" onClick={() => removeGenre(g)} className="hover:text-red-200 font-bold">×</button>
+              <button type="button" onClick={() => removeGenre(g)} className="hover:opacity-70 font-bold">×</button>
             </span>
           ))}
         </div>
@@ -290,7 +291,8 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 rounded-full font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+          className="px-6 py-3 rounded-full font-bold transition-colors hover:bg-[var(--color-border)]"
+          style={{ background: "var(--color-sunken)", color: "var(--color-text-muted)" }}
         >
           Avbryt
         </button>

@@ -75,7 +75,7 @@ const BookRankingList = ({ listId, books, canEdit, onBooksChange }) => {
     return (
       <div className="card text-center py-12">
         <div className="text-4xl mb-3">📚</div>
-        <p className="text-gray-600 font-medium">Ingen bøker på listen ennå</p>
+        <p className="text-text-muted font-medium">Ingen bøker på listen ennå</p>
       </div>
     );
   }

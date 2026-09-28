@@ -185,15 +185,15 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
 
         {/* Book Info */}
         <div className="p-2 sm:p-4">
-          <h3 className="font-bold text-xs sm:text-base text-gray-900 line-clamp-2 mb-0.5 sm:mb-1 group-hover:text-purple-700 transition-colors">
+          <h3 className="font-bold text-xs sm:text-base text-gray-900 line-clamp-2 mb-0.5 sm:mb-1 group-hover:text-[var(--color-primary)] transition-colors">
             {book.title}
           </h3>
-          <p className="text-xs sm:text-sm text-gray-500 mb-1 sm:mb-2 line-clamp-1">
+          <p className="text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-1" style={{ color: "var(--color-text-faint)" }}>
             {book.author}
           </p>
 
           {book.series && (
-            <p className="block text-xs text-purple-600 font-medium mb-2">
+            <p className="block text-xs font-medium mb-2" style={{ color: "var(--color-secondary)" }}>
               {book.series}
               {book.seriesNumber ? ` #${book.seriesNumber}` : ""}
             </p>
@@ -203,11 +203,11 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
             <div className="hidden sm:flex items-center gap-1.5 text-sm mb-3">
               <span className="text-yellow-400 tracking-tight">
                 {"★".repeat(Math.round(book.averageRating))}
-                <span className="text-gray-300">
+                <span style={{ color: "var(--color-border-strong)" }}>
                   {"★".repeat(5 - Math.round(book.averageRating))}
                 </span>
               </span>
-              <span className="text-gray-500 text-xs">
+              <span className="text-xs" style={{ color: "var(--color-text-faint)" }}>
                 {book.averageRating.toFixed(1)} ({book.reviewCount})
               </span>
             </div>
@@ -225,7 +225,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 </span>
               ))}
               {book.genres.length > 2 && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium text-gray-400 border border-gray-200">
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium border" style={{ color: "var(--color-text-faint)", borderColor: "var(--color-border)" }}>
                   +{book.genres.length - 2}
                 </span>
               )}
