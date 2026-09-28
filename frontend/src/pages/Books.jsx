@@ -4,6 +4,7 @@ import { userBooksApi } from "../api/userBooksApi";
 import BookGrid from "../components/books/BookGrid";
 import RequestBookModal from "../components/books/RequestBookModal";
 import AddBookModal from "../components/books/AddBookModal";
+import Switch from "../components/common/Switch";
 
 const Books = () => {
   const [books, setBooks] = useState([]);
@@ -41,15 +42,16 @@ const Books = () => {
   };
   const [ownedOnly, setOwnedOnly] = useState(savedFilters.ownedOnly || false);
   const [showHidden, setShowHidden] = useState(savedFilters.showHidden || false);
+  const [groupSeries, setGroupSeries] = useState(savedFilters.groupSeries || false);
   const [showFilters, setShowFilters] = useState(false);
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
     sessionStorage.setItem(
       "bookFilters",
-      JSON.stringify({ search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden }),
+      JSON.stringify({ search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden, groupSeries }),
     );
-  }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
+  }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden, groupSeries]);
 
   const [userBookMap, setUserBookMap] = useState({});
   const [availableGenres, setAvailableGenres] = useState([]);
@@ -135,6 +137,7 @@ const Books = () => {
     setGenre("");
     setSort("added-desc");
     setReadFilter("all");
+    setGroupSeries(false);
     sessionStorage.removeItem("bookFilters");
   };
 
@@ -225,6 +228,14 @@ const Books = () => {
             ))}
           </div>
 
+          <div
+            className="flex items-center gap-4 px-3 py-2 rounded-lg"
+            style={{ background: "var(--color-sunken)" }}
+          >
+            <Switch checked={groupSeries} onChange={setGroupSeries} label="Grupper serier" />
+            <Switch checked={showHidden} onChange={setShowHidden} label="Vis skjulte bøker" />
+          </div>
+
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
@@ -281,7 +292,6 @@ const Books = () => {
               { checked: audiobookOnly, set: setAudiobookOnly, label: "Lydbok" },
               { checked: ebookOnly, set: setEbookOnly, label: "E-bok" },
               { checked: ownedOnly, set: setOwnedOnly, label: "Eier boken" },
-              { checked: showHidden, set: setShowHidden, label: "Vis skjulte bøker" },
             ].map(({ checked, set, label }) => (
               <button
                 key={label}
@@ -351,7 +361,7 @@ const Books = () => {
         )}
 
         {/* Books Grid */}
-        <BookGrid books={books} loading={loading} error={error} userBookMap={userBookMap} onStatusChange={handleStatusChange} />
+        <BookGrid books={books} loading={loading} error={error} userBookMap={userBookMap} onStatusChange={handleStatusChange} groupSeries={groupSeries} />
       </div>
 
       {showRequestModal && (

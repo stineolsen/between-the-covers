@@ -60,7 +60,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
 
   return (
     <div
-      className="relative"
+      className="relative h-full"
       onMouseEnter={() => setShowOverlay(true)}
       onMouseLeave={() => setShowOverlay(false)}
       onTouchStart={handleTouchStart}
@@ -69,7 +69,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
     >
       <Link
         to={`/books/${book._id}`}
-        className="group block rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
+        className="group flex flex-col h-full rounded-2xl overflow-hidden animate-fadeIn transition-all duration-300"
         style={{
           background: "var(--color-card)",
           boxShadow: showOverlay ? "0 8px 28px rgba(147, 38, 77, 0.18)" : "0 2px 12px rgba(0,0,0,0.07)",
@@ -77,7 +77,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
         }}
       >
         {/* Book Cover */}
-        <div className="relative aspect-[2/3] overflow-hidden bg-primary-25">
+        <div className="relative aspect-[2/3] overflow-hidden bg-primary-25 flex-shrink-0">
           <BookCoverFallback
             src={coverUrl}
             alt={book.title}
@@ -184,7 +184,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
         </div>
 
         {/* Book Info */}
-        <div className="p-2 sm:p-4">
+        <div className="p-2 sm:p-4 flex-1">
           <h3 className="font-bold text-xs sm:text-base text-gray-900 line-clamp-2 mb-0.5 sm:mb-1 group-hover:text-[var(--color-primary)] transition-colors">
             {book.title}
           </h3>
@@ -225,7 +225,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 </span>
               ))}
               {book.genres.length > 2 && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium border" style={{ color: "var(--color-text-faint)", borderColor: "var(--color-border)" }}>
+                <span className="text-xs py-1 rounded-full font-medium border" style={{ color: "var(--color-text-faint)", borderColor: "var(--color-border)" }}>
                   +{book.genres.length - 2}
                 </span>
               )}

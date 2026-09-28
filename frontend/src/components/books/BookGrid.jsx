@@ -1,6 +1,8 @@
 import BookCard from "./BookCard";
+import SeriesGroupCard from "./SeriesGroupCard";
+import { groupBySeries } from "../../utils/groupBySeries";
 
-const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange }) => {
+const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange, groupSeries = false }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-20">
@@ -33,11 +35,29 @@ const BookGrid = ({ books, loading, error, userBookMap = {}, onStatusChange }) =
     );
   }
 
+  const items = groupSeries ? groupBySeries(books) : books.map((book) => ({ type: "book", book }));
+
   return (
     <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-6">
-      {books.map((book) => (
-        <BookCard key={book._id} book={book} userBookEntry={userBookMap[book._id]} onStatusChange={onStatusChange} />
-      ))}
+      {items.map((item) =>
+        item.type === "series" ? (
+          <SeriesGroupCard
+            key={`series-${item.seriesName}`}
+            seriesName={item.seriesName}
+            books={item.books}
+            genres={item.genres}
+            userBookMap={userBookMap}
+            onStatusChange={onStatusChange}
+          />
+        ) : (
+          <BookCard
+            key={item.book._id}
+            book={item.book}
+            userBookEntry={userBookMap[item.book._id]}
+            onStatusChange={onStatusChange}
+          />
+        ),
+      )}
     </div>
   );
 };
