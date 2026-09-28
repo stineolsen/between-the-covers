@@ -194,7 +194,7 @@ const Profile = () => {
               <div
                 className="w-40 h-40 rounded-full overflow-hidden shadow-xl mb-4"
                 style={{
-                  background: "var(--color-primary)",
+                  background: "var(--color-primary-solid)",
                 }}
               >
                 {getDisplayAvatar() ? (
@@ -215,7 +215,7 @@ const Profile = () => {
                 onClick={() => setShowAvatarModal(true)}
                 className="absolute bottom-4 right-0 bg-white rounded-full p-3 shadow-lg transform hover:scale-110 transition-transform"
                 style={{
-                  background: "var(--color-primary)",
+                  background: "var(--color-primary-solid)",
                 }}
               >
                 <span className="text-white text-xl">📷</span>
@@ -229,7 +229,7 @@ const Profile = () => {
               <span
                 className="px-3 py-1 rounded-full text-sm font-bold text-white"
                 style={{
-                  background: "var(--color-primary)",
+                  background: "var(--color-primary-solid)",
                 }}
               >
                 {user?.role}
@@ -470,7 +470,7 @@ const Profile = () => {
                         className="px-4 py-2 rounded-full text-sm font-bold text-white"
                         style={{
                           background:
-                            "var(--color-primary)",
+                            "var(--color-primary-solid)",
                         }}
                       >
                         {genre}
@@ -503,13 +503,12 @@ const Profile = () => {
               <button
                 onClick={handleTogglePush}
                 disabled={pushState === "loading" || pushBusy}
-                className="flex-shrink-0 px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-white disabled:opacity-50"
-                style={{
-                  background:
-                    pushState === "subscribed"
-                      ? "var(--color-text-faint)"
-                      : "var(--color-primary)",
-                }}
+                className="flex-shrink-0 px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
+                style={
+                  pushState === "subscribed"
+                    ? { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
+                    : { background: "var(--color-primary-solid)", color: "white" }
+                }
               >
                 {pushBusy
                   ? "..."
@@ -713,7 +712,7 @@ const Profile = () => {
                   onClick={handleDeleteAvatar}
                   className="w-full py-3 rounded-full font-bold text-white transition-all transform hover:scale-105 shadow-lg"
                   style={{
-                    background: "var(--color-terracotta)",
+                    background: "var(--color-terracotta-solid)",
                   }}
                 >
                   🗑️ Fjern avatar

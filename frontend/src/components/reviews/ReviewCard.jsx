@@ -56,7 +56,7 @@ const ReviewCard = ({
               onClick={() => onEdit(review)}
               className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110"
               style={{
-                background: "var(--color-blue)",
+                background: "var(--color-blue-solid)",
                 color: "white",
               }}
             >
@@ -68,7 +68,7 @@ const ReviewCard = ({
               onClick={() => onDelete(review._id)}
               className="text-sm px-4 py-2 rounded-full font-bold transition-all transform hover:scale-110"
               style={{
-                background: "var(--color-terracotta)",
+                background: "var(--color-terracotta-solid)",
                 color: "white",
               }}
             >

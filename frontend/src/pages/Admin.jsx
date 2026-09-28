@@ -494,7 +494,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "requests"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -507,7 +507,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "products"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -520,7 +520,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "orders"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -533,7 +533,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "users"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -546,7 +546,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "passwords"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -559,7 +559,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "books"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -572,7 +572,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "import"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -585,7 +585,7 @@ const Admin = () => {
             }`}
             style={
               activeTab === "alerts"
-                ? { background: "var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)" }
                 : {}
             }
           >
@@ -596,7 +596,7 @@ const Admin = () => {
         {error && (
           <div
             className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-            style={{ background: "var(--color-terracotta)" }}
+            style={{ background: "var(--color-terracotta-solid)" }}
           >
             {error}
           </div>
@@ -605,7 +605,7 @@ const Admin = () => {
         {successMessage && (
           <div
             className="mb-6 p-4 rounded-2xl text-white font-bold text-center animate-slideIn"
-            style={{ background: "var(--color-sage)" }}
+            style={{ background: "var(--color-sage-solid)" }}
           >
             {successMessage}
           </div>
@@ -1027,7 +1027,7 @@ const Admin = () => {
                       <button
                         onClick={() => handleAdminResetPassword(member._id, member.displayName || member.username)}
                         className="px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg text-white"
-                        style={{ background: "var(--color-secondary)" }}
+                        style={{ background: "var(--color-secondary-solid)" }}
                       >
                         🔑 Tilbakestill passord
                       </button>
@@ -1048,7 +1048,7 @@ const Admin = () => {
                         onClick={() => handleSaveAbsUsername(member._id)}
                         disabled={savingAbsUsername === member._id}
                         className="text-xs font-bold px-4 py-1.5 rounded-full text-white disabled:opacity-50"
-                        style={{ background: "var(--color-primary)" }}
+                        style={{ background: "var(--color-primary-solid)" }}
                       >
                         {savingAbsUsername === member._id ? "..." : "Lagre"}
                       </button>
@@ -1363,14 +1363,14 @@ const Admin = () => {
                                 <button
                                   onClick={() => setMatchingAbsItem(item)}
                                   className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-                                  style={{ background: "var(--color-primary)" }}
+                                  style={{ background: "var(--color-primary-solid)" }}
                                 >
                                   🔗 Match til bok
                                 </button>
                                 <button
                                   onClick={() => setAddingAbsItem(item)}
                                   className="text-xs font-bold px-3 py-1.5 rounded-full text-white"
-                                  style={{ background: "var(--color-sage)" }}
+                                  style={{ background: "var(--color-sage-solid)" }}
                                 >
                                   ✨ Ny bok
                                 </button>

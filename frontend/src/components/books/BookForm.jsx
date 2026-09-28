@@ -201,7 +201,7 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                   type="file"
                   accept="image/*"
                   onChange={handleImageChange}
-                  className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary/90"
+                  className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-solid file:text-white hover:file:bg-primary-solid-deep"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Anbefalt: 300x450px, maks 5MB (JPG, PNG, GIF, WebP)

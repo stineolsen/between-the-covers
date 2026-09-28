@@ -50,7 +50,7 @@ const AddBookToListModal = ({ listId, existingBookIds, onClose, onAdded }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
       <div
         className="w-full max-w-lg rounded-2xl p-6 animate-fadeIn shadow-2xl max-h-[85vh] flex flex-col"
-        style={{ background: "linear-gradient(135deg, #fff 80%, rgba(124,58,237,0.06))" }}
+        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)" }}
       >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold gradient-text">➕ Legg til bok</h2>
@@ -92,7 +92,7 @@ const AddBookToListModal = ({ listId, existingBookIds, onClose, onAdded }) => {
               return (
                 <div
                   key={book._id}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-white/50 transition-colors"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2 hover:bg-[var(--color-sunken)] transition-colors"
                 >
                   <BookCoverFallback
                     src={book.coverImage ? booksApi.getCoverUrl(book.coverImage) : null}

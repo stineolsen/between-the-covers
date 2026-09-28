@@ -57,7 +57,7 @@ const Lists = () => {
             className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
             style={
               tab === "public"
-                ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
                 : { background: "var(--color-card)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }
             }
           >
@@ -68,7 +68,7 @@ const Lists = () => {
             className="px-4 py-2 rounded-full text-sm font-semibold transition-all"
             style={
               tab === "mine"
-                ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
                 : { background: "var(--color-card)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }
             }
           >

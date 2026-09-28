@@ -197,7 +197,7 @@ const ReadingHistory = () => {
 
   const pillStyle = (active) =>
     active
-      ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+      ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
       : { background: "var(--color-card)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" };
   const pillClass = "px-4 py-2 rounded-full font-semibold text-sm transition-all";
 
@@ -271,7 +271,7 @@ const ReadingHistory = () => {
         {dateError && (
           <div
             className="mb-4 p-3 rounded-xl text-center font-bold animate-fadeIn"
-            style={{ background: "var(--color-terracotta)", color: "white" }}
+            style={{ background: "var(--color-terracotta-solid)", color: "white" }}
           >
             {dateError}
           </div>
@@ -314,7 +314,7 @@ const ReadingHistory = () => {
                     <div className="flex items-center gap-4 mb-6">
                       <div
                         className="text-white px-6 py-1 rounded-full font-bold text-2xl shadow-lg"
-                        style={{ background: "var(--color-primary)" }}
+                        style={{ background: "var(--color-primary-solid)" }}
                       >
                         {year}
                       </div>
@@ -332,7 +332,7 @@ const ReadingHistory = () => {
                           key={userBook._id}
                           userBook={userBook}
                           badge="✓ Lest"
-                          badgeColor="var(--color-sage)"
+                          badgeColor="var(--color-sage-solid)"
                           footer={
                             <div className="flex items-center gap-2 text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>
                               <span>📅</span>
@@ -400,7 +400,7 @@ const ReadingHistory = () => {
                     key={userBook._id}
                     userBook={userBook}
                     badge="📖 Leser"
-                    badgeColor="var(--color-secondary)"
+                    badgeColor="var(--color-secondary-solid)"
                     footer={null}
                   />
                 ))}
@@ -426,7 +426,7 @@ const ReadingHistory = () => {
                     key={userBook._id}
                     userBook={userBook}
                     badge="📚 TBR"
-                    badgeColor="var(--color-blue)"
+                    badgeColor="var(--color-blue-solid)"
                     footer={null}
                   />
                 ))}
@@ -452,7 +452,7 @@ const ReadingHistory = () => {
                     key={userBook._id}
                     userBook={userBook}
                     badge="🚫 DNF"
-                    badgeColor="var(--color-terracotta)"
+                    badgeColor="var(--color-terracotta-solid)"
                     footer={null}
                   />
                 ))}

@@ -219,7 +219,8 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fadeIn"
+        className="rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col animate-fadeIn"
+        style={{ background: "var(--color-card)" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

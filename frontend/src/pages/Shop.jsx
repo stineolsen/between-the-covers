@@ -158,7 +158,7 @@ const Shop = () => {
 
         {/* Cart Sidebar */}
         {showCart && (
-          <div className="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl z-50 overflow-y-auto animate-fadeIn">
+          <div className="fixed inset-y-0 right-0 w-full md:w-96 shadow-2xl z-50 overflow-y-auto animate-fadeIn" style={{ background: "var(--color-card)" }}>
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold gradient-text">
@@ -252,7 +252,7 @@ const Shop = () => {
         {/* Checkout Modal */}
         {showCheckout && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 animate-fadeIn">
+            <div className="rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8 animate-fadeIn" style={{ background: "var(--color-card)" }}>
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold gradient-text">Utsjekk</h2>
                 <button

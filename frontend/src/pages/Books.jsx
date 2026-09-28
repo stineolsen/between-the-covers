@@ -198,7 +198,7 @@ const Books = () => {
               className="px-3 py-2 text-sm font-semibold transition-all"
               style={
                 readFilter.length === 0
-                  ? { background: "var(--color-primary)", color: "white" }
+                  ? { background: "var(--color-primary-solid)", color: "white" }
                   : { background: "var(--color-card)", color: "var(--color-text-muted)" }
               }
             >
@@ -216,7 +216,7 @@ const Books = () => {
                 style={{
                   borderLeft: "1.5px solid var(--color-border-strong)",
                   ...(readFilter.includes(value)
-                    ? { background: "var(--color-primary)", color: "white" }
+                    ? { background: "var(--color-primary-solid)", color: "white" }
                     : { background: "var(--color-card)", color: "var(--color-text-muted)" }),
                 }}
               >
@@ -289,7 +289,7 @@ const Books = () => {
                 className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={
                   checked
-                    ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                    ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
                     : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
                 }
               >
@@ -307,7 +307,7 @@ const Books = () => {
               className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
               style={
                 genre === ""
-                  ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                  ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
                   : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
               }
             >
@@ -320,7 +320,7 @@ const Books = () => {
                 className="px-3 py-1.5 rounded-full text-sm font-semibold transition-all"
                 style={
                   genre === g.name
-                    ? { background: "var(--color-primary)", color: "white", border: "1.5px solid var(--color-primary)" }
+                    ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
                     : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1.5px solid var(--color-border-strong)" }
                 }
               >

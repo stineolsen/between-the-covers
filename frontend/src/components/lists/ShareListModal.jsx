@@ -73,7 +73,7 @@ const ShareListModal = ({ list, onClose, onShared }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.4)" }}>
       <div
         className="w-full max-w-md rounded-2xl p-6 animate-fadeIn shadow-2xl"
-        style={{ background: "linear-gradient(135deg, #fff 80%, rgba(124,58,237,0.06))" }}
+        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)" }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-lg gradient-text">Del «{list.title}» med...</h3>
@@ -110,7 +110,7 @@ const ShareListModal = ({ list, onClose, onShared }) => {
                 return (
                   <label
                     key={member._id}
-                    className="flex items-center gap-3 cursor-pointer select-none rounded-xl px-3 py-2 hover:bg-white/50 transition-colors"
+                    className="flex items-center gap-3 cursor-pointer select-none rounded-xl px-3 py-2 hover:bg-[var(--color-sunken)] transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -134,7 +134,8 @@ const ShareListModal = ({ list, onClose, onShared }) => {
               maxLength={500}
               rows={2}
               placeholder="Legg til en melding (valgfritt)..."
-              className="w-full rounded-xl border border-purple-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-purple-400 bg-white/70 mb-4"
+              className="w-full rounded-xl border px-3 py-2 text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] mb-4"
+              style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
             />
 
             <div className="flex gap-3">

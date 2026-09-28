@@ -381,7 +381,7 @@ const BookDetail = () => {
                 disabled={ownedLoading}
                 className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all disabled:opacity-50"
                 style={userOwned
-                  ? { background: "var(--color-secondary)", color: "white" }
+                  ? { background: "var(--color-secondary-solid)", color: "white" }
                   : { background: "var(--color-gold-tint)", color: "var(--color-secondary-deep)", border: "1.5px solid var(--color-secondary)" }
                 }
               >

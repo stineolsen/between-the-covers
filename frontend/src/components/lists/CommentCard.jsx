@@ -66,7 +66,7 @@ const CommentCard = ({ comment, onEdit, onDelete }) => {
             style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
           />
           <div className="flex gap-2 mt-2">
-            <button onClick={handleSave} className="text-xs font-bold px-3 py-1.5 rounded-lg text-white" style={{ background: "var(--color-primary)" }}>
+            <button onClick={handleSave} className="text-xs font-bold px-3 py-1.5 rounded-lg text-white" style={{ background: "var(--color-primary-solid)" }}>
               Lagre
             </button>
             <button

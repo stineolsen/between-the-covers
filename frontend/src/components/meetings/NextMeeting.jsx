@@ -98,7 +98,7 @@ const NextMeeting = ({ meeting: meetingProp }) => {
         <div
           className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
           style={{
-            background: "var(--color-primary)",
+            background: "var(--color-primary-solid)",
             color: "white",
             fontFamily: "'Fraunces', serif",
             fontWeight: 600,

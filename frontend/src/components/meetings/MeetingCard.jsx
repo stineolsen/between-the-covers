@@ -118,7 +118,7 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
 
       {/* Book (if linked) */}
       {meeting.book && (
-        <div className="mb-4 p-4 rounded-2xl bg-white/50">
+        <div className="mb-4 p-4 rounded-2xl" style={{ background: "var(--color-sunken)" }}>
           <div className="flex items-center gap-3">
             {meeting.book.coverImage && (
               <img

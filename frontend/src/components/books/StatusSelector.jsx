@@ -42,7 +42,7 @@ const StatusSelector = ({ currentStatus, onStatusChange, loading = false }) => {
               className="flex-1 py-2 text-sm font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 borderLeft: i > 0 ? "1.5px solid var(--color-border-strong)" : "none",
-                background: isSelected ? "var(--color-primary)" : "var(--color-card)",
+                background: isSelected ? "var(--color-primary-solid)" : "var(--color-card)",
                 color: isSelected ? "white" : "var(--color-text-muted)",
               }}
             >

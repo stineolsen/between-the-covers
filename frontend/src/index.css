@@ -5,31 +5,49 @@
      every existing var(--color-*) call site retints automatically. */
   --color-primary: #93264d; /* Wine — primary accent */
   --color-primary-deep: #6b1938; /* Wine, deeper — hovers/active */
-  --color-secondary: #c08a2e; /* Gold — secondary accent */
-  --color-secondary-deep: #96631d; /* Gold, deeper — hovers/active */
+  --color-secondary: #7b591e; /* Gold — secondary accent, darkened for WCAG AA as text in light mode */
+  --color-secondary-deep: #895a1a; /* Gold, deeper — hovers/active; darkened for WCAG AA vs gold-tint */
   --color-background: #f6f1e7; /* Warm paper background */
   --color-sunken: #efe7d6; /* Recessed surfaces (toolbars, filter rows) */
   --color-card: #ffffff; /* Card surface */
   --color-text: #2a2321; /* Ink */
   --color-text-muted: #756558; /* Muted ink */
-  --color-text-faint: #9c8e80; /* Faint ink (captions, counts) */
+  --color-text-faint: #6b6054; /* Faint ink (captions, counts) — WCAG AA against all surfaces */
   --color-border: #e4dacb; /* Hairline border */
-  --color-border-strong: #d3c4a6; /* Stronger border (chips, segmented controls) */
+  --color-border-strong: #9a804c; /* Stronger border (chips, segmented controls) — darkened to clear the 3:1 non-text UI contrast minimum */
 
-  /* Status semantics — read/reading/tbr/dnf, used consistently everywhere */
-  --color-sage: #2f7a50; /* Read */
+  /* Status semantics — read/reading/tbr/dnf, used consistently everywhere.
+     Darkened from the original hue for WCAG AA against their own -tint. */
+  --color-sage: #2b6f49; /* Read */
   --color-sage-tint: #dcefe0;
-  --color-blue: #1e7a93; /* To-read / TBR */
+  --color-blue: #1a687e; /* To-read / TBR */
   --color-blue-tint: #d9eef2;
-  --color-terracotta: #c1502a; /* DNF */
+  --color-terracotta: #a44424; /* DNF */
   --color-terracotta-tint: #f6e0d2;
   --color-gold-tint: #f7e7c9; /* Currently-reading tint (pairs with --color-secondary) */
   --color-wine-tint: #f6dfe6; /* Wine tint (pairs with --color-primary) */
+
+  /* Solid-fill accents — deliberately theme-invariant. --color-primary etc.
+     above are tuned per-theme to work as TEXT on that theme's backgrounds
+     (so they get lighter in dark mode); that makes them too light for white
+     text once used as a solid fill background. These stay a fixed, dark
+     enough shade in both themes so white text on top always clears 4.5:1. */
+  --color-primary-solid: #93264d;
+  --color-primary-solid-deep: #6b1938;
+  --color-secondary-solid: #96631d;
+  --color-secondary-solid-deep: #784f17;
+  --color-sage-solid: #2f7a50;
+  --color-blue-solid: #1e7a93;
+  --color-terracotta-solid: #c1502a;
 
   /* Navigation chrome */
   --color-nav-bg: #6b1938;
   --color-nav-text: #fbeee2;
   --color-nav-text-muted: rgba(251, 238, 226, 0.68);
+  /* Theme-invariant gold accent for text on --color-nav-bg specifically —
+     --color-secondary is tuned for the page surfaces, not this dark chrome,
+     and darkening it for those surfaces would break its contrast here. */
+  --color-nav-accent: #e0ac52;
 
   /* Minimal gradient for special elements only */
   --gradient-primary: linear-gradient(135deg, #93264d 0%, #6b1938 100%);
@@ -43,15 +61,15 @@
     --color-primary: #e8799f;
     --color-primary-deep: #b85178;
     --color-secondary: #e0ac52;
-    --color-secondary-deep: #b8863e;
+    --color-secondary-deep: #d3b07d; /* lightened for WCAG AA vs gold-tint */
     --color-background: #221a1c;
     --color-sunken: #1a1416;
     --color-card: #2c2224;
     --color-text: #f1e6dc;
     --color-text-muted: #bba99a;
-    --color-text-faint: #8b7a6d;
+    --color-text-faint: #9d8e83; /* WCAG AA against all surfaces */
     --color-border: #3d3134;
-    --color-border-strong: #4c3d41;
+    --color-border-strong: #856b72; /* lightened to clear the 3:1 non-text UI contrast minimum */
     --color-sage: #59c08a;
     --color-sage-tint: #173424;
     --color-blue: #4fc1de;
@@ -152,7 +170,7 @@
 @layer components {
   /* Simplified button styles */
   .btn-primary {
-    background: var(--color-primary);
+    background: var(--color-primary-solid);
     color: white;
     padding: 0.75rem 1.75rem;
     border-radius: 8px;
@@ -164,7 +182,7 @@
   }
 
   .btn-primary:hover {
-    background: var(--color-primary-deep);
+    background: var(--color-primary-solid-deep);
     box-shadow: 0 4px 12px rgba(147, 38, 77, 0.3);
   }
 
@@ -178,7 +196,7 @@
   }
 
   .btn-secondary {
-    background: var(--color-secondary);
+    background: var(--color-secondary-solid);
     color: white;
     padding: 0.75rem 1.75rem;
     border-radius: 8px;
@@ -190,7 +208,7 @@
   }
 
   .btn-secondary:hover {
-    background: var(--color-secondary-deep);
+    background: var(--color-secondary-solid-deep);
     box-shadow: 0 4px 12px rgba(192, 138, 46, 0.3);
   }
 

@@ -118,7 +118,7 @@ const ListDetail = () => {
           </div>
 
           {list.notes && (
-            <div className="mt-4 p-4 rounded-xl bg-white/60">
+            <div className="mt-4 p-4 rounded-xl" style={{ background: "var(--color-sunken)" }}>
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Notater</p>
               <p className="text-sm text-gray-700 whitespace-pre-line">{list.notes}</p>
             </div>
@@ -133,7 +133,7 @@ const ListDetail = () => {
             {(list.collaborators || []).map((c) => {
               const name = c.displayName || c.username;
               return (
-                <div key={c._id} className="flex items-center gap-1.5 bg-white/60 rounded-full pl-1 pr-2 py-0.5">
+                <div key={c._id} className="flex items-center gap-1.5 rounded-full pl-1 pr-2 py-0.5" style={{ background: "var(--color-sunken)" }}>
                   <UserAvatar user={c} className="w-7 h-7 rounded-full text-xs font-bold" />
                   <span className="text-xs text-gray-600 font-medium">{name}</span>
                   {canEdit && (

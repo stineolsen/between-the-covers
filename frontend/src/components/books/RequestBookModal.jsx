@@ -42,7 +42,7 @@ const RequestBookModal = ({ onClose }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
       <div
         className="w-full max-w-md rounded-2xl p-6 animate-fadeIn shadow-2xl"
-        style={{ background: 'linear-gradient(135deg, #fff 80%, rgba(124,58,237,0.06))' }}
+        style={{ background: "var(--color-card)", border: "1px solid var(--color-border)" }}
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-bold gradient-text">📬 Be om en bok</h2>

@@ -41,7 +41,7 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
 
         <div
           className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-          style={{ background: "var(--color-primary)" }}
+          style={{ background: "var(--color-primary-solid)" }}
         >
           {rank}
         </div>

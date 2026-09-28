@@ -128,30 +128,22 @@ const Meetings = () => {
             <div className="flex justify-center gap-4 mb-8 animate-fadeIn">
               <button
                 onClick={() => setActiveTab("upcoming")}
-                className={`px-8 py-4 rounded-lg font-bold text-lg transition-all ${
-                  activeTab === "upcoming"
-                    ? "text-white shadow-md"
-                    : "bg-white text-gray-700 hover:shadow-md border border-gray-200"
-                }`}
+                className="px-8 py-4 rounded-lg font-bold text-lg transition-all"
                 style={
                   activeTab === "upcoming"
-                    ? { background: "var(--color-primary)" }
-                    : {}
+                    ? { background: "var(--color-primary-solid)", color: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }
+                    : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }
                 }
               >
                 🗓️ Kommende
               </button>
               <button
                 onClick={() => setActiveTab("past")}
-                className={`px-8 py-4 rounded-lg font-bold text-lg transition-all ${
-                  activeTab === "past"
-                    ? "text-white shadow-md"
-                    : "bg-white text-gray-700 hover:shadow-md border border-gray-200"
-                }`}
+                className="px-8 py-4 rounded-lg font-bold text-lg transition-all"
                 style={
                   activeTab === "past"
-                    ? { background: "var(--color-secondary)" }
-                    : {}
+                    ? { background: "var(--color-secondary-solid)", color: "white", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }
+                    : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }
                 }
               >
                 🗂️ Arkiverte møter

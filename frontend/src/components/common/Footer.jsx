@@ -28,7 +28,7 @@ const Footer = () => {
 
             {/* Quick Links */}
             <div>
-              <h3 className="font-bold text-sm uppercase tracking-wide mb-3" style={{ color: "var(--color-secondary)" }}>
+              <h3 className="font-bold text-sm uppercase tracking-wide mb-3" style={{ color: "var(--color-nav-accent)" }}>
                 Lenker
               </h3>
               <ul className="space-y-2 text-sm">
@@ -73,7 +73,7 @@ const Footer = () => {
 
             {/* Community */}
             <div>
-              <h3 className="font-bold text-sm uppercase tracking-wide mb-3" style={{ color: "var(--color-secondary)" }}>
+              <h3 className="font-bold text-sm uppercase tracking-wide mb-3" style={{ color: "var(--color-nav-accent)" }}>
                 Fellesskap
               </h3>
               <p className="text-sm mb-4 leading-relaxed" style={{ color: "var(--color-nav-text-muted)" }}>

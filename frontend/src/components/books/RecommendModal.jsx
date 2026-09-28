@@ -102,7 +102,7 @@ const RecommendModal = ({ book, onClose }) => {
               return (
                 <label
                   key={member._id}
-                  className="flex items-center gap-3 cursor-pointer select-none rounded-xl px-3 py-2 hover:bg-white/50 transition-colors"
+                  className="flex items-center gap-3 cursor-pointer select-none rounded-xl px-3 py-2 hover:bg-[var(--color-sunken)] transition-colors"
                 >
                   <input
                     type="checkbox"
@@ -127,7 +127,8 @@ const RecommendModal = ({ book, onClose }) => {
             maxLength={500}
             rows={2}
             placeholder="Legg til en melding (valgfritt)..."
-            className="w-full rounded-xl border border-purple-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-purple-400 bg-white/70 mb-4"
+            className="w-full rounded-xl border px-3 py-2 text-sm resize-none focus:outline-none focus:border-[var(--color-primary)] mb-4"
+              style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
           />
 
           {/* Actions */}

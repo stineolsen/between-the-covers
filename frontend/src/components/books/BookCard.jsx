@@ -89,7 +89,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
           {book.bookclubMonth && (
             <div
               className="absolute top-2 right-2 text-white text-xs font-semibold px-2 py-0.5 rounded-full hidden sm:block"
-              style={{ background: "var(--color-primary)", opacity: 0.92 }}
+              style={{ background: "var(--color-primary-solid)", opacity: 0.92 }}
             >
               {book.bookclubMonth}
             </div>
@@ -114,8 +114,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
                 style={
                   currentStatus === "to-read"
-                    ? { background: "var(--color-blue)", color: "white" }
-                    : { background: "rgba(255,255,255,0.92)", color: "var(--color-blue)" }
+                    ? { background: "var(--color-blue-solid)", color: "white" }
+                    : { background: "var(--color-card)", color: "var(--color-blue)" }
                 }
               >
                 {currentStatus === "to-read" ? "✓ TBR" : "+ TBR"}
@@ -126,8 +126,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
                 style={
                   currentStatus === "read"
-                    ? { background: "var(--color-sage)", color: "white" }
-                    : { background: "rgba(255,255,255,0.92)", color: "var(--color-sage)" }
+                    ? { background: "var(--color-sage-solid)", color: "white" }
+                    : { background: "var(--color-card)", color: "var(--color-sage)" }
                 }
               >
                 {currentStatus === "read" ? "✓ Lest" : "+ Lest"}
@@ -138,8 +138,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 className="w-full py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-60"
                 style={
                   currentStatus === "dnf"
-                    ? { background: "var(--color-terracotta)", color: "white" }
-                    : { background: "rgba(255,255,255,0.92)", color: "var(--color-terracotta)" }
+                    ? { background: "var(--color-terracotta-solid)", color: "white" }
+                    : { background: "var(--color-card)", color: "var(--color-terracotta)" }
                 }
               >
                 {currentStatus === "dnf" ? "✓ DNF" : "+ DNF"}
@@ -163,12 +163,12 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
                 style={{
                   background:
                     currentStatus === "read"
-                      ? "var(--color-sage)"
+                      ? "var(--color-sage-solid)"
                       : currentStatus === "to-read"
-                      ? "var(--color-blue)"
+                      ? "var(--color-blue-solid)"
                       : currentStatus === "dnf"
-                      ? "var(--color-terracotta)"
-                      : "var(--color-secondary)",
+                      ? "var(--color-terracotta-solid)"
+                      : "var(--color-secondary-solid)",
                 }}
               >
                 {currentStatus === "read"
