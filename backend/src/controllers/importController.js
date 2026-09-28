@@ -24,15 +24,18 @@ const MAX_OPDS_PAGES = 200;
 // replaces the whole subdocument and would silently wipe out any existing
 // libraryLinks.audiobook (e.g. one set by the Audiobookshelf sync, or the
 // admin "match"/"add as new book" flow for an unmatched audiobook).
+// series/seriesNumber/genres are NOT included here either - see
+// calibreFillableFields, they're fill-the-gaps only on an update.
+// title is NOT included either - the database's title is treated as
+// authoritative (an admin may have corrected it), so it's only ever set on
+// insert. Matching a book to its Calibre entry on later runs relies on
+// calibreId first (see runCalibreImport), precisely so a title correction -
+// in either direction - doesn't break the link.
 function calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized) {
   return {
-    title: parsed.title,
     author: parsed.author,
     description: parsed.description,
-    series: parsed.series,
-    seriesNumber: parsed.seriesNumber,
     publishedYear: parsed.publishedYear,
-    genres: parsed.genres,
     publisher: parsed.publisher,
     // bulkWrite bypasses the Book schema's `language` default ("English"), so
     // this must never be null - MongoDB's text index reads this field as its
@@ -47,16 +50,36 @@ function calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNorma
   };
 }
 
+// series/seriesNumber/genres may have been manually corrected in the app
+// after a book was first imported, so on an update Calibre should only fill
+// these in where the database doesn't already have a value - never clobber
+// an existing one. `existing` is the matched book's current DB state (or, for
+// a same-run duplicate, the stub registered when it was inserted earlier in
+// this batch - see runCalibreImport).
+function calibreFillableFields(parsed, existing) {
+  const fields = {};
+  const hasSeries = !!existing?.series?.trim();
+  const hasSeriesNumber = existing?.seriesNumber != null;
+  const hasGenres = Array.isArray(existing?.genres) && existing.genres.length > 0;
+
+  if (!hasSeries && parsed.series) fields.series = parsed.series;
+  if (!hasSeriesNumber && parsed.seriesNumber != null) fields.seriesNumber = parsed.seriesNumber;
+  if (!hasGenres && parsed.genres?.length) fields.genres = parsed.genres;
+
+  return fields;
+}
+
 // A book already exists that matches this OPDS entry (by exact or fuzzy
 // title/author match against the current catalog) - update it in place
 // rather than inserting a duplicate.
-function buildCalibreBookUpdateOp(parsed, calibreWebBookBase, adminUserId, targetId, titleNormalized, authorNormalized) {
+function buildCalibreBookUpdateOp(parsed, calibreWebBookBase, adminUserId, targetId, titleNormalized, authorNormalized, existing) {
   return {
     updateOne: {
       filter: { _id: targetId },
       update: {
         $set: {
           ...calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized),
+          ...calibreFillableFields(parsed, existing),
           "libraryLinks.ebook": parsed.calibreId ? `${calibreWebBookBase}${parsed.calibreId}` : null,
           updatedAt: new Date(),
         },
@@ -74,7 +97,11 @@ function buildCalibreBookInsertOp(id, parsed, calibreWebBookBase, adminUserId, t
     insertOne: {
       document: {
         _id: id,
+        title: parsed.title,
         ...calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized),
+        series: parsed.series,
+        seriesNumber: parsed.seriesNumber,
+        genres: parsed.genres,
         libraryLinks: {
           ebook: parsed.calibreId ? `${calibreWebBookBase}${parsed.calibreId}` : null,
           audiobook: null,
@@ -175,21 +202,26 @@ exports.runCalibreImport = async (req, res) => {
       url = getOpdsNextPageUrl(xml, CALIBRE_WEB_BASE_URL);
     }
 
-    // Match each entry against the existing catalog the same way runAbsSync
-    // does (exact normalized title+author, then fuzzy title with tolerant
-    // author matching) so re-importing a book that already exists - e.g. one
-    // added via the Audiobookshelf "unmatched" admin flow - updates it in
-    // place instead of creating a duplicate.
+    // Match each entry against the existing catalog. calibreId is checked
+    // first - like runAbsSync checks absId first - since it's a stable link
+    // that survives a title edit on either side (Calibre or in the app).
+    // Anything not yet linked falls back to exact normalized title+author,
+    // then fuzzy title with tolerant author matching, so re-importing a book
+    // that already exists - e.g. one added via the Audiobookshelf "unmatched"
+    // admin flow - updates it in place instead of creating a duplicate.
     const booksCollection = mongoose.connection.db.collection("books");
     const mongoBooks = await booksCollection
-      .find({}, { projection: { _id: 1, title: 1, author: 1, titleNormalized: 1, authorNormalized: 1 } })
+      .find({}, { projection: { _id: 1, title: 1, author: 1, titleNormalized: 1, authorNormalized: 1, series: 1, seriesNumber: 1, genres: 1, calibreId: 1 } })
       .toArray();
     const byNorm = new Map();
+    const byCalibreId = new Map();
     for (const b of mongoBooks) {
       const key = `${b.titleNormalized || normalizeTitle(b.title)}::${b.authorNormalized || normalizeAuthor(b.author)}`;
       byNorm.set(key, b);
+      if (b.calibreId) byCalibreId.set(b.calibreId, b);
     }
 
+    let matchedByCalibreId = 0;
     let matchedExact = 0;
     let matchedFuzzy = 0;
     const ops = [];
@@ -199,45 +231,64 @@ exports.runCalibreImport = async (req, res) => {
       const authorNormalized = normalizeAuthor(parsed.author);
       const key = `${titleNormalized}::${authorNormalized}`;
 
-      let target = byNorm.get(key) || null;
+      let target = (parsed.calibreId && byCalibreId.get(parsed.calibreId)) || null;
       if (target) {
-        matchedExact++;
+        matchedByCalibreId++;
       } else {
-        let best = null;
-        let bestScore = 0;
-        for (const m of mongoBooks) {
-          const mAuthorNormalized = m.authorNormalized || normalizeAuthor(m.author);
-          const authorOk =
-            !authorNormalized ||
-            !mAuthorNormalized ||
-            mAuthorNormalized === authorNormalized ||
-            mAuthorNormalized.includes(authorNormalized) ||
-            authorNormalized.includes(mAuthorNormalized);
+        target = byNorm.get(key) || null;
+        if (target) {
+          matchedExact++;
+        } else {
+          let best = null;
+          let bestScore = 0;
+          for (const m of mongoBooks) {
+            const mAuthorNormalized = m.authorNormalized || normalizeAuthor(m.author);
+            const authorOk =
+              !authorNormalized ||
+              !mAuthorNormalized ||
+              mAuthorNormalized === authorNormalized ||
+              mAuthorNormalized.includes(authorNormalized) ||
+              authorNormalized.includes(mAuthorNormalized);
 
-          if (!authorOk) continue;
+            if (!authorOk) continue;
 
-          const score = titleSimilarity(parsed.title, m.title);
-          if (score > bestScore) {
-            bestScore = score;
-            best = m;
+            const score = titleSimilarity(parsed.title, m.title);
+            if (score > bestScore) {
+              bestScore = score;
+              best = m;
+            }
           }
-        }
-        if (best && bestScore >= 0.9) {
-          target = best;
-          matchedFuzzy++;
+          if (best && bestScore >= 0.9) {
+            target = best;
+            matchedFuzzy++;
+          }
         }
       }
 
       if (target) {
-        ops.push(buildCalibreBookUpdateOp(parsed, calibreWebBookBase, req.user._id, target._id, titleNormalized, authorNormalized));
+        ops.push(buildCalibreBookUpdateOp(parsed, calibreWebBookBase, req.user._id, target._id, titleNormalized, authorNormalized, target));
       } else {
         const id = new mongoose.Types.ObjectId();
         ops.push(buildCalibreBookInsertOp(id, parsed, calibreWebBookBase, req.user._id, titleNormalized, authorNormalized));
         // Register immediately so a later entry in this same run that
         // normalizes to the same key updates this one instead of also
-        // inserting - bulkWrite ops don't see each other's effects.
-        const stub = { _id: id, title: parsed.title, author: parsed.author, titleNormalized, authorNormalized };
+        // inserting - bulkWrite ops don't see each other's effects. Carries
+        // series/seriesNumber/genres too, so if that later entry matches this
+        // stub, calibreFillableFields checks against what was just inserted
+        // rather than treating them as blank.
+        const stub = {
+          _id: id,
+          title: parsed.title,
+          author: parsed.author,
+          titleNormalized,
+          authorNormalized,
+          series: parsed.series,
+          seriesNumber: parsed.seriesNumber,
+          genres: parsed.genres,
+          calibreId: parsed.calibreId,
+        };
         byNorm.set(key, stub);
+        if (parsed.calibreId) byCalibreId.set(parsed.calibreId, stub);
         mongoBooks.push(stub);
       }
     }
@@ -265,6 +316,7 @@ exports.runCalibreImport = async (req, res) => {
       skipped,
       inserted,
       modified,
+      matchedByCalibreId,
       matchedExact,
       matchedFuzzy,
       since: since ? since.toISOString() : null,

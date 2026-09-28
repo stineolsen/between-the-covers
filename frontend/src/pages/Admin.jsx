@@ -1295,8 +1295,8 @@ const Admin = () => {
                 <div className="p-4 rounded-xl text-sm" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
                   Sett gjennom {calibreImportResult.scanned} bøker —{" "}
                   {calibreImportResult.inserted} nye, {calibreImportResult.modified} oppdatert
-                  {(calibreImportResult.matchedExact > 0 || calibreImportResult.matchedFuzzy > 0) &&
-                    ` (${calibreImportResult.matchedExact || 0} eksakt, ${calibreImportResult.matchedFuzzy || 0} fuzzy)`}
+                  {(calibreImportResult.matchedByCalibreId > 0 || calibreImportResult.matchedExact > 0 || calibreImportResult.matchedFuzzy > 0) &&
+                    ` (${calibreImportResult.matchedByCalibreId || 0} via calibre-id, ${calibreImportResult.matchedExact || 0} eksakt, ${calibreImportResult.matchedFuzzy || 0} fuzzy)`}
                   {calibreImportResult.skipped > 0 &&
                     `, ${calibreImportResult.skipped} hoppet over`}
                   .
