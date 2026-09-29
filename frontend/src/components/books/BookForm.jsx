@@ -30,6 +30,13 @@ const BookForm = ({ bookId = null, initialData = null }) => {
   const [genreInput, setGenreInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [seriesSuggestions, setSeriesSuggestions] = useState([]);
+
+  useEffect(() => {
+    booksApi.getSeriesNames()
+      .then((data) => setSeriesSuggestions(data.series || []))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (initialData) {
@@ -350,7 +357,14 @@ const BookForm = ({ bookId = null, initialData = null }) => {
                 onChange={handleChange}
                 className="input-field"
                 placeholder="F.eks. Harry Potter"
+                list="series-suggestions"
+                autoComplete="off"
               />
+              <datalist id="series-suggestions">
+                {seriesSuggestions.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
             </div>
 
             <div>

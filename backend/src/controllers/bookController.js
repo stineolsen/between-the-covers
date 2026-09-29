@@ -247,6 +247,21 @@ exports.getGenres = async (req, res, next) => {
   }
 };
 
+// @desc    Get every distinct series name in the catalog, for autocomplete
+//          when adding/editing a book (so typos don't fork one series into
+//          two near-duplicate names)
+// @route   GET /api/books/series
+// @access  Private
+exports.getSeriesNames = async (req, res, next) => {
+  try {
+    const series = await Book.distinct("series", { series: { $nin: [null, ""] } });
+    series.sort((a, b) => a.localeCompare(b));
+    res.status(200).json({ success: true, series });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get all books by a given author (exact authorNormalized match)
 // @route   GET /api/authors/:authorNormalized
 // @access  Private

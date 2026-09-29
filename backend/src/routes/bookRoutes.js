@@ -7,6 +7,7 @@ const {
   deleteBook,
   getBooksByStatus,
   getGenres,
+  getSeriesNames,
   uploadCover,
   searchExternalSources,
 } = require("../controllers/bookController");
@@ -18,6 +19,7 @@ const router = express.Router();
 // Public/Member routes
 router.get("/", protect, getBooks);
 router.get("/genres", protect, getGenres);
+router.get("/series", protect, getSeriesNames);
 router.get("/status/:status", protect, getBooksByStatus);
 // Must come before "/:id" — otherwise Express matches "search-external" as :id.
 router.get("/search-external", protect, searchExternalSources);

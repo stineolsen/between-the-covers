@@ -102,6 +102,12 @@ export const booksApi = {
     return response.data;
   },
 
+  // Get all distinct series names, for autocomplete when adding/editing a book
+  getSeriesNames: async () => {
+    const response = await api.get('/api/books/series');
+    return response.data;
+  },
+
   // Search Hardcover.app for book metadata (Add Book search, third source
   // alongside the direct Open Library / NB calls — proxied server-side since
   // it needs a secret API key).

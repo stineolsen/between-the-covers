@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { booksApi } from "../../api/booksApi";
 
 const EMPTY_FORM = {
@@ -50,6 +50,13 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
   const [genreInput, setGenreInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [seriesSuggestions, setSeriesSuggestions] = useState([]);
+
+  useEffect(() => {
+    booksApi.getSeriesNames()
+      .then((data) => setSeriesSuggestions(data.series || []))
+      .catch(() => {});
+  }, []);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -220,7 +227,12 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Serie</label>
-          <input name="series" value={form.series} onChange={handleChange} className="input-field" placeholder="F.eks. Harry Potter" />
+          <input name="series" value={form.series} onChange={handleChange} className="input-field" placeholder="F.eks. Harry Potter" list="admin-series-suggestions" autoComplete="off" />
+          <datalist id="admin-series-suggestions">
+            {seriesSuggestions.map((name) => (
+              <option key={name} value={name} />
+            ))}
+          </datalist>
         </div>
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1"># i serien</label>
