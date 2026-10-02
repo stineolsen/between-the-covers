@@ -31,17 +31,24 @@ const wrappedResponseSchema = new mongoose.Schema(
       default: null,
     },
 
-    awards: {
-      bestBook: { type: String, trim: true, default: "" },
-      worstBook: { type: String, trim: true, default: "" },
-      mostTalkedAbout: { type: String, trim: true, default: "" },
-      mostConfusing: { type: String, trim: true, default: "" },
-      bestHateRead: { type: String, trim: true, default: "" },
-      favoriteCharacter: { type: String, trim: true, default: "" },
-      mostAnnoyingCharacter: { type: String, trim: true, default: "" },
-      bestSideCharacter: { type: String, trim: true, default: "" },
-      bestSpicyScene: { type: String, trim: true, default: "" },
-    },
+    // One entry per answered WrappedQuestion - only the field matching the
+    // question's type is populated, the other two stay null.
+    answers: [
+      {
+        question: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "WrappedQuestion",
+          required: true,
+        },
+        textValue: { type: String, trim: true, default: null },
+        numberValue: { type: Number, default: null },
+        bookValue: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Book",
+          default: null,
+        },
+      },
+    ],
 
     stepsCompleted: {
       confirmList: { type: Boolean, default: false },

@@ -1,11 +1,12 @@
 const WrappedResponse = require("../models/WrappedResponse");
+const WrappedQuestion = require("../models/WrappedQuestion");
 const UserBook = require("../models/UserBook");
 const Book = require("../models/Book");
 const Review = require("../models/Review");
 const List = require("../models/List");
 const Setting = require("../models/Setting");
 const User = require("../models/User");
-const { AWARD_FIELDS } = require("../constants/wrappedAwardFields");
+const { DEFAULT_QUESTIONS } = require("../constants/defaultWrappedQuestions");
 
 const windowSettingKey = (year) => `wrapped:${year}:window`;
 
@@ -39,6 +40,24 @@ async function getOrCreateResponse(userId, year) {
     response = await WrappedResponse.create({ user: userId, year });
   }
   return response;
+}
+
+async function getBookclubBooksForYear(year) {
+  return Book.find({ bookclubMonth: { $regex: String(year) } });
+}
+
+// Admin manages questions per year from here on, but a year starts out with
+// this default set the first time anyone needs it (member loading step 3,
+// or admin opening the Bokwrapped tab) - same lazy-seed idea as the
+// ranking list below.
+async function getOrSeedQuestions(year) {
+  const existing = await WrappedQuestion.find({ year }).sort({ order: 1 });
+  if (existing.length > 0) return existing;
+
+  await WrappedQuestion.insertMany(
+    DEFAULT_QUESTIONS.map((q, index) => ({ ...q, year, order: index })),
+  );
+  return WrappedQuestion.find({ year }).sort({ order: 1 });
 }
 
 // @desc    Candidate books for step 1 (confirm reading list)
@@ -113,7 +132,7 @@ exports.getRankingList = async (req, res) => {
       }
     }
 
-    const bookclubBooks = await Book.find({ bookclubMonth: { $regex: String(year) } });
+    const bookclubBooks = await getBookclubBooksForYear(year);
 
     const reviews = await Review.find({
       user: userId,
@@ -166,30 +185,73 @@ exports.markRankingDone = async (req, res) => {
   }
 };
 
-// @desc    Save a draft of the Book Awards nominations
+// @desc    This year's active Book Awards questions
+// @route   GET /api/wrapped/:year/questions
+// @access  Private
+exports.getQuestions = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const all = await getOrSeedQuestions(year);
+    res.status(200).json({ success: true, questions: all.filter((q) => q.active) });
+  } catch (error) {
+    console.error("Get wrapped questions error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente spørsmålene" });
+  }
+};
+
+// @desc    This year's bookclub books (for the "book-bookclub" question type)
+// @route   GET /api/wrapped/:year/bookclub-books
+// @access  Private
+exports.getBookclubBooks = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const books = await getBookclubBooksForYear(year);
+    res.status(200).json({ success: true, books });
+  } catch (error) {
+    console.error("Get wrapped bookclub books error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente bokklubbøkene" });
+  }
+};
+
+// @desc    Save a draft of the Book Awards answers
 // @route   PUT /api/wrapped/:year/awards
 // @access  Private
 exports.saveAwards = async (req, res) => {
   try {
     const year = Number(req.params.year);
+    const { answers } = req.body;
+
+    if (!Array.isArray(answers)) {
+      return res.status(400).json({ success: false, message: "answers må være en liste" });
+    }
+
+    const questions = await WrappedQuestion.find({ year });
+    const questionById = new Map(questions.map((q) => [q._id.toString(), q]));
+
     const response = await getOrCreateResponse(req.user._id, year);
 
-    const allowedFields = [
-      "bestBook",
-      "worstBook",
-      "mostTalkedAbout",
-      "mostConfusing",
-      "bestHateRead",
-      "favoriteCharacter",
-      "mostAnnoyingCharacter",
-      "bestSideCharacter",
-      "bestSpicyScene",
-    ];
-    for (const field of allowedFields) {
-      if (req.body[field] !== undefined) {
-        response.awards[field] = req.body[field];
+    const saved = [];
+    for (const entry of answers) {
+      const question = questionById.get(String(entry.questionId));
+      if (!question) continue;
+      if (entry.value === undefined || entry.value === null || entry.value === "") continue;
+
+      const answer = { question: question._id, textValue: null, numberValue: null, bookValue: null };
+
+      if (question.type === "text") {
+        answer.textValue = String(entry.value).trim();
+      } else if (question.type === "number") {
+        const num = Number(entry.value);
+        if (Number.isNaN(num)) continue;
+        answer.numberValue = num;
+      } else {
+        answer.bookValue = entry.value;
       }
+
+      saved.push(answer);
     }
+
+    response.answers = saved;
     await response.save();
 
     res.status(200).json({ success: true, message: "Kladd lagret", response });
@@ -217,13 +279,16 @@ exports.submit = async (req, res) => {
   }
 };
 
-// @desc    Status summary for the homepage banner
+// @desc    Status summary for the homepage banner + draft restore for step 3
 // @route   GET /api/wrapped/:year/status
 // @access  Private
 exports.getStatus = async (req, res) => {
   try {
     const year = Number(req.params.year);
-    const response = await WrappedResponse.findOne({ user: req.user._id, year });
+    const response = await WrappedResponse.findOne({ user: req.user._id, year }).populate(
+      "answers.bookValue",
+      "title author",
+    );
 
     const stepsCompleted = response?.stepsCompleted || {
       confirmList: false,
@@ -238,7 +303,7 @@ exports.getStatus = async (req, res) => {
       window: await getWindow(year),
       stepsCompleted,
       completedCount,
-      awards: response?.awards || {},
+      answers: response?.answers || [],
     });
   } catch (error) {
     console.error("Get wrapped status error:", error);
@@ -292,6 +357,120 @@ exports.setAdminWindow = async (req, res) => {
   }
 };
 
+// @desc    Admin: list all of this year's questions (incl. inactive)
+// @route   GET /api/wrapped/:year/admin/questions
+// @access  Private (admin only)
+exports.getAdminQuestions = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const questions = await getOrSeedQuestions(year);
+    res.status(200).json({ success: true, questions });
+  } catch (error) {
+    console.error("Get admin wrapped questions error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente spørsmålene" });
+  }
+};
+
+// @desc    Admin: create a new question
+// @route   POST /api/wrapped/:year/admin/questions
+// @access  Private (admin only)
+exports.createQuestion = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const { label, type, helper } = req.body;
+
+    if (!label || !label.trim()) {
+      return res.status(400).json({ success: false, message: "Spørsmålet må ha en tekst" });
+    }
+    if (!["text", "number", "book-library", "book-bookclub"].includes(type)) {
+      return res.status(400).json({ success: false, message: "Ugyldig svartype" });
+    }
+
+    const count = await WrappedQuestion.countDocuments({ year });
+    const question = await WrappedQuestion.create({
+      year,
+      label: label.trim(),
+      type,
+      helper: helper || "",
+      order: count,
+    });
+
+    res.status(201).json({ success: true, message: "Spørsmål lagt til", question });
+  } catch (error) {
+    console.error("Create wrapped question error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke legge til spørsmålet" });
+  }
+};
+
+// @desc    Admin: update a question's label/type/helper/active
+// @route   PUT /api/wrapped/:year/admin/questions/:id
+// @access  Private (admin only)
+exports.updateQuestion = async (req, res) => {
+  try {
+    const { label, type, helper, active } = req.body;
+    const question = await WrappedQuestion.findById(req.params.id);
+    if (!question) {
+      return res.status(404).json({ success: false, message: "Fant ikke spørsmålet" });
+    }
+
+    if (type !== undefined && !["text", "number", "book-library", "book-bookclub"].includes(type)) {
+      return res.status(400).json({ success: false, message: "Ugyldig svartype" });
+    }
+
+    if (label !== undefined) question.label = label.trim();
+    if (type !== undefined) question.type = type;
+    if (helper !== undefined) question.helper = helper;
+    if (active !== undefined) question.active = active;
+    await question.save();
+
+    res.status(200).json({ success: true, message: "Spørsmål oppdatert", question });
+  } catch (error) {
+    console.error("Update wrapped question error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke oppdatere spørsmålet" });
+  }
+};
+
+// @desc    Admin: delete a question
+// @route   DELETE /api/wrapped/:year/admin/questions/:id
+// @access  Private (admin only)
+exports.deleteQuestion = async (req, res) => {
+  try {
+    const question = await WrappedQuestion.findByIdAndDelete(req.params.id);
+    if (!question) {
+      return res.status(404).json({ success: false, message: "Fant ikke spørsmålet" });
+    }
+    res.status(200).json({ success: true, message: "Spørsmål slettet" });
+  } catch (error) {
+    console.error("Delete wrapped question error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke slette spørsmålet" });
+  }
+};
+
+// @desc    Admin: reorder this year's questions
+// @route   PUT /api/wrapped/:year/admin/questions/reorder
+// @access  Private (admin only)
+exports.reorderQuestions = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const { orderedQuestionIds } = req.body;
+    if (!Array.isArray(orderedQuestionIds)) {
+      return res.status(400).json({ success: false, message: "orderedQuestionIds må være en liste" });
+    }
+
+    await Promise.all(
+      orderedQuestionIds.map((id, index) =>
+        WrappedQuestion.findOneAndUpdate({ _id: id, year }, { order: index }),
+      ),
+    );
+
+    const questions = await WrappedQuestion.find({ year }).sort({ order: 1 });
+    res.status(200).json({ success: true, questions });
+  } catch (error) {
+    console.error("Reorder wrapped questions error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke lagre rekkefølgen" });
+  }
+};
+
 // @desc    Admin: tally the Book Awards nominations for a year
 // @route   GET /api/wrapped/:year/admin/tally
 // @access  Private (admin only)
@@ -299,36 +478,60 @@ exports.getAdminTally = async (req, res) => {
   try {
     const year = Number(req.params.year);
 
-    const [responses, totalMembers] = await Promise.all([
-      WrappedResponse.find({ year }).populate("user", "displayName username"),
+    const [questions, responses, totalMembers] = await Promise.all([
+      WrappedQuestion.find({ year }).sort({ order: 1 }),
+      WrappedResponse.find({ year })
+        .populate("user", "displayName username")
+        .populate("answers.bookValue", "title author"),
       User.countDocuments({ status: "approved" }),
     ]);
 
     const submittedCount = responses.filter((r) => r.stepsCompleted?.awards).length;
 
     const tally = {};
-    for (const field of AWARD_FIELDS) {
-      const groups = new Map(); // normalized text -> { text, count, respondents }
+    for (const question of questions) {
+      const groups = new Map();
 
       for (const response of responses) {
-        const raw = (response.awards?.[field.key] || "").trim();
-        if (!raw) continue;
+        const answer = response.answers.find(
+          (a) => a.question.toString() === question._id.toString(),
+        );
+        if (!answer) continue;
 
-        const normalized = raw.toLowerCase().replace(/\s+/g, " ");
         const respondentName = response.user?.displayName || response.user?.username || "Ukjent";
+        let groupKey;
+        let displayText;
 
-        if (!groups.has(normalized)) {
-          groups.set(normalized, { text: raw, count: 0, respondents: [] });
+        if (question.type === "text") {
+          if (!answer.textValue) continue;
+          groupKey = answer.textValue.toLowerCase().replace(/\s+/g, " ");
+          displayText = answer.textValue;
+        } else if (question.type === "number") {
+          if (answer.numberValue === null || answer.numberValue === undefined) continue;
+          groupKey = String(answer.numberValue);
+          displayText = String(answer.numberValue);
+        } else {
+          if (!answer.bookValue) continue;
+          groupKey = answer.bookValue._id
+            ? answer.bookValue._id.toString()
+            : answer.bookValue.toString();
+          displayText = answer.bookValue.title
+            ? `${answer.bookValue.title} — ${answer.bookValue.author}`
+            : "Ukjent bok";
         }
-        const group = groups.get(normalized);
+
+        if (!groups.has(groupKey)) {
+          groups.set(groupKey, { text: displayText, count: 0, respondents: [] });
+        }
+        const group = groups.get(groupKey);
         group.count += 1;
         group.respondents.push(respondentName);
       }
 
-      tally[field.key] = [...groups.values()].sort((a, b) => b.count - a.count);
+      tally[question._id.toString()] = [...groups.values()].sort((a, b) => b.count - a.count);
     }
 
-    res.status(200).json({ success: true, submittedCount, totalMembers, tally });
+    res.status(200).json({ success: true, submittedCount, totalMembers, questions, tally });
   } catch (error) {
     console.error("Get wrapped admin tally error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke telle opp nominasjonene" });

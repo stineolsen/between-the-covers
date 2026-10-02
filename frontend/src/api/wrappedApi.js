@@ -21,8 +21,18 @@ export const wrappedApi = {
     return response.data;
   },
 
-  saveAwards: async (year, awards) => {
-    const response = await api.put(`/api/wrapped/${year}/awards`, awards);
+  getQuestions: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/questions`);
+    return response.data;
+  },
+
+  getBookclubBooks: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/bookclub-books`);
+    return response.data;
+  },
+
+  saveAwards: async (year, answers) => {
+    const response = await api.put(`/api/wrapped/${year}/awards`, { answers });
     return response.data;
   },
 
@@ -49,6 +59,33 @@ export const wrappedApi = {
 
   getAdminTally: async (year) => {
     const response = await api.get(`/api/wrapped/${year}/admin/tally`);
+    return response.data;
+  },
+
+  getAdminQuestions: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/admin/questions`);
+    return response.data;
+  },
+
+  createQuestion: async (year, { label, type, helper }) => {
+    const response = await api.post(`/api/wrapped/${year}/admin/questions`, { label, type, helper });
+    return response.data;
+  },
+
+  updateQuestion: async (year, id, data) => {
+    const response = await api.put(`/api/wrapped/${year}/admin/questions/${id}`, data);
+    return response.data;
+  },
+
+  deleteQuestion: async (year, id) => {
+    const response = await api.delete(`/api/wrapped/${year}/admin/questions/${id}`);
+    return response.data;
+  },
+
+  reorderQuestions: async (year, orderedQuestionIds) => {
+    const response = await api.put(`/api/wrapped/${year}/admin/questions/reorder`, {
+      orderedQuestionIds,
+    });
     return response.data;
   },
 };

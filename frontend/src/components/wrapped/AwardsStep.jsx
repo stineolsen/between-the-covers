@@ -1,30 +1,55 @@
 import { useEffect, useState } from "react";
 import { useToast } from "../../contexts/useToast";
 import wrappedApi from "../../api/wrappedApi";
-import { AWARD_FIELDS as FIELDS } from "../../constants/wrappedAwardFields";
-
-const emptyAwards = FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: "" }), {});
+import BookPicker from "./BookPicker";
 
 const AwardsStep = ({ year, onBack, onSubmitted }) => {
   const toast = useToast();
-  const [awards, setAwards] = useState(emptyAwards);
+  const [questions, setQuestions] = useState([]);
+  const [values, setValues] = useState({}); // questionId -> string | Book | null
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    wrappedApi
-      .getStatus(year)
-      .then((data) => setAwards({ ...emptyAwards, ...(data.awards || {}) }))
-      .catch(() => {})
+    Promise.all([wrappedApi.getQuestions(year), wrappedApi.getStatus(year)])
+      .then(([questionsData, statusData]) => {
+        const qs = questionsData.questions || [];
+        setQuestions(qs);
+
+        const initial = {};
+        for (const answer of statusData.answers || []) {
+          const questionId = answer.question;
+          if (answer.textValue !== null && answer.textValue !== undefined) {
+            initial[questionId] = answer.textValue;
+          } else if (answer.numberValue !== null && answer.numberValue !== undefined) {
+            initial[questionId] = String(answer.numberValue);
+          } else if (answer.bookValue) {
+            initial[questionId] = answer.bookValue;
+          }
+        }
+        setValues(initial);
+      })
+      .catch(() => toast.error("Klarte ikke hente spørsmålene"))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [year]);
 
-  const update = (key, value) => setAwards((prev) => ({ ...prev, [key]: value }));
+  const update = (questionId, value) => setValues((prev) => ({ ...prev, [questionId]: value }));
+
+  const buildAnswers = () =>
+    questions.map((q) => {
+      const raw = values[q._id];
+      let value = raw;
+      if (q.type === "book-library" || q.type === "book-bookclub") {
+        value = raw?._id || null;
+      }
+      return { questionId: q._id, value };
+    });
 
   const handleSaveDraft = async () => {
     setSaving(true);
     try {
-      await wrappedApi.saveAwards(year, awards);
+      await wrappedApi.saveAwards(year, buildAnswers());
       toast.success("Kladd lagret ✓");
     } catch (err) {
       toast.error(err.response?.data?.message || "Klarte ikke lagre kladden");
@@ -36,7 +61,7 @@ const AwardsStep = ({ year, onBack, onSubmitted }) => {
   const handleSubmit = async () => {
     setSaving(true);
     try {
-      await wrappedApi.saveAwards(year, awards);
+      await wrappedApi.saveAwards(year, buildAnswers());
       await wrappedApi.submit(year);
       onSubmitted();
     } catch (err) {
@@ -64,23 +89,49 @@ const AwardsStep = ({ year, onBack, onSubmitted }) => {
       </p>
 
       <div className="flex flex-col gap-3.5 mb-5">
-        {FIELDS.map((field) => (
-          <div key={field.key}>
+        {questions.length === 0 && (
+          <p className="text-sm" style={{ color: "var(--color-text-faint)" }}>
+            Ingen spørsmål er satt opp for {year} ennå.
+          </p>
+        )}
+        {questions.map((q) => (
+          <div key={q._id}>
             <label className="block text-xs font-bold mb-1">
-              {field.label}
-              {field.helper && (
+              {q.label}
+              {q.helper && (
                 <span className="font-normal ml-1" style={{ color: "var(--color-text-faint)" }}>
-                  {field.helper}
+                  {q.helper}
                 </span>
               )}
             </label>
-            <input
-              type="text"
-              value={awards[field.key]}
-              onChange={(e) => update(field.key, e.target.value)}
-              placeholder="Søk blant bøkene dine..."
-              className="input-field"
-            />
+
+            {q.type === "text" && (
+              <input
+                type="text"
+                value={values[q._id] || ""}
+                onChange={(e) => update(q._id, e.target.value)}
+                placeholder="Skriv svaret ditt..."
+                className="input-field"
+              />
+            )}
+
+            {q.type === "number" && (
+              <input
+                type="number"
+                value={values[q._id] || ""}
+                onChange={(e) => update(q._id, e.target.value)}
+                className="input-field"
+              />
+            )}
+
+            {(q.type === "book-library" || q.type === "book-bookclub") && (
+              <BookPicker
+                mode={q.type === "book-library" ? "library" : "bookclub"}
+                year={year}
+                value={values[q._id] || null}
+                onChange={(book) => update(q._id, book)}
+              />
+            )}
           </div>
         ))}
       </div>

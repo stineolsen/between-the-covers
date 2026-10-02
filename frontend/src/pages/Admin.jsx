@@ -7,7 +7,13 @@ import { booksApi } from "../api/booksApi";
 import { importApi } from "../api/importApi";
 import { notificationApi } from "../api/notificationApi";
 import wrappedApi from "../api/wrappedApi";
-import { AWARD_FIELDS } from "../constants/wrappedAwardFields";
+
+const QUESTION_TYPE_LABELS = {
+  text: "Fritekst",
+  number: "Tall",
+  "book-library": "Bok (bibliotek)",
+  "book-bookclub": "Bok (bokklubb)",
+};
 import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
 import AddBookModal from "../components/books/AddBookModal";
@@ -60,8 +66,13 @@ const Admin = () => {
   const [wrappedWindowEnd, setWrappedWindowEnd] = useState("");
   const [savingWrappedWindow, setSavingWrappedWindow] = useState(false);
   const [wrappedTally, setWrappedTally] = useState(null);
+  const [wrappedQuestions, setWrappedQuestions] = useState([]);
   const [wrappedSubmittedCount, setWrappedSubmittedCount] = useState(0);
   const [wrappedTotalMembers, setWrappedTotalMembers] = useState(0);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [questionForm, setQuestionForm] = useState({ label: "", type: "text", helper: "" });
+  const [savingQuestion, setSavingQuestion] = useState(false);
   const wrappedYear = new Date().getFullYear();
 
   const { visibleRequests, archivedRequestsCount } = useMemo(() => {
@@ -119,6 +130,7 @@ const Admin = () => {
       setWrappedWindowStart(windowData.start);
       setWrappedWindowEnd(windowData.end);
       setWrappedTally(tallyData.tally);
+      setWrappedQuestions(tallyData.questions || []);
       setWrappedSubmittedCount(tallyData.submittedCount);
       setWrappedTotalMembers(tallyData.totalMembers);
       setError("");
@@ -144,6 +156,83 @@ const Admin = () => {
       console.error(err);
     } finally {
       setSavingWrappedWindow(false);
+    }
+  };
+
+  const handleAddQuestion = () => {
+    setEditingQuestion(null);
+    setQuestionForm({ label: "", type: "text", helper: "" });
+    setShowQuestionForm(true);
+  };
+
+  const handleEditQuestion = (question) => {
+    setEditingQuestion(question);
+    setQuestionForm({ label: question.label, type: question.type, helper: question.helper || "" });
+    setShowQuestionForm(true);
+  };
+
+  const handleSaveQuestion = async () => {
+    if (!questionForm.label.trim()) {
+      setError("Spørsmålet må ha en tekst");
+      return;
+    }
+    setSavingQuestion(true);
+    try {
+      if (editingQuestion) {
+        await wrappedApi.updateQuestion(wrappedYear, editingQuestion._id, questionForm);
+      } else {
+        await wrappedApi.createQuestion(wrappedYear, questionForm);
+      }
+      setShowQuestionForm(false);
+      setEditingQuestion(null);
+      await fetchWrappedAdmin();
+      setSuccessMessage("Spørsmål lagret!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Greide ikke lagre spørsmålet");
+      console.error(err);
+    } finally {
+      setSavingQuestion(false);
+    }
+  };
+
+  const handleDeleteQuestion = async (question) => {
+    if (!window.confirm(`Er du sikker på at du vil slette spørsmålet «${question.label}»?`)) {
+      return;
+    }
+    try {
+      await wrappedApi.deleteQuestion(wrappedYear, question._id);
+      await fetchWrappedAdmin();
+      setSuccessMessage("Spørsmål slettet!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke slette spørsmålet");
+      console.error(err);
+    }
+  };
+
+  const handleToggleQuestionActive = async (question) => {
+    try {
+      await wrappedApi.updateQuestion(wrappedYear, question._id, { active: !question.active });
+      await fetchWrappedAdmin();
+    } catch (err) {
+      setError("Greide ikke oppdatere spørsmålet");
+      console.error(err);
+    }
+  };
+
+  const handleMoveQuestion = async (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= wrappedQuestions.length) return;
+    const reordered = [...wrappedQuestions];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+    setWrappedQuestions(reordered);
+    try {
+      await wrappedApi.reorderQuestions(wrappedYear, reordered.map((q) => q._id));
+      await fetchWrappedAdmin();
+    } catch (err) {
+      setError("Greide ikke lagre rekkefølgen");
+      console.error(err);
     }
   };
 
@@ -1563,6 +1652,148 @@ const Admin = () => {
             </div>
 
             <div className="container-gradient">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <h3 className="text-2xl font-bold gradient-text">❓ Spørsmål</h3>
+                {!showQuestionForm && (
+                  <button onClick={handleAddQuestion} className="btn-secondary px-4 py-2 text-sm">
+                    ＋ Legg til spørsmål
+                  </button>
+                )}
+              </div>
+              <p className="text-text-muted mb-4">
+                Velg hvilke kategorier medlemmene svarer på i steg 3, og hvilken type svar hver
+                skal ha.
+              </p>
+
+              {showQuestionForm && (
+                <div
+                  className="p-4 rounded-xl mb-4 grid gap-3"
+                  style={{ background: "var(--color-sunken)" }}
+                >
+                  <div>
+                    <label className="block text-sm font-bold text-text-muted mb-2">
+                      Spørsmål
+                    </label>
+                    <input
+                      type="text"
+                      value={questionForm.label}
+                      onChange={(e) => setQuestionForm({ ...questionForm, label: e.target.value })}
+                      className="input-field"
+                      placeholder="f.eks. Årets beste bok"
+                    />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-bold text-text-muted mb-2">
+                        Svartype
+                      </label>
+                      <select
+                        value={questionForm.type}
+                        onChange={(e) => setQuestionForm({ ...questionForm, type: e.target.value })}
+                        className="input-field py-2"
+                      >
+                        <option value="text">Fritekst</option>
+                        <option value="number">Tall</option>
+                        <option value="book-library">Bok fra biblioteket</option>
+                        <option value="book-bookclub">Bok fra årets bokklubbøker</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-text-muted mb-2">
+                        Hjelpetekst <span className="font-normal">(valgfritt)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={questionForm.helper}
+                        onChange={(e) => setQuestionForm({ ...questionForm, helper: e.target.value })}
+                        className="input-field"
+                        placeholder="f.eks. navn + bok"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSaveQuestion}
+                      disabled={savingQuestion}
+                      className="btn-primary px-4 py-2 text-sm"
+                    >
+                      {savingQuestion ? "Lagrer..." : "Lagre"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowQuestionForm(false);
+                        setEditingQuestion(null);
+                      }}
+                      className="text-sm font-bold text-text-muted"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                {wrappedQuestions.map((question, index) => (
+                  <div
+                    key={question._id}
+                    className="flex items-center gap-3 p-3 rounded-xl"
+                    style={{
+                      background: "var(--color-sunken)",
+                      opacity: question.active ? 1 : 0.5,
+                    }}
+                  >
+                    <div className="flex flex-col">
+                      <button
+                        onClick={() => handleMoveQuestion(index, -1)}
+                        disabled={index === 0}
+                        className="text-xs leading-none disabled:opacity-30"
+                        title="Flytt opp"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => handleMoveQuestion(index, 1)}
+                        disabled={index === wrappedQuestions.length - 1}
+                        className="text-xs leading-none disabled:opacity-30"
+                        title="Flytt ned"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm truncate">{question.label}</p>
+                      <p className="text-xs text-text-faint">
+                        {QUESTION_TYPE_LABELS[question.type]}
+                        {question.helper && ` · ${question.helper}`}
+                        {!question.active && " · skjult"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleEditQuestion(question)}
+                      className="text-sm font-bold flex-shrink-0"
+                      style={{ color: "var(--color-primary)" }}
+                    >
+                      Rediger
+                    </button>
+                    <button
+                      onClick={() => handleToggleQuestionActive(question)}
+                      className="text-sm font-bold flex-shrink-0 text-text-muted"
+                    >
+                      {question.active ? "Skjul" : "Vis"}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteQuestion(question)}
+                      className="text-sm font-bold flex-shrink-0"
+                      style={{ color: "var(--color-terracotta)" }}
+                    >
+                      Slett
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="container-gradient">
               <h3 className="text-2xl font-bold gradient-text mb-2">📊 Nominasjoner</h3>
               <p className="text-text-muted mb-4">
                 {wrappedSubmittedCount} av {wrappedTotalMembers} medlemmer har sendt inn
@@ -1572,15 +1803,15 @@ const Admin = () => {
                 <p className="text-text-muted">Laster...</p>
               ) : (
                 <div className="grid gap-5 md:grid-cols-2">
-                  {AWARD_FIELDS.map((field) => {
-                    const answers = wrappedTally[field.key] || [];
+                  {wrappedQuestions.map((question) => {
+                    const answers = wrappedTally[question._id] || [];
                     return (
                       <div
-                        key={field.key}
+                        key={question._id}
                         className="p-4 rounded-xl"
                         style={{ background: "var(--color-sunken)" }}
                       >
-                        <h4 className="font-bold text-sm mb-2">{field.label}</h4>
+                        <h4 className="font-bold text-sm mb-2">{question.label}</h4>
                         {answers.length === 0 ? (
                           <p className="text-sm text-text-faint">Ingen svar ennå</p>
                         ) : (
