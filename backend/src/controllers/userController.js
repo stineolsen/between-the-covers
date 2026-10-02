@@ -1,6 +1,11 @@
 const User = require("../models/User");
+const UserBook = require("../models/UserBook");
 const path = require("path");
 const fs = require("fs");
+
+// "test" is a real approved account kept around purely for testing - never
+// show it alongside real members in recipient pickers or the members page.
+const isTestAccount = (user) => user.username?.toLowerCase() === "test";
 
 // @desc    Get all approved club members (for recipient selection)
 // @route   GET /api/users/members
@@ -10,7 +15,25 @@ exports.getMembers = async (req, res, next) => {
     const members = await User.find({ status: 'approved' })
       .select('_id displayName username avatar email absUsername absTotalListeningSeconds absLastSyncedAt')
       .sort({ displayName: 1 });
-    res.status(200).json({ success: true, members });
+    const visibleMembers = members.filter((member) => !isTestAccount(member));
+
+    const currentlyReadingBooks = await UserBook.find({
+      user: { $in: visibleMembers.map((member) => member._id) },
+      status: "currently-reading",
+    }).select("user book");
+
+    const readingByUser = {};
+    currentlyReadingBooks.forEach((userBook) => {
+      const key = userBook.user.toString();
+      (readingByUser[key] ||= []).push(userBook.book);
+    });
+
+    const membersWithReading = visibleMembers.map((member) => ({
+      ...member.toObject(),
+      currentlyReading: readingByUser[member._id.toString()] || [],
+    }));
+
+    res.status(200).json({ success: true, members: membersWithReading });
   } catch (error) {
     next(error);
   }

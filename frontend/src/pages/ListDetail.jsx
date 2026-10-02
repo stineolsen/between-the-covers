@@ -186,7 +186,13 @@ const ListDetail = () => {
           )}
         </div>
         <div className="mb-10">
-          <BookRankingList listId={list._id} books={list.books} canEdit={canEdit} onBooksChange={handleBooksChange} />
+          <BookRankingList
+            listId={list._id}
+            listTitle={list.title}
+            books={list.books}
+            canEdit={canEdit}
+            onBooksChange={handleBooksChange}
+          />
         </div>
 
         {/* List-level comments */}
