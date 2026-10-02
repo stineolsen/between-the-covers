@@ -35,6 +35,22 @@ export const wrappedApi = {
     const response = await api.get(`/api/wrapped/${year}/status`);
     return response.data;
   },
+
+  // Admin only
+  getAdminWindow: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/admin/window`);
+    return response.data;
+  },
+
+  updateAdminWindow: async (year, { start, end }) => {
+    const response = await api.put(`/api/wrapped/${year}/admin/window`, { start, end });
+    return response.data;
+  },
+
+  getAdminTally: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/admin/tally`);
+    return response.data;
+  },
 };
 
 export default wrappedApi;

@@ -3,20 +3,32 @@ const UserBook = require("../models/UserBook");
 const Book = require("../models/Book");
 const Review = require("../models/Review");
 const List = require("../models/List");
+const Setting = require("../models/Setting");
+const User = require("../models/User");
+const { AWARD_FIELDS } = require("../constants/wrappedAwardFields");
+
+const windowSettingKey = (year) => `wrapped:${year}:window`;
 
 // December collection window for a given wrapped year - 1st through the
-// 27th (admin needs the rest of the holidays to generate the actual
-// wrapped). Hardcoded for now; move to the Setting model if this ever needs
-// to be admin-adjustable.
-function getWindow(year) {
+// 27th by default (admin needs the rest of the holidays to generate the
+// actual wrapped), but adjustable per year via the Setting model, same
+// pattern as the Calibre "import since" date in importController.js.
+async function getWindow(year) {
+  const setting = await Setting.findOne({ key: windowSettingKey(year) });
+  if (setting?.value?.start && setting?.value?.end) {
+    return {
+      start: new Date(`${setting.value.start}T00:00:00`),
+      end: new Date(`${setting.value.end}T23:59:59`),
+    };
+  }
   return {
     start: new Date(`${year}-12-01T00:00:00`),
     end: new Date(`${year}-12-27T23:59:59`),
   };
 }
 
-function isWindowOpen(year) {
-  const { start, end } = getWindow(year);
+async function isWindowOpen(year) {
+  const { start, end } = await getWindow(year);
   const now = new Date();
   return now >= start && now <= end;
 }
@@ -222,8 +234,8 @@ exports.getStatus = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      windowOpen: isWindowOpen(year),
-      window: getWindow(year),
+      windowOpen: await isWindowOpen(year),
+      window: await getWindow(year),
       stepsCompleted,
       completedCount,
       awards: response?.awards || {},
@@ -231,5 +243,94 @@ exports.getStatus = async (req, res) => {
   } catch (error) {
     console.error("Get wrapped status error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke hente status" });
+  }
+};
+
+// @desc    Admin: get the collection window for a year
+// @route   GET /api/wrapped/:year/admin/window
+// @access  Private (admin only)
+exports.getAdminWindow = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const setting = await Setting.findOne({ key: windowSettingKey(year) });
+    const { start, end } = await getWindow(year);
+
+    res.status(200).json({
+      success: true,
+      start: setting?.value?.start || start.toISOString().slice(0, 10),
+      end: setting?.value?.end || end.toISOString().slice(0, 10),
+      isDefault: !setting,
+    });
+  } catch (error) {
+    console.error("Get wrapped admin window error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente innsamlingsvinduet" });
+  }
+};
+
+// @desc    Admin: set the collection window for a year
+// @route   PUT /api/wrapped/:year/admin/window
+// @access  Private (admin only)
+exports.setAdminWindow = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const { start, end } = req.body;
+
+    if (!start || !end) {
+      return res.status(400).json({ success: false, message: "Start- og sluttdato er påkrevd" });
+    }
+
+    await Setting.findOneAndUpdate(
+      { key: windowSettingKey(year) },
+      { value: { start, end } },
+      { upsert: true },
+    );
+
+    res.status(200).json({ success: true, message: "Innsamlingsvinduet er oppdatert", start, end });
+  } catch (error) {
+    console.error("Set wrapped admin window error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke lagre innsamlingsvinduet" });
+  }
+};
+
+// @desc    Admin: tally the Book Awards nominations for a year
+// @route   GET /api/wrapped/:year/admin/tally
+// @access  Private (admin only)
+exports.getAdminTally = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+
+    const [responses, totalMembers] = await Promise.all([
+      WrappedResponse.find({ year }).populate("user", "displayName username"),
+      User.countDocuments({ status: "approved" }),
+    ]);
+
+    const submittedCount = responses.filter((r) => r.stepsCompleted?.awards).length;
+
+    const tally = {};
+    for (const field of AWARD_FIELDS) {
+      const groups = new Map(); // normalized text -> { text, count, respondents }
+
+      for (const response of responses) {
+        const raw = (response.awards?.[field.key] || "").trim();
+        if (!raw) continue;
+
+        const normalized = raw.toLowerCase().replace(/\s+/g, " ");
+        const respondentName = response.user?.displayName || response.user?.username || "Ukjent";
+
+        if (!groups.has(normalized)) {
+          groups.set(normalized, { text: raw, count: 0, respondents: [] });
+        }
+        const group = groups.get(normalized);
+        group.count += 1;
+        group.respondents.push(respondentName);
+      }
+
+      tally[field.key] = [...groups.values()].sort((a, b) => b.count - a.count);
+    }
+
+    res.status(200).json({ success: true, submittedCount, totalMembers, tally });
+  } catch (error) {
+    console.error("Get wrapped admin tally error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke telle opp nominasjonene" });
   }
 };

@@ -1,18 +1,7 @@
 import { useEffect, useState } from "react";
 import { useToast } from "../../contexts/useToast";
 import wrappedApi from "../../api/wrappedApi";
-
-const FIELDS = [
-  { key: "bestBook", label: "Årets beste bok" },
-  { key: "worstBook", label: "Årets dårligste bok" },
-  { key: "mostTalkedAbout", label: "Årets mest snakket om bok" },
-  { key: "mostConfusing", label: "Mest forvirrende bok" },
-  { key: "bestHateRead", label: 'Beste "hate read"' },
-  { key: "favoriteCharacter", label: "Årets favorittkarakter", helper: "navn + bok" },
-  { key: "mostAnnoyingCharacter", label: "Årets mest irriterende karakter", helper: "navn + bok" },
-  { key: "bestSideCharacter", label: "Årets beste sidekarakter", helper: "navn + bok" },
-  { key: "bestSpicyScene", label: "Årets beste smutscene", helper: "valgfritt" },
-];
+import { AWARD_FIELDS as FIELDS } from "../../constants/wrappedAwardFields";
 
 const emptyAwards = FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: "" }), {});
 

@@ -6,6 +6,8 @@ import { usersApi } from "../api/usersApi";
 import { booksApi } from "../api/booksApi";
 import { importApi } from "../api/importApi";
 import { notificationApi } from "../api/notificationApi";
+import wrappedApi from "../api/wrappedApi";
+import { AWARD_FIELDS } from "../constants/wrappedAwardFields";
 import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
 import AddBookModal from "../components/books/AddBookModal";
@@ -54,6 +56,13 @@ const Admin = () => {
   const [searchingBooks, setSearchingBooks] = useState(false);
   const [selectedBookForLink, setSelectedBookForLink] = useState(null);
   const [now] = useState(() => Date.now());
+  const [wrappedWindowStart, setWrappedWindowStart] = useState("");
+  const [wrappedWindowEnd, setWrappedWindowEnd] = useState("");
+  const [savingWrappedWindow, setSavingWrappedWindow] = useState(false);
+  const [wrappedTally, setWrappedTally] = useState(null);
+  const [wrappedSubmittedCount, setWrappedSubmittedCount] = useState(0);
+  const [wrappedTotalMembers, setWrappedTotalMembers] = useState(0);
+  const wrappedYear = new Date().getFullYear();
 
   const { visibleRequests, archivedRequestsCount } = useMemo(() => {
     const cutoff = now - 14 * 24 * 60 * 60 * 1000;
@@ -97,6 +106,44 @@ const Admin = () => {
     } catch (err) {
       setError("Greide ikke lagre importdato");
       console.error(err);
+    }
+  };
+
+  const fetchWrappedAdmin = async () => {
+    try {
+      setLoading(true);
+      const [windowData, tallyData] = await Promise.all([
+        wrappedApi.getAdminWindow(wrappedYear),
+        wrappedApi.getAdminTally(wrappedYear),
+      ]);
+      setWrappedWindowStart(windowData.start);
+      setWrappedWindowEnd(windowData.end);
+      setWrappedTally(tallyData.tally);
+      setWrappedSubmittedCount(tallyData.submittedCount);
+      setWrappedTotalMembers(tallyData.totalMembers);
+      setError("");
+    } catch (err) {
+      setError("Greide ikke laste Bokwrapped-status");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveWrappedWindow = async () => {
+    setSavingWrappedWindow(true);
+    try {
+      await wrappedApi.updateAdminWindow(wrappedYear, {
+        start: wrappedWindowStart,
+        end: wrappedWindowEnd,
+      });
+      setSuccessMessage("Innsamlingsvinduet er lagret!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke lagre innsamlingsvinduet");
+      console.error(err);
+    } finally {
+      setSavingWrappedWindow(false);
     }
   };
 
@@ -441,6 +488,8 @@ const Admin = () => {
       fetchAllMembers();
     } else if (activeTab === "import") {
       fetchImportStatus();
+    } else if (activeTab === "wrapped") {
+      fetchWrappedAdmin();
     }
   }, [activeTab]);
 
@@ -590,6 +639,19 @@ const Admin = () => {
             }
           >
             🔔 Send varsel
+          </button>
+          <button
+            onClick={() => setActiveTab("wrapped")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "wrapped" ? "text-white" : "bg-card text-text-muted"
+            }`}
+            style={
+              activeTab === "wrapped"
+                ? { background: "var(--color-primary-solid)" }
+                : {}
+            }
+          >
+            🎁 Bokwrapped
           </button>
         </div>
 
@@ -1451,6 +1513,99 @@ const Admin = () => {
                 {alertResult.failed > 0 && ` (${alertResult.failed} feilet)`}.
               </div>
             )}
+          </div>
+        )}
+        {/* Bokwrapped Tab */}
+        {activeTab === "wrapped" && (
+          <div className="grid gap-6 animate-fadeIn">
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">
+                🎁 Bokwrapped {wrappedYear}
+              </h3>
+              <p className="text-text-muted mb-4">
+                Styr hvor lenge innsamlingen er åpen på forsiden, og se hvordan nominasjonene
+                fordeler seg så langt.
+              </p>
+              <div className="flex items-end gap-3 flex-wrap mb-2">
+                <div>
+                  <label className="block text-sm font-bold text-text-muted mb-2">
+                    Åpner
+                  </label>
+                  <input
+                    type="date"
+                    value={wrappedWindowStart}
+                    onChange={(e) => setWrappedWindowStart(e.target.value)}
+                    className="input-field py-2 w-auto"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-text-muted mb-2">
+                    Frist
+                  </label>
+                  <input
+                    type="date"
+                    value={wrappedWindowEnd}
+                    onChange={(e) => setWrappedWindowEnd(e.target.value)}
+                    className="input-field py-2 w-auto"
+                  />
+                </div>
+                <button
+                  onClick={handleSaveWrappedWindow}
+                  disabled={savingWrappedWindow}
+                  className="btn-secondary px-4 py-2 text-sm"
+                >
+                  {savingWrappedWindow ? "Lagrer..." : "Lagre frist"}
+                </button>
+              </div>
+              <p className="text-sm text-text-faint">
+                Banneret på forsiden vises kun i dette tidsrommet.
+              </p>
+            </div>
+
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">📊 Nominasjoner</h3>
+              <p className="text-text-muted mb-4">
+                {wrappedSubmittedCount} av {wrappedTotalMembers} medlemmer har sendt inn
+                nominasjonene sine.
+              </p>
+              {!wrappedTally ? (
+                <p className="text-text-muted">Laster...</p>
+              ) : (
+                <div className="grid gap-5 md:grid-cols-2">
+                  {AWARD_FIELDS.map((field) => {
+                    const answers = wrappedTally[field.key] || [];
+                    return (
+                      <div
+                        key={field.key}
+                        className="p-4 rounded-xl"
+                        style={{ background: "var(--color-sunken)" }}
+                      >
+                        <h4 className="font-bold text-sm mb-2">{field.label}</h4>
+                        {answers.length === 0 ? (
+                          <p className="text-sm text-text-faint">Ingen svar ennå</p>
+                        ) : (
+                          <ul className="space-y-1.5">
+                            {answers.map((a) => (
+                              <li key={a.text} className="text-sm flex justify-between gap-3">
+                                <span className="truncate" title={a.respondents.join(", ")}>
+                                  {a.text}
+                                </span>
+                                <span
+                                  className="font-bold flex-shrink-0"
+                                  style={{ color: "var(--color-primary)" }}
+                                >
+                                  {a.count}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
