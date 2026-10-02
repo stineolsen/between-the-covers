@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import bookRequestApi from '../../api/bookRequestApi';
 
 const FORMAT_LABELS = { ebook: '📱 E-bok', audiobook: '🎧 Lydbok' };
@@ -49,13 +50,24 @@ const MyRequestsFeed = () => {
               )}
             </div>
 
-            <div className="flex-shrink-0 flex items-center gap-2">
+            <div className="flex-shrink-0 flex flex-col items-end gap-2">
               {req.status === 'added' ? (
-                <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
-                  ✅ Lagt til i biblioteket
-                </span>
-              ) : (
                 <>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
+                    ✅ Lagt til i biblioteket
+                  </span>
+                  {req.addedBook && (
+                    <Link
+                      to={`/books/${req.addedBook._id}`}
+                      className="px-3 py-1.5 rounded-full text-xs font-bold transition-colors"
+                      style={{ background: "var(--color-primary-solid)", color: "white" }}
+                    >
+                      Se boken
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
                   <span className="px-3 py-1.5 rounded-full text-xs font-bold" style={{ background: "var(--color-gold-tint)", color: "var(--color-secondary)" }}>
                     ⏳ Venter på svar
                   </span>
@@ -67,7 +79,7 @@ const MyRequestsFeed = () => {
                   >
                     ✕
                   </button>
-                </>
+                </div>
               )}
             </div>
           </div>
