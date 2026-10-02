@@ -16,16 +16,16 @@ import WrappedBanner from "../components/home/WrappedBanner";
 
 const Home = () => {
   const { user } = useAuth();
-  const [meeting, setMeeting] = useState(null);
+  const [meetings, setMeetings] = useState([]);
   const [meetingLoading, setMeetingLoading] = useState(true);
   const [readThisYear, setReadThisYear] = useState(0);
   const [currentlyReading, setCurrentlyReading] = useState([]);
 
   useEffect(() => {
     meetingsApi
-      .getNextMeeting()
-      .then((data) => setMeeting(data.meeting || null))
-      .catch(() => setMeeting(null))
+      .getMeetings({ upcoming: true })
+      .then((data) => setMeetings(data.meetings || []))
+      .catch(() => setMeetings([]))
       .finally(() => setMeetingLoading(false));
 
     userBooksApi
@@ -39,7 +39,8 @@ const Home = () => {
       .catch(() => {});
   }, []);
 
-  const featuredBook = meeting?.book;
+  const nextMeeting = meetings[0];
+  const featuredBook = nextMeeting?.book;
 
   return (
     <div className="min-h-screen">
@@ -90,7 +91,7 @@ const Home = () => {
                 className="text-xs font-bold mb-1"
                 style={{ color: "var(--color-primary)" }}
               >
-                {meeting.title || "Bokklubbens bok"}
+                {nextMeeting.title || "Bokklubbens bok"}
               </p>
               <h2 className="text-2xl font-semibold mb-1">
                 {featuredBook.title}
@@ -113,12 +114,12 @@ const Home = () => {
         <WrappedBanner />
 
         {/* Main grid: activity (main) + meeting/goal/shelf (side) */}
-        <div className="grid lg:grid-cols-[1fr_300px] gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
           {/* Side column comes first in DOM so it can be ordered first on
               mobile (order-1) while sitting to the right on desktop
               (lg:order-2). */}
           <div className="order-1 lg:order-2">
-            <NextMeeting meeting={meeting} />
+            <NextMeeting meetings={meetings} />
             <ReadingGoalCard readCount={readThisYear} />
             {currentlyReading.length > 0 && (
               <div className="card p-5 rounded-2xl mb-5">
