@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { productsApi } from "../api/productsApi";
 import { useCart } from "../contexts/useCart";
 import { useToast } from "../contexts/useToast";
+import { useAuth } from "../contexts/useAuth";
 import BookCoverFallback from "../components/common/BookCoverFallback";
 
 const Shop = () => {
@@ -19,11 +20,13 @@ const Shop = () => {
     clearCart,
   } = useCart();
   const toast = useToast();
+  const { user } = useAuth();
 
-  // Checkout form state
+  // Checkout form state - name/email default to the logged-in member's own
+  // info so they don't have to retype it every time.
   const [checkoutForm, setCheckoutForm] = useState({
-    name: "",
-    email: "",
+    name: user?.displayName || user?.username || "",
+    email: user?.email || "",
     phone: "",
     deliveryAddress: "",
     notes: "",
@@ -84,11 +87,11 @@ const Shop = () => {
         items,
       });
 
-      // Clear cart and form
+      // Clear cart and form - keep name/email prefilled for next time
       clearCart();
       setCheckoutForm({
-        name: "",
-        email: "",
+        name: user?.displayName || user?.username || "",
+        email: user?.email || "",
         phone: "",
         deliveryAddress: "",
         notes: "",
@@ -271,6 +274,7 @@ const Shop = () => {
                   <input
                     type="text"
                     required
+                    autoComplete="name"
                     value={checkoutForm.name}
                     onChange={(e) =>
                       setCheckoutForm({ ...checkoutForm, name: e.target.value })
@@ -286,6 +290,7 @@ const Shop = () => {
                   <input
                     type="email"
                     required
+                    autoComplete="email"
                     value={checkoutForm.email}
                     onChange={(e) =>
                       setCheckoutForm({
@@ -303,6 +308,7 @@ const Shop = () => {
                   </label>
                   <input
                     type="tel"
+                    autoComplete="tel"
                     value={checkoutForm.phone}
                     onChange={(e) =>
                       setCheckoutForm({
@@ -329,6 +335,9 @@ const Shop = () => {
                     rows="3"
                     className="w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:border-[var(--color-primary)]" style={{ borderColor: "var(--color-border)", background: "var(--color-card)", color: "var(--color-text)" }}
                   />
+                  <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
+                    Blank betyr "en gang vi møtes i nær framtid"
+                  </p>
                 </div>
 
                 <div>

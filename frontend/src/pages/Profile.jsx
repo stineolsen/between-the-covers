@@ -492,7 +492,7 @@ const Profile = () => {
         {/* Push Notifications Section */}
         {pushState !== "unsupported" && (
           <div className="container-gradient mt-6">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-bold text-text mb-1">🔔 Push-varsler</h3>
                 <p className="text-text-muted text-sm">
@@ -656,7 +656,6 @@ const Profile = () => {
             </h3>
 
             {/* Upload Custom Avatar */}
-            <div className="mb-6 pb-6 border-b border-border">
               <h4 className="text-lg font-bold text-text mb-3">
                 📤 Last opp egen avatar/bilde
               </h4>
@@ -677,33 +676,6 @@ const Profile = () => {
               <p className="text-sm text-text-faint mt-2">
                 Maks filstørrelse: 5MB. Støttede formater: JPG, PNG, GIF, WebP
               </p>
-            </div>
-
-            {/* Default Avatars */}
-            <div>
-              <h4 className="text-lg font-bold text-text mb-3">
-                🎨 Default avatarer
-              </h4>
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                {defaultAvatars.map((avatar) => (
-                  <button
-                    key={avatar.name}
-                    onClick={() => handleSelectDefaultAvatar(avatar.name)}
-                    disabled={isUploading}
-                    className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-border hover:border-[var(--color-primary)] transition-all transform hover:scale-105 disabled:opacity-50"
-                  >
-                    <img
-                      src={usersApi.getAvatarUrl(avatar.name)}
-                      alt={avatar.label}
-                      className="w-20 h-20 rounded-full shadow-lg"
-                    />
-                    <span className="text-sm font-medium text-text-muted">
-                      {avatar.label}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Delete Avatar */}
             {user?.avatar && (
