@@ -201,9 +201,9 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
 
           {book.averageRating > 0 && (
             <div className="hidden sm:flex items-center gap-1.5 text-sm mb-3">
-              <span className="text-yellow-400 tracking-tight">
+              <span className="tracking-tight" style={{ color: "var(--color-secondary-solid)" }}>
                 {"★".repeat(Math.round(book.averageRating))}
-                <span style={{ color: "var(--color-border-strong)" }}>
+                <span style={{ color: "var(--color-border)" }}>
                   {"★".repeat(5 - Math.round(book.averageRating))}
                 </span>
               </span>

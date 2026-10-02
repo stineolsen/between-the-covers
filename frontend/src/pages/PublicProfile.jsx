@@ -88,6 +88,14 @@ const PublicProfile = () => {
     <div className="min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-4 space-y-6">
 
+        <Link
+          to="/members"
+          className="inline-flex items-center gap-1.5 text-sm font-semibold"
+          style={{ color: "var(--color-primary)" }}
+        >
+          ← Tilbake til medlemmer
+        </Link>
+
         {/* Avatar + name card */}
         <div className="container-gradient flex flex-col items-center text-center pb-8">
           {/* Avatar */}

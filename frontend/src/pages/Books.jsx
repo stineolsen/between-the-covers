@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { booksApi } from "../api/booksApi";
 import { userBooksApi } from "../api/userBooksApi";
 import BookGrid from "../components/books/BookGrid";
@@ -6,7 +6,21 @@ import RequestBookModal from "../components/books/RequestBookModal";
 import AddBookModal from "../components/books/AddBookModal";
 import Switch from "../components/common/Switch";
 
+const SCROLL_KEY = "books:scrollState"; // { y, filterKey }
+
 const Books = () => {
+  const hasRestoredScroll = useRef(false);
+  // Whatever the saved position was for, it only applies if the list is the
+  // same (same filters) - read once at mount so we can tell on the very
+  // first render whether there's a matching position worth protecting from
+  // being clobbered before we've had a chance to restore it.
+  const savedScroll = (() => {
+    try {
+      return JSON.parse(sessionStorage.getItem(SCROLL_KEY) || "null");
+    } catch {
+      return null;
+    }
+  })();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,6 +58,19 @@ const Books = () => {
   const [showHidden, setShowHidden] = useState(savedFilters.showHidden || false);
   const [groupSeries, setGroupSeries] = useState(savedFilters.groupSeries || false);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Identifies "the same list" for scroll-restore purposes - must mirror
+  // fetchBooks' params below, since those are what determine the order/
+  // contents of the list a saved scroll position would need to still match.
+  const filterKey = JSON.stringify({
+    search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden,
+  });
+  // Don't let scroll events (including the browser clamping scrollY to fit
+  // the brief loading state) clobber a saved position that still matches
+  // the current list, until we've had a chance to restore it.
+  const canSaveScroll = useRef(
+    !(savedScroll && savedScroll.filterKey === filterKey),
+  );
 
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
@@ -123,6 +150,79 @@ const Books = () => {
   useEffect(() => {
     fetchBooks();
   }, [search, bookclubOnly, audiobookOnly, ebookOnly, genre, sort, readFilter, ownedOnly, showHidden]);
+
+  // Keep a ref mirroring the latest filterKey so the scroll listener below
+  // (attached once on mount) always saves against the current list, even if
+  // filters change while the user is scrolling around.
+  const filterKeyRef = useRef(filterKey);
+  useEffect(() => {
+    filterKeyRef.current = filterKey;
+  }, [filterKey]);
+
+  // Continuously remember scroll position while on this page, so returning
+  // - by any route: the back button, browser back, or clicking "Bøker"
+  // again - lands back where you were instead of at the top.
+  useEffect(() => {
+    let frame = null;
+    const saveScrollY = () => {
+      sessionStorage.setItem(
+        SCROLL_KEY,
+        JSON.stringify({ y: window.scrollY, filterKey: filterKeyRef.current }),
+      );
+    };
+    const handleScroll = () => {
+      if (!canSaveScroll.current) return;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        saveScrollY();
+        frame = null;
+      });
+    };
+    // Clicking a book is what navigates away, and the destination page
+    // resets scroll to its own top on mount - that fires a native "scroll"
+    // event which can reach this still-attached listener *before* React
+    // gets around to cleaning it up (a genuine browser/React timing race),
+    // overwriting the real position with 0. A capture-phase click listener
+    // fires synchronously before any of that, so it always wins the save.
+    let resumeTimer = null;
+    const handleClick = () => {
+      if (!canSaveScroll.current) return;
+      saveScrollY();
+      // Briefly ignore further scroll-driven saves: if this click does
+      // navigate away, a late "scroll to 0" from the new page could still
+      // reach handleScroll above before cleanup removes it, clobbering the
+      // value just saved. If it doesn't navigate, saving just resumes.
+      canSaveScroll.current = false;
+      if (resumeTimer) clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        canSaveScroll.current = true;
+      }, 200);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("click", handleClick, { capture: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("click", handleClick, { capture: true });
+      if (frame) cancelAnimationFrame(frame);
+      if (resumeTimer) clearTimeout(resumeTimer);
+    };
+  }, []);
+
+  // Only restore once per mount, and only if the saved position was for
+  // this same list (same filters) - a genuinely different search/filter
+  // should start at the top as usual.
+  useLayoutEffect(() => {
+    if (loading || hasRestoredScroll.current) {
+      return;
+    }
+    hasRestoredScroll.current = true;
+    if (savedScroll && savedScroll.filterKey === filterKey) {
+      window.scrollTo(0, savedScroll.y);
+    }
+    // Only now is it safe to let real scrolling overwrite the saved value -
+    // the restore attempt (or the decision to skip it) has already happened.
+    canSaveScroll.current = true;
+  }, [loading, filterKey, savedScroll]);
 
   const handleSearchChange = (e) => {
     setSearch(e.target.value);

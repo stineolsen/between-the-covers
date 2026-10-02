@@ -10,6 +10,7 @@ import { ToastProvider } from "./contexts/ToastContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
+import ScrollToTop from "./components/common/ScrollToTop";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Pages
@@ -43,6 +44,7 @@ function App() {
         <CartProvider>
           <ToastProvider>
             <div className="min-h-screen flex flex-col animate-fadeIn pb-16 lg:pb-0">
+              <ScrollToTop />
               <Navbar />
               <Routes>
                 {/* Public Routes */}

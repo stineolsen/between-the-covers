@@ -21,8 +21,12 @@ const relativeTime = (date) => {
 const Stars = ({ rating }) => {
   const full = Math.round(rating);
   return (
-    <span className="text-yellow-400 text-sm leading-none">
-      {'★'.repeat(full)}{'☆'.repeat(5 - full)}
+    <span className="inline-flex items-center gap-1 text-sm leading-none">
+      <span>
+        <span style={{ color: "var(--color-secondary-solid)" }}>{'★'.repeat(full)}</span>
+        <span style={{ color: "var(--color-border)" }}>{'★'.repeat(5 - full)}</span>
+      </span>
+      <span className="text-xs text-text-faint">{rating.toFixed(1)}</span>
     </span>
   );
 };
