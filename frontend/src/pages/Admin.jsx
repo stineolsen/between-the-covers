@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
 import bookRequestApi from "../api/bookRequestApi";
@@ -1123,7 +1124,11 @@ const Admin = () => {
 
                         {req.status === 'added' && req.addedBook && (
                           <p className="mt-2 text-sm" style={{ color: "var(--color-sage)" }}>
-                            → Lenket til: <strong>{req.addedBook.title}</strong> ({req.addedBook.author})
+                            → Lenket til:{' '}
+                            <Link to={`/books/${req.addedBook._id}`} className="underline font-bold">
+                              {req.addedBook.title}
+                            </Link>{' '}
+                            ({req.addedBook.author})
                           </p>
                         )}
                       </div>

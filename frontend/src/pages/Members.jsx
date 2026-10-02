@@ -66,18 +66,18 @@ const Members = () => {
                     @{member.username}
                   </p>
                   {member.currentlyReading?.length > 0 && (
-                    <p
-                      className="text-xs truncate mt-1"
-                      title={member.currentlyReading
-                        .map((book) => book.title)
-                        .join(", ")}
-                      style={{ color: "var(--color-text-muted)" }}
-                    >
-                      📖{" "}
-                      {member.currentlyReading
-                        .map((book) => book.title)
-                        .join(", ")}
-                    </p>
+                    <div className="mt-1 space-y-0.5">
+                      {member.currentlyReading.map((book) => (
+                        <p
+                          key={book._id}
+                          className="text-xs truncate"
+                          title={book.title}
+                          style={{ color: "var(--color-text-muted)" }}
+                        >
+                          📖 {book.title}
+                        </p>
+                      ))}
+                    </div>
                   )}
                 </div>
               </Link>

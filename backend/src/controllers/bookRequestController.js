@@ -50,7 +50,9 @@ exports.getMyRequests = async (req, res) => {
         { status: 'pending' },
         { status: 'added', addedAt: { $gte: twoWeeksAgo } }
       ]
-    }).sort({ createdAt: -1 });
+    })
+      .sort({ createdAt: -1 })
+      .populate('addedBook', 'title coverImage');
 
 
     res.status(200).json({ success: true, requests });

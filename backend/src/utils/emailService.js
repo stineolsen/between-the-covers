@@ -9,6 +9,13 @@ const { sendPushToUser } = require("./pushService");
 const REQUEST_NOTIFY_DELAY_MS = 10 * 60 * 1000;
 const IMMEDIATE_CHECK_KEY = "lastImmediateCheckAt";
 
+// Only notify about books that actually have somewhere to read/listen - a
+// catalog entry with neither link isn't usable yet, so it shouldn't trigger
+// "new book" emails/push.
+const HAS_LIBRARY_LINK = {
+  $or: [{ "libraryLinks.ebook": { $nin: [null, ""] } }, { "libraryLinks.audiobook": { $nin: [null, ""] } }],
+};
+
 function getClient() {
   if (!process.env.RESEND_API_KEY) return null;
   return new Resend(process.env.RESEND_API_KEY);
@@ -192,17 +199,32 @@ async function checkForImmediateUpdates() {
   const checkedAt = new Date();
 
   if (!settingDoc) {
-    await Setting.create({ key: IMMEDIATE_CHECK_KEY, value: checkedAt });
+    try {
+      await Setting.create({ key: IMMEDIATE_CHECK_KEY, value: checkedAt });
+    } catch (error) {
+      // Lost the race to create the baseline to a concurrent run (e.g. an
+      // overlapping tick or another server instance) - nothing to do.
+    }
     return;
   }
 
   const since = new Date(settingDoc.value);
-  const [newBooks, newAudiobooks] = await Promise.all([
-    Book.find({ createdAt: { $gt: since } }).select("title author").lean(),
-    Book.find({ absUpdatedAt: { $gt: since } }).select("title author").lean(),
-  ]);
 
-  await Setting.findOneAndUpdate({ key: IMMEDIATE_CHECK_KEY }, { value: checkedAt });
+  // Atomically claim this check window before doing any work: only a run
+  // whose read of `value` still matches gets to advance it. If two crons
+  // run at once (an overlapping tick, or more than one server instance),
+  // the loser gets null back here and skips notifying for the same window
+  // the winner already claimed - otherwise both would notify everyone.
+  const claimed = await Setting.findOneAndUpdate(
+    { key: IMMEDIATE_CHECK_KEY, value: settingDoc.value },
+    { $set: { value: checkedAt } },
+  );
+  if (!claimed) return;
+
+  const [newBooks, newAudiobooks] = await Promise.all([
+    Book.find({ createdAt: { $gt: since }, ...HAS_LIBRARY_LINK }).select("title author").lean(),
+    Book.find({ absUpdatedAt: { $gt: since }, ...HAS_LIBRARY_LINK }).select("title author").lean(),
+  ]);
 
   if (newBooks.length === 0 && newAudiobooks.length === 0) return;
 
@@ -233,8 +255,8 @@ async function sendDigestsFor(frequency, sinceFloorDays) {
     try {
       const since = user.lastNotifiedAt || new Date(Date.now() - sinceFloorDays * 24 * 60 * 60 * 1000);
       const [newBooks, newAudiobooks] = await Promise.all([
-        Book.find({ createdAt: { $gt: since } }).select("title author").lean(),
-        Book.find({ absUpdatedAt: { $gt: since } }).select("title author").lean(),
+        Book.find({ createdAt: { $gt: since }, ...HAS_LIBRARY_LINK }).select("title author").lean(),
+        Book.find({ absUpdatedAt: { $gt: since }, ...HAS_LIBRARY_LINK }).select("title author").lean(),
       ]);
 
       if (newBooks.length === 0 && newAudiobooks.length === 0) continue;
@@ -324,14 +346,23 @@ async function sendPendingRequestNotifications() {
   }
 
   for (const request of requests) {
+    // Claim the request atomically before sending: if an overlapping tick
+    // or another server instance already claimed it, this returns null and
+    // we skip it instead of also emailing the requester.
+    const claimed = await BookRequest.findOneAndUpdate(
+      { _id: request._id, notifiedRequesterAt: null },
+      { $set: { notifiedRequesterAt: new Date() } },
+    );
+    if (!claimed) continue;
+
     try {
       if (request.requestedBy?.notifyOnRequestFulfilled) {
         await sendRequestFulfilledEmail(request.requestedBy.email, request, request.addedBook);
       }
-      request.notifiedRequesterAt = new Date();
-      await request.save();
     } catch (error) {
       console.error("Failed to process pending request notification for", request._id, error);
+      // Release the claim so the next tick retries the send.
+      await BookRequest.updateOne({ _id: request._id }, { $set: { notifiedRequesterAt: null } });
     }
   }
 }
