@@ -31,6 +31,7 @@ import Profile from "./pages/Profile";
 import PublicProfile from "./pages/PublicProfile";
 import Admin from "./pages/Admin";
 import Howto from "./pages/Howto";
+import Bokwrapped from "./pages/Bokwrapped";
 
 function App() {
   return (
@@ -164,6 +165,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Howto />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bokwrapped"
+                  element={
+                    <ProtectedRoute>
+                      <Bokwrapped />
                     </ProtectedRoute>
                   }
                 />

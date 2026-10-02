@@ -24,6 +24,7 @@ const listNotificationRoutes = require("./routes/listNotificationRoutes");
 const authorRoutes = require("./routes/authorRoutes");
 const seriesRoutes = require("./routes/seriesRoutes");
 const pushRoutes = require("./routes/pushRoutes");
+const wrappedRoutes = require("./routes/wrappedRoutes");
 
 const app = express();
 
@@ -84,6 +85,7 @@ app.use("/api/list-notifications", listNotificationRoutes);
 app.use("/api/authors", authorRoutes);
 app.use("/api/series", seriesRoutes);
 app.use("/api/push", pushRoutes);
+app.use("/api/wrapped", wrappedRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

@@ -12,6 +12,7 @@ import ListNotificationFeed from "../components/common/ListNotificationFeed";
 import MyRequestsFeed from "../components/common/MyRequestsFeed";
 import ReadingGoalCard from "../components/common/ReadingGoalCard";
 import BookCoverFallback from "../components/common/BookCoverFallback";
+import WrappedBanner from "../components/home/WrappedBanner";
 
 const Home = () => {
   const { user } = useAuth();
@@ -108,6 +109,8 @@ const Home = () => {
             </div>
           </Link>
         )}
+
+        <WrappedBanner />
 
         {/* Main grid: activity (main) + meeting/goal/shelf (side) */}
         <div className="grid lg:grid-cols-[1fr_300px] gap-8">
