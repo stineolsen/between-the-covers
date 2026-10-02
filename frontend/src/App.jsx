@@ -25,10 +25,12 @@ import ListDetail from "./pages/ListDetail";
 import AddBook from "./pages/AddBook";
 import EditBook from "./pages/EditBook";
 import Meetings from "./pages/Meetings";
+import MeetingDetail from "./pages/MeetingDetail";
 import ReadingHistory from "./pages/ReadingHistory";
 import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
 import PublicProfile from "./pages/PublicProfile";
+import Members from "./pages/Members";
 import Admin from "./pages/Admin";
 import Howto from "./pages/Howto";
 import Bokwrapped from "./pages/Bokwrapped";
@@ -129,6 +131,14 @@ function App() {
                   }
                 />
                 <Route
+                  path="/meetings/:id"
+                  element={
+                    <ProtectedRoute>
+                      <MeetingDetail />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/history"
                   element={
                     <ProtectedRoute>
@@ -149,6 +159,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/members"
+                  element={
+                    <ProtectedRoute>
+                      <Members />
                     </ProtectedRoute>
                   }
                 />

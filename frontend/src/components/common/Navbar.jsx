@@ -103,7 +103,7 @@ const Navbar = () => {
                 />
               </span>
               <span
-                className="text-lg font-semibold hidden sm:block"
+                className="text-xs sm:text-lg font-semibold"
                 style={{
                   fontFamily: "'Fraunces', serif",
                   fontStyle: "italic",
@@ -229,6 +229,14 @@ const Navbar = () => {
                             style={{ color: "var(--color-text)" }}
                           >
                             Butikk
+                          </Link>
+                          <Link
+                            to="/members"
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:opacity-80"
+                            style={{ color: "var(--color-text)" }}
+                          >
+                            Medlemmer
                           </Link>
                           {isAdmin && (
                             <Link

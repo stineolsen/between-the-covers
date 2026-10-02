@@ -175,7 +175,11 @@ const NextMeeting = ({ meetings: meetingsProp }) => {
                 style={{ width: `${100 / meetings.length}%` }}
                 className="flex-shrink-0 px-0.5"
               >
-                <div className="flex items-center gap-3 mb-3">
+                <Link
+                  to={`/meetings/${meeting._id}`}
+                  onClickCapture={suppressClickAfterDrag}
+                  className="flex items-center gap-3 mb-3 hover:opacity-80 transition-opacity"
+                >
                   <div
                     className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                     style={{
@@ -201,9 +205,9 @@ const NextMeeting = ({ meetings: meetingsProp }) => {
                       </p>
                     )}
                   </div>
-                </div>
+                </Link>
 
-                {meeting.book && (
+                {meeting.book ? (
                   <Link
                     to={`/books/${meeting.book._id}`}
                     onClickCapture={suppressClickAfterDrag}
@@ -229,6 +233,25 @@ const NextMeeting = ({ meetings: meetingsProp }) => {
                       </p>
                     </div>
                   </Link>
+                ) : (
+                  meeting.title && (
+                    <div
+                      className="flex items-center gap-2.5 p-2 rounded-lg mb-3"
+                      style={{ background: "var(--color-sunken)" }}
+                    >
+                      <div className="min-w-0">
+                        <p
+                          className="text-[0.65rem] font-bold uppercase tracking-wide"
+                          style={{ color: "var(--color-text-faint)" }}
+                        >
+                          Tema
+                        </p>
+                        <p className="text-sm font-semibold truncate">
+                          {meeting.title}
+                        </p>
+                      </div>
+                    </div>
+                  )
                 )}
 
                 <div className="flex items-center gap-2">

@@ -17,7 +17,7 @@ import { useToast } from "../../contexts/useToast";
 import listsApi from "../../api/listsApi";
 import BookRankingRow from "./BookRankingRow";
 
-const BookRankingList = ({ listId, books, canEdit, onBooksChange }) => {
+const BookRankingList = ({ listId, listTitle, books, canEdit, onBooksChange }) => {
   const toast = useToast();
   // A book referenced here can have been deleted elsewhere in the app -
   // drop any entry whose book no longer exists rather than crashing on
@@ -60,6 +60,16 @@ const BookRankingList = ({ listId, books, canEdit, onBooksChange }) => {
   };
 
   const handleRemove = async (bookId) => {
+    const targetEntry = items.find((e) => e.book._id === bookId);
+    const bookTitle = targetEntry?.book?.title || "boken";
+    if (
+      !window.confirm(
+        `Er du sikker på at du vil slette "${bookTitle}" fra listen "${listTitle}"?`,
+      )
+    ) {
+      return;
+    }
+
     const previous = items;
     setItems((prev) => prev.filter((entry) => entry.book._id !== bookId));
     try {
