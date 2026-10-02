@@ -303,13 +303,15 @@ const BookDetail = () => {
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-6xl mx-auto px-4">
-        {/* Back Button */}
-        <Link
-          to="/books"
+        {/* Back Button - uses browser history so returning to the book list
+            restores the scroll position/book the user had been viewing,
+            instead of pushing a fresh navigation that resets it to the top */}
+        <button
+          onClick={() => navigate(-1)}
           className="inline-flex items-center text-text-muted hover:text-primary mb-3 font-semibold transition-colors"
         >
           <span className="mr-2 md:btn-primary">←</span> Tilbake til bøker
-        </Link>
+        </button>
 
         {/* Header card — cover + title/author/rating */}
         <div
@@ -352,9 +354,9 @@ const BookDetail = () => {
 
             {book.averageRating > 0 && (
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-yellow-400 text-xl tracking-tight">
+                <span className="text-xl tracking-tight" style={{ color: "var(--color-secondary-solid)" }}>
                   {"★".repeat(Math.round(book.averageRating))}
-                  <span style={{ color: "var(--color-border-strong)" }}>
+                  <span style={{ color: "var(--color-border)" }}>
                     {"★".repeat(5 - Math.round(book.averageRating))}
                   </span>
                 </span>

@@ -12,8 +12,8 @@ const StarSVG = ({ fill, px, gradId }) => {
     <svg width={px} height={px} viewBox="0 0 24 24" style={{ display: "block" }}>
       <defs>
         <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="0">
-          <stop offset={`${pct}%`} stopColor="#facc15" />
-          <stop offset={`${pct}%`} stopColor="#d1d5db" />
+          <stop offset={`${pct}%`} style={{ stopColor: "var(--color-secondary-solid)" }} />
+          <stop offset={`${pct}%`} style={{ stopColor: "var(--color-border)" }} />
         </linearGradient>
       </defs>
       <path fill={`url(#${gradId})`} d={STAR_PATH} />
@@ -72,6 +72,11 @@ const StarRating = ({
       {!readOnly && hoverRating > 0 && (
         <span className="ml-2 text-text-muted font-medium text-sm">
           {formatRating(hoverRating)} {hoverRating === 1 ? "stjerne" : "stjerner"}
+        </span>
+      )}
+      {readOnly && rating > 0 && (
+        <span className="ml-1.5 text-text-muted font-medium text-sm">
+          {formatRating(rating)}
         </span>
       )}
     </div>
