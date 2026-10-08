@@ -109,6 +109,209 @@
   --color-nav-text-muted: rgba(246, 220, 230, 0.68);
 }
 
+/* Seasonal themes — admin-togglable site-wide "skin" (see Admin → Sesong →
+   Sesongtema), deliberately narrow in scope: only nav chrome, primary/
+   secondary SOLID buttons, and the two decorative gradients shift. Body
+   text, backgrounds, borders and the sage/blue/terracotta/gold-tint status
+   semantics are untouched, so the site stays recognizably itself with the
+   rest of the admin's "keep it mostly as-is" request. Placed after the
+   dark-mode blocks above so a season wins for the tokens it touches
+   regardless of light/dark - each season's values are picked to work on
+   either ground, the same way the dark-invariant *-solid tokens already do. */
+:root[data-season="halloween"] {
+  --color-nav-bg: #2b1a3a;
+  --color-nav-accent: #f08a24;
+  --color-primary-solid: #d9641e;
+  --color-primary-solid-deep: #a84a15;
+  --color-secondary-solid: #5b3a7a;
+  --color-secondary-solid-deep: #432a5c;
+  --gradient-primary: linear-gradient(135deg, #d9641e 0%, #5b3a7a 100%);
+  --gradient-secondary: linear-gradient(135deg, #d9641e33 0%, #5b3a7a33 100%);
+}
+:root[data-season="jul"] {
+  --color-nav-bg: #7a0f1f;
+  --color-nav-accent: #e8c468;
+  --color-primary-solid: #b5182f;
+  --color-primary-solid-deep: #7a0f1f;
+  --color-secondary-solid: #1f5d3e;
+  --color-secondary-solid-deep: #163f2a;
+  --gradient-primary: linear-gradient(135deg, #b5182f 0%, #1f5d3e 100%);
+  --gradient-secondary: linear-gradient(135deg, #b5182f33 0%, #1f5d3e33 100%);
+}
+:root[data-season="nyttaar"] {
+  --color-nav-bg: #10182e;
+  --color-nav-accent: #c9ced9;
+  --color-primary-solid: #2a3a6a;
+  --color-primary-solid-deep: #10182e;
+  --color-secondary-solid: #5a5a68;
+  --color-secondary-solid-deep: #3c3c46;
+  --gradient-primary: linear-gradient(135deg, #2a3a6a 0%, #10182e 100%);
+  --gradient-secondary: linear-gradient(135deg, #2a3a6a33 0%, #10182e33 100%);
+}
+/* Seasonal effects, CSS/SVG shapes only (no emoji) - compositor-only
+   properties (transform + opacity) so they're cheap regardless of count;
+   pointer-events:none so nothing ever blocks interaction; off under
+   reduced motion since this is pure decoration. Two groups:
+   - .seasonal-particles (SeasonalParticles.jsx, mounted once in App.jsx,
+     site-wide): falling snow (jul) and firework bursts (nyttaar). Stays
+     below the nav and toasts (both z-50).
+   - .home-ghosts (HomeGhosts.jsx, mounted only inside Home.jsx): Halloween
+     only, and only on the front page, not site-wide like the other two.
+     Absolutely positioned against Home's own (relative) root element so
+     the ghosts scroll together with the page instead of staying pinned to
+     the viewport. */
+.seasonal-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 30;
+}
+.seasonal-particle {
+  position: absolute;
+  top: -10vh;
+  will-change: transform, opacity;
+  animation-name: seasonal-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.seasonal-particle--snow {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}
+@keyframes seasonal-fall {
+  0% {
+    transform: translate3d(0, -10vh, 0) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(calc(var(--drift) * 1px), 55vh, 0) rotate(calc(var(--rotate-end) / 2));
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(0, 115vh, 0) rotate(var(--rotate-end));
+    opacity: 0;
+  }
+}
+
+/* Fireworks (nyttaar): each burst is a cluster of spark dots sharing one
+   origin point. The radial end-offset (--dx/--dy) is computed once in JS
+   (angle+distance -> x/y) and handed to CSS as plain px custom properties,
+   so one keyframe serves every spark regardless of its direction. A burst
+   is only "visible" for the first ~28% of its animation-duration and then
+   holds invisible at rest until the loop restarts - randomizing duration
+   and a negative delay per firework is what makes them pop at staggered,
+   irregular times instead of all firing in sync. */
+.seasonal-firework {
+  position: absolute;
+}
+.seasonal-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  will-change: transform, opacity;
+  animation-name: firework-burst;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+@keyframes firework-burst {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.3);
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  28% {
+    transform: translate3d(var(--dx), var(--dy), 0) scale(0.6);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(var(--dx), var(--dy), 0) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seasonal-particles,
+  .home-ghosts {
+    display: none;
+  }
+}
+
+/* Halloween ghosts - front page only (HomeGhosts.jsx), shape is an inline
+   SVG (see the component), this just handles layout/animation. Absolute
+   (not fixed) against Home's relative root so they scroll with the page -
+   positioned throughout the full page height, not just the first screen. */
+.home-ghosts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 10;
+}
+.home-ghost {
+  position: absolute;
+  will-change: transform, opacity;
+  animation-name: ghost-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ghost-float {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(var(--dx1), var(--dy1), 0);
+  }
+  50% {
+    transform: translate3d(var(--dx2), var(--dy2), 0);
+  }
+  75% {
+    transform: translate3d(var(--dx3), var(--dy3), 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+/* Nested inside .home-ghost so its bob+tilt composes with the parent's
+   wander instead of fighting it for the same `transform` - each element
+   can only run one transform-animation at a time. Also carries the glow,
+   shared across all ghosts (only position/size/wander/opacity vary per
+   ghost, set inline from HomeGhosts.jsx). */
+.home-ghost-inner {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+  will-change: transform;
+  animation-name: ghost-bob;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+@keyframes ghost-bob {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(0, -6px, 0) rotate(3deg);
+  }
+  75% {
+    transform: translate3d(0, 6px, 0) rotate(-3deg);
+  }
+}
+
 /* Legacy hardcoded Tailwind gray text (e.g. section headings like
    "Anmeldelser" / "Biblioteklenker") predate the token system above and
    stayed unreadably dark in dark mode. Retint them to the ink tokens so they

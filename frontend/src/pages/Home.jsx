@@ -14,6 +14,7 @@ import ReadingGoalCard from "../components/common/ReadingGoalCard";
 import BookCoverFallback from "../components/common/BookCoverFallback";
 import WrappedBanner from "../components/home/WrappedBanner";
 import AdventCalendarBanner from "../components/home/AdventCalendarBanner";
+import HomeGhosts from "../components/home/HomeGhosts";
 
 const Home = () => {
   const { user } = useAuth();
@@ -44,7 +45,8 @@ const Home = () => {
   const featuredBook = nextMeeting?.book;
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <HomeGhosts />
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Greeting */}
         <div className="mb-6 animate-fadeIn">

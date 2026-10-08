@@ -8,6 +8,8 @@ import { booksApi } from "../api/booksApi";
 import { importApi } from "../api/importApi";
 import { notificationApi } from "../api/notificationApi";
 import wrappedApi from "../api/wrappedApi";
+import settingsApi from "../api/settingsApi";
+import { useSeasonalTheme } from "../contexts/SeasonalThemeContext";
 
 const QUESTION_TYPE_LABELS = {
   text: "Fritekst",
@@ -67,6 +69,7 @@ const ADMIN_NAV = [
     tabs: [
       { key: "wrapped", label: "🎁 Bokwrapped" },
       { key: "advent", label: "🎄 Julekalender" },
+      { key: "seasonTheme", label: "🎨 Sesongtema" },
     ],
   },
 ];
@@ -74,12 +77,41 @@ const TAB_TO_GROUP = Object.fromEntries(
   ADMIN_NAV.flatMap((group) => group.tabs.map((tab) => [tab.key, group.key])),
 );
 
+// Swatch colors mirror index.css's :root[data-season="..."] blocks (the
+// --color-primary-solid value for each) - kept as plain hex here rather
+// than read from CSS, since this is purely a preview swatch, not the
+// theme's source of truth.
+const SEASON_THEME_OPTIONS = [
+  { key: null, label: "Standard design", swatch: "#93264d" },
+  { key: "halloween", label: "Halloween", swatch: "#d9641e" },
+  { key: "jul", label: "Jul", swatch: "#b5182f" },
+  { key: "nyttaar", label: "Nyttår", swatch: "#2a3a6a" },
+];
+
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("requests");
   const activeGroupKey = TAB_TO_GROUP[activeTab];
   const activeGroup = ADMIN_NAV.find((g) => g.key === activeGroupKey);
   const selectGroup = (group) => {
     if (group.key !== activeGroupKey) setActiveTab(group.tabs[0].key);
+  };
+  const { season, applySeason } = useSeasonalTheme();
+  const [savingSeasonTheme, setSavingSeasonTheme] = useState(false);
+  const handleSetSeasonTheme = async (next) => {
+    if (next === season) return;
+    setSavingSeasonTheme(true);
+    try {
+      const data = await settingsApi.setSeasonalTheme(next);
+      applySeason(data.theme);
+      const label = SEASON_THEME_OPTIONS.find((o) => o.key === data.theme)?.label || "Standard design";
+      setSuccessMessage(`Sesongtema satt til ${label}!`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke lagre sesongtema");
+      console.error(err);
+    } finally {
+      setSavingSeasonTheme(false);
+    }
   };
   const [pendingUsers, setPendingUsers] = useState([]);
   const [products, setProducts] = useState([]);
@@ -1844,6 +1876,38 @@ const Admin = () => {
 
         {/* Advent Calendar Tab */}
         {activeTab === "advent" && <AdventAdminPanel />}
+
+        {/* Seasonal Theme Tab */}
+        {activeTab === "seasonTheme" && (
+          <div className="container-gradient animate-fadeIn">
+            <h3 className="text-2xl font-bold gradient-text mb-2">🎨 Sesongtema</h3>
+            <p className="text-text-muted mb-4">
+              Bytter navigasjonsfargen, de utfylte knappene og et par dekorative overganger
+              site-wide, for alle medlemmer med en gang. Resten av designet er uendret.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {SEASON_THEME_OPTIONS.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => handleSetSeasonTheme(opt.key)}
+                  disabled={savingSeasonTheme}
+                  className="flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
+                  style={
+                    season === opt.key
+                      ? { background: opt.swatch, color: "#fff" }
+                      : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1px solid var(--color-border-strong)" }
+                  }
+                >
+                  {season !== opt.key && (
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: opt.swatch }} />
+                  )}
+                  {opt.label}
+                  {season === opt.key && <span>✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Generated Password Modal */}
