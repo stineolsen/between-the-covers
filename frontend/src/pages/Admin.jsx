@@ -20,13 +20,67 @@ import AdminBookForm from "../components/admin/AdminBookForm";
 import AddBookModal from "../components/books/AddBookModal";
 import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
 import AdventAdminPanel from "../components/admin/AdventAdminPanel";
+import VisibilityToggle from "../components/admin/VisibilityToggle";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const FORMAT_LABELS = { ebook: '📱 E-bok', audiobook: '🎧 Lydbok' };
 
+// Two-level nav: a short row of always-visible group buttons, each opening
+// its own row of tabs below when it holds more than one. A group with a
+// single tab (alerts/wrapped/advent) just activates that tab directly -
+// no redundant one-item tab row.
+const ADMIN_NAV = [
+  {
+    key: "store",
+    label: "Butikk",
+    icon: "🛍️",
+    tabs: [
+      { key: "products", label: "Varer" },
+      { key: "orders", label: "Bestillinger" },
+    ],
+  },
+  {
+    key: "people",
+    label: "Brukere",
+    icon: "👥",
+    tabs: [
+      { key: "users", label: "Brukere" },
+      { key: "passwords", label: "Tilbakestill passord" },
+    ],
+  },
+  {
+    key: "booksGroup",
+    label: "Bøker",
+    icon: "📚",
+    tabs: [
+      { key: "requests", label: "Bokforespørsler" },
+      { key: "books", label: "Legg til bok" },
+      { key: "import", label: "Importer" },
+    ],
+  },
+  { key: "alerts", label: "Send varsel", icon: "🔔", tabs: [{ key: "alerts", label: "Send varsel" }] },
+  {
+    key: "season",
+    label: "Sesong",
+    icon: "🎉",
+    tabs: [
+      { key: "wrapped", label: "🎁 Bokwrapped" },
+      { key: "advent", label: "🎄 Julekalender" },
+    ],
+  },
+];
+const TAB_TO_GROUP = Object.fromEntries(
+  ADMIN_NAV.flatMap((group) => group.tabs.map((tab) => [tab.key, group.key])),
+);
+
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("requests");
+  const activeGroupKey = TAB_TO_GROUP[activeTab];
+  const activeGroup = ADMIN_NAV.find((g) => g.key === activeGroupKey);
+  const selectGroup = (group) => {
+    if (group.key !== activeGroupKey) setActiveTab(group.tabs[0].key);
+  };
   const [pendingUsers, setPendingUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -154,9 +208,12 @@ const Admin = () => {
     try {
       const data = await wrappedApi.setAdminVisibility(wrappedYear, next);
       setWrappedVisibility(data.visibility);
-      setSuccessMessage(
-        next === "open" ? "Bokwrapped er nå åpen for alle medlemmer!" : "Bokwrapped er nå skjult for alle unntatt admin!",
-      );
+      const messages = {
+        open: "Bokwrapped er nå åpen for alle medlemmer!",
+        "admin-only": "Bokwrapped er nå skjult for alle unntatt admin!",
+        hidden: "Bokwrapped er nå skjult for alle, også admin!",
+      };
+      setSuccessMessage(messages[next]);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError("Greide ikke endre synlighet");
@@ -647,139 +704,41 @@ const Admin = () => {
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 flex-wrap">
-          <button
-            onClick={() => setActiveTab("requests")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "requests" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "requests"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📋 Bokforespørsler
-          </button>
-          <button
-            onClick={() => setActiveTab("products")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "products" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "products"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🛍️ Varer
-          </button>
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "orders" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "orders"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📦 Bestillinger
-          </button>
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "users" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "users"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            👥 Brukere
-          </button>
-          <button
-            onClick={() => setActiveTab("passwords")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "passwords" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "passwords"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🔑 Tilbakestill passord
-          </button>
-          <button
-            onClick={() => setActiveTab("books")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "books" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "books"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📚 Legg til bok
-          </button>
-          <button
-            onClick={() => setActiveTab("import")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "import" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "import"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📥 Importer
-          </button>
-          <button
-            onClick={() => setActiveTab("alerts")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "alerts" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "alerts"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🔔 Send varsel
-          </button>
-          <button
-            onClick={() => setActiveTab("wrapped")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "wrapped" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "wrapped"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🎁 Bokwrapped
-          </button>
-          <button
-            onClick={() => setActiveTab("advent")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "advent" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "advent"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🎄 Julekalender
-          </button>
+        {/* Top-level groups, each expanding to its own row of tabs below
+            when it has more than one - keeps the always-visible button row
+            short regardless of how many admin sections exist. */}
+        <div className="flex gap-4 mb-4 flex-wrap">
+          {ADMIN_NAV.map((group) => (
+            <button
+              key={group.key}
+              onClick={() => selectGroup(group)}
+              className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+                activeGroupKey === group.key ? "text-white" : "bg-card text-text-muted"
+              }`}
+              style={activeGroupKey === group.key ? { background: "var(--color-primary-solid)" } : {}}
+            >
+              {group.icon} {group.label}
+            </button>
+          ))}
         </div>
+
+        {activeGroup && activeGroup.tabs.length > 1 && (
+          <div className="flex gap-1 mb-8 flex-wrap" style={{ borderBottom: "1px solid var(--color-border)" }}>
+            {activeGroup.tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="text-sm font-bold px-1 pb-2 mr-5"
+                style={{
+                  color: activeTab === tab.key ? "var(--color-primary)" : "var(--color-text-muted)",
+                  borderBottom: activeTab === tab.key ? "2px solid var(--color-primary)" : "2px solid transparent",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {error && (
           <div
@@ -1691,40 +1650,7 @@ const Admin = () => {
                 Banneret på forsiden vises kun i dette tidsrommet.
               </p>
 
-              <div className="flex items-center gap-3 flex-wrap p-3 rounded-xl" style={{ background: "var(--color-sunken)" }}>
-                <span className="text-sm font-bold text-text-muted">Synlighet:</span>
-                <div className="flex rounded-full overflow-hidden" style={{ border: "1px solid var(--color-border-strong)" }}>
-                  <button
-                    onClick={() => handleToggleWrappedVisibility("open")}
-                    disabled={savingWrappedVisibility || wrappedVisibility === null}
-                    className="px-4 py-1.5 text-sm font-bold disabled:opacity-50"
-                    style={
-                      wrappedVisibility === "open"
-                        ? { background: "var(--color-sage-solid)", color: "#fff" }
-                        : { background: "var(--color-card)", color: "var(--color-text-muted)" }
-                    }
-                  >
-                    🌍 Åpen for alle
-                  </button>
-                  <button
-                    onClick={() => handleToggleWrappedVisibility("admin-only")}
-                    disabled={savingWrappedVisibility || wrappedVisibility === null}
-                    className="px-4 py-1.5 text-sm font-bold disabled:opacity-50"
-                    style={
-                      wrappedVisibility === "admin-only"
-                        ? { background: "var(--color-terracotta-solid)", color: "#fff" }
-                        : { background: "var(--color-card)", color: "var(--color-text-muted)" }
-                    }
-                  >
-                    🔒 Kun admin
-                  </button>
-                </div>
-                {wrappedVisibility === "admin-only" && (
-                  <span className="text-xs" style={{ color: "var(--color-terracotta)" }}>
-                    Skjult for medlemmer, uavhengig av datoene over.
-                  </span>
-                )}
-              </div>
+              <VisibilityToggle value={wrappedVisibility} busy={savingWrappedVisibility} onChange={handleToggleWrappedVisibility} />
             </div>
 
             <div className="container-gradient">

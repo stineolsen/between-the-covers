@@ -8,7 +8,7 @@ const { now, doorOpensAt, doorDeadline } = require("../utils/calendarClock");
 const { ADVENT_IMAGE_ROOT } = require("../utils/adventPaths");
 const { publishDoorToLibraryIfDue, sweepDueDoors } = require("../utils/adventLibraryPublish");
 const { awardDoorCountBadgesForUser, recalculateDoorCountBadgesForYear } = require("../utils/badgeAwarder");
-const { normalizeAuthor } = require("../utils/importHelpers");
+const { normalizeTitle, normalizeAuthor } = require("../utils/importHelpers");
 const { processAdventCover } = require("../utils/adventImagePipeline");
 const { getVisibility, setVisibility } = require("../utils/featureVisibility");
 const { MAX_ATTEMPTS, POINTS_BY_ATTEMPT, LEADERBOARD_DEADLINE_DAYS_AFTER_OPEN } = require("../constants/adventConfig");
@@ -367,6 +367,106 @@ exports.adminListDays = async (req, res) => {
   } catch (error) {
     console.error("Advent admin list error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke hente luker" });
+  }
+};
+
+// @desc    Create a new door. Pass bookId to link an existing library book
+//          as the answer (left exactly as-is, visible or not - we never
+//          retroactively hide a book that's already public); omit it to
+//          find-or-create a hidden candidate Book from title/author, same
+//          match-by-normalized-title+author logic as seedAdventCalendar.js.
+// @route   POST /api/advent/:year/:day/admin
+// @access  Private/Admin
+exports.adminCreateDay = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const day = Number(req.params.day);
+    if (!day || day < 1 || day > 24) {
+      return res.status(400).json({ success: false, message: "Luke må være mellom 1 og 24" });
+    }
+
+    const existing = await AdventDay.findOne({ year, day });
+    if (existing) {
+      return res.status(409).json({ success: false, message: `Luke ${day} finnes allerede for ${year}` });
+    }
+
+    const { title, author, altTitles, isbn, publishedYear, pageCount, genre, hint1, hint2, hint3, bookId } = req.body;
+    if (!title?.trim() || !author?.trim() || !genre?.trim()) {
+      return res.status(400).json({ success: false, message: "Tittel, forfatter og sjanger er påkrevd" });
+    }
+
+    let answerBookId = bookId || null;
+    if (answerBookId) {
+      const book = await Book.findById(answerBookId);
+      if (!book) return res.status(400).json({ success: false, message: "Fant ikke valgt bok" });
+    } else {
+      const titleNormalized = normalizeTitle(title);
+      const authorNormalized = normalizeAuthor(author);
+      let book = await Book.findOne({ titleNormalized, authorNormalized });
+      if (!book) {
+        book = await Book.create({
+          title: title.trim(),
+          author: author.trim(),
+          isbn: isbn || undefined,
+          publishedYear: publishedYear || undefined,
+          genres: genre ? [genre] : [],
+          hiddenFromLibrary: true,
+          addedBy: req.user._id,
+        });
+      }
+      answerBookId = book._id;
+    }
+
+    const door = await AdventDay.create({
+      year,
+      day,
+      title: title.trim(),
+      author: author.trim(),
+      altTitles: Array.isArray(altTitles) ? altTitles : [],
+      isbn: isbn || null,
+      publishedYear: publishedYear || null,
+      pageCount: pageCount || null,
+      genre: genre.trim(),
+      hint1: hint1 || "",
+      hint2: hint2 || "",
+      hint3: hint3 || "",
+      answerBookId,
+    });
+
+    res.status(201).json({ success: true, door });
+  } catch (error) {
+    console.error("Advent admin create error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke opprette luken" });
+  }
+};
+
+// @desc    Delete a door - also clears attempts/results tied to it (its
+//          generated images are removed too) but never touches the
+//          answerBookId Book itself, published or not.
+// @route   DELETE /api/advent/:year/:day/admin
+// @access  Private/Admin
+exports.adminDeleteDay = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const day = Number(req.params.day);
+    const door = await AdventDay.findOne({ year, day });
+    if (!door) return res.status(404).json({ success: false, message: "Luke finnes ikke" });
+
+    await Promise.all([
+      AdventAttempt.deleteMany({ adventDay: door._id }),
+      AdventResult.deleteMany({ adventDay: door._id }),
+    ]);
+
+    const imageDir = path.join(ADVENT_IMAGE_ROOT, String(year), String(day));
+    if (imageDir.startsWith(ADVENT_IMAGE_ROOT) && fs.existsSync(imageDir)) {
+      fs.rmSync(imageDir, { recursive: true, force: true });
+    }
+
+    await door.deleteOne();
+    res.status(200).json({ success: true, message: `Luke ${day} slettet` });
+  } catch (error) {
+    console.error("Advent admin delete error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke slette luken" });
   }
 };
 

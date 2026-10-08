@@ -43,8 +43,18 @@ export const adventApi = {
     return response.data;
   },
 
+  adminCreateDay: async (year, day, data) => {
+    const response = await api.post(`/api/advent/${year}/${day}/admin`, data);
+    return response.data;
+  },
+
   adminUpdateDay: async (year, day, updates) => {
     const response = await api.put(`/api/advent/${year}/${day}/admin`, updates);
+    return response.data;
+  },
+
+  adminDeleteDay: async (year, day) => {
+    const response = await api.delete(`/api/advent/${year}/${day}/admin`);
     return response.data;
   },
 

@@ -7,7 +7,9 @@ const {
   searchCandidates,
   getLeaderboard,
   adminListDays,
+  adminCreateDay,
   adminUpdateDay,
+  adminDeleteDay,
   adminUploadDayImage,
   adminPublishDue,
   adminRecalculateBadges,
@@ -41,7 +43,9 @@ router.get("/:year/:day", visible, getDay);
 router.get("/:year/:day/image/:level", visible, getDayImage);
 router.post("/:year/:day/attempt", visible, adventAttemptLimiter, submitAttempt);
 
+router.post("/:year/:day/admin", authorize("admin"), adminCreateDay);
 router.put("/:year/:day/admin", authorize("admin"), adminUpdateDay);
+router.delete("/:year/:day/admin", authorize("admin"), adminDeleteDay);
 router.post("/:year/:day/admin/image", authorize("admin"), adventImageUpload.single("cover"), adminUploadDayImage);
 router.post("/:year/admin/publish-due", authorize("admin"), adminPublishDue);
 router.post("/:year/admin/recalculate-badges", authorize("admin"), adminRecalculateBadges);
