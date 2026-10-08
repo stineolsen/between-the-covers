@@ -34,6 +34,7 @@ Thumbs.db
 
 # Uploads (images)
 uploads/
+advent-images/
 
 # Claude
 .claude/

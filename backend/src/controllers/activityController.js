@@ -1,6 +1,9 @@
 const Review = require('../models/Review');
 const UserBook = require('../models/UserBook');
 const Meeting = require('../models/Meeting');
+const AdventResult = require('../models/AdventResult');
+const AdventAttempt = require('../models/AdventAttempt');
+const AdventDay = require('../models/AdventDay');
 
 // @desc    Get recent activity feed for all club members
 // @route   GET /api/activity
@@ -14,7 +17,7 @@ exports.getActivity = async (req, res) => {
     // Review pre-hook auto-populates 'user'; add 'book' manually
     // UserBook pre-hook auto-populates 'book'; add 'user' manually
     // Meeting pre-hook auto-populates 'book', 'attendees', 'createdBy'
-    const [reviews, userBooks, meetings] = await Promise.all([
+    const [reviews, userBooks, meetings, adventResults] = await Promise.all([
       Review.find({})
         .sort({ createdAt: -1 })
         .limit(30)
@@ -30,7 +33,17 @@ exports.getActivity = async (req, res) => {
         date: { $gte: sixtyDaysAgo }
       })
         .sort({ date: -1 })
-        .limit(10)
+        .limit(10),
+
+      // Solved doors only (never failed attempts - see
+      // docs/julekalender-design.md section 8), and never the book
+      // title/author: just the door number and the colour sequence, like
+      // sharing a Wordle result.
+      AdventResult.find({ status: 'solved' })
+        .sort({ finishedAt: -1 })
+        .limit(30)
+        .populate('user', 'displayName avatar username')
+        .populate('adventDay', 'day year'),
     ]);
 
     // Map to unified activity shape
@@ -74,11 +87,36 @@ exports.getActivity = async (req, res) => {
       date: m.date
     }));
 
+    const validAdventResults = adventResults.filter(r => r.user && r.adventDay);
+    const adventAttempts = validAdventResults.length
+      ? await AdventAttempt.find({
+          user: { $in: validAdventResults.map(r => r.user._id) },
+          adventDay: { $in: validAdventResults.map(r => r.adventDay._id) },
+        }).sort({ attemptNo: 1 })
+      : [];
+    const squaresByKey = new Map();
+    adventAttempts.forEach(a => {
+      const key = `${a.user}_${a.adventDay}`;
+      if (!squaresByKey.has(key)) squaresByKey.set(key, []);
+      squaresByKey.get(key).push(a.result);
+    });
+
+    const adventActivities = validAdventResults.map(r => ({
+      type: 'advent',
+      user: r.user,
+      day: r.adventDay.day,
+      year: r.adventDay.year,
+      points: r.points,
+      squares: squaresByKey.get(`${r.user._id}_${r.adventDay._id}`) || [],
+      date: r.finishedAt,
+    }));
+
     // Merge, sort newest first, cap at limit
     const activities = [
       ...reviewActivities,
       ...statusActivities,
-      ...meetingActivities
+      ...meetingActivities,
+      ...adventActivities
     ]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, limit);

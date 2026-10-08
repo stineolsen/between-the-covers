@@ -31,6 +31,11 @@ exports.getBooks = async (req, res, next) => {
     // Build query
     let query = {};
 
+    // Advent calendar candidate books stay out of the normal library
+    // listing/search until their door's deadline publishes them - see
+    // Book.hiddenFromLibrary and adventLibraryPublish.js.
+    query.hiddenFromLibrary = { $ne: true };
+
     // Search by title, author, or series only
     if (search) {
       const regex = new RegExp(search, 'i');

@@ -62,6 +62,16 @@ export const wrappedApi = {
     return response.data;
   },
 
+  getAdminVisibility: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/admin/visibility`);
+    return response.data;
+  },
+
+  setAdminVisibility: async (year, visibility) => {
+    const response = await api.put(`/api/wrapped/${year}/admin/visibility`, { visibility });
+    return response.data;
+  },
+
   getAdminQuestions: async (year) => {
     const response = await api.get(`/api/wrapped/${year}/admin/questions`);
     return response.data;

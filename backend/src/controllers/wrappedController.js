@@ -7,8 +7,10 @@ const List = require("../models/List");
 const Setting = require("../models/Setting");
 const User = require("../models/User");
 const { DEFAULT_QUESTIONS } = require("../constants/defaultWrappedQuestions");
+const { getVisibility, setVisibility } = require("../utils/featureVisibility");
 
 const windowSettingKey = (year) => `wrapped:${year}:window`;
+const visibilitySettingKey = (year) => `wrapped:${year}:visibility`;
 
 // December collection window for a given wrapped year - 1st through the
 // 27th by default (admin needs the rest of the holidays to generate the
@@ -354,6 +356,34 @@ exports.setAdminWindow = async (req, res) => {
   } catch (error) {
     console.error("Set wrapped admin window error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke lagre innsamlingsvinduet" });
+  }
+};
+
+// @desc    Admin: read this year's launch state ("open" to every member, or
+//          "admin-only" while it's being prepared)
+// @route   GET /api/wrapped/:year/admin/visibility
+// @access  Private (admin only)
+exports.getAdminVisibility = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const visibility = await getVisibility(visibilitySettingKey(year));
+    res.status(200).json({ success: true, visibility });
+  } catch (error) {
+    console.error("Get wrapped admin visibility error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente synlighet" });
+  }
+};
+
+// @desc    Admin: flip this year's launch state
+// @route   PUT /api/wrapped/:year/admin/visibility
+// @access  Private (admin only)
+exports.setAdminVisibility = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const visibility = await setVisibility(visibilitySettingKey(year), req.body.visibility);
+    res.status(200).json({ success: true, visibility });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 

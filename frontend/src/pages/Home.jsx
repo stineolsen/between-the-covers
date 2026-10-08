@@ -13,6 +13,7 @@ import MyRequestsFeed from "../components/common/MyRequestsFeed";
 import ReadingGoalCard from "../components/common/ReadingGoalCard";
 import BookCoverFallback from "../components/common/BookCoverFallback";
 import WrappedBanner from "../components/home/WrappedBanner";
+import AdventCalendarBanner from "../components/home/AdventCalendarBanner";
 
 const Home = () => {
   const { user } = useAuth();
@@ -112,6 +113,7 @@ const Home = () => {
         )}
 
         <WrappedBanner />
+        <AdventCalendarBanner />
 
         {/* Main grid: activity (main) + meeting/goal/shelf (side) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">

@@ -125,6 +125,15 @@ const bookSchema = new mongoose.Schema(
       min: 0,
     },
 
+    // Set on advent-calendar candidate books (the 24 doors + reserves +
+    // extra "known books" pool) so they're guessable via /api/advent/search
+    // without showing up in the normal library browse/search before their
+    // door's deadline publishes them. Cleared by adventLibraryPublish.
+    hiddenFromLibrary: {
+      type: Boolean,
+      default: false,
+    },
+
     // Admin tracking
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,

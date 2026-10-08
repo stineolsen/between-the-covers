@@ -1,6 +1,7 @@
 const cron = require("node-cron");
 const { sendDigestsFor, sendPendingRequestNotifications, checkForImmediateUpdates } = require("./emailService");
 const { syncAbsListeningStats } = require("./absListeningSync");
+const { sweepDueDoors } = require("./adventLibraryPublish");
 
 const TIMEZONE = "Europe/Oslo";
 
@@ -40,9 +41,15 @@ function startNotificationScheduler() {
   cron.schedule("0 3 * * *", runSafely("abs listening stats sync", syncAbsListeningStats), {
     timezone: TIMEZONE,
   });
+  // Safety net for the advent calendar's lazy library publish (which
+  // normally fires on the first GET of a door after its deadline) - catches
+  // any door nobody happened to request.
+  cron.schedule("0 4 * * *", runSafely("advent library publish sweep", sweepDueDoors), {
+    timezone: TIMEZONE,
+  });
 
   console.log(
-    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, Europe/Oslo)",
+    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, advent library sweep daily 04:00, Europe/Oslo)",
   );
 }
 

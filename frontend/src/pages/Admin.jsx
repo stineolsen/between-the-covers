@@ -19,6 +19,7 @@ import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
 import AddBookModal from "../components/books/AddBookModal";
 import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
+import AdventAdminPanel from "../components/admin/AdventAdminPanel";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -66,6 +67,8 @@ const Admin = () => {
   const [wrappedWindowStart, setWrappedWindowStart] = useState("");
   const [wrappedWindowEnd, setWrappedWindowEnd] = useState("");
   const [savingWrappedWindow, setSavingWrappedWindow] = useState(false);
+  const [wrappedVisibility, setWrappedVisibility] = useState(null); // "open" | "admin-only" | null (loading)
+  const [savingWrappedVisibility, setSavingWrappedVisibility] = useState(false);
   const [wrappedTally, setWrappedTally] = useState(null);
   const [wrappedQuestions, setWrappedQuestions] = useState([]);
   const [wrappedSubmittedCount, setWrappedSubmittedCount] = useState(0);
@@ -124,9 +127,10 @@ const Admin = () => {
   const fetchWrappedAdmin = async () => {
     try {
       setLoading(true);
-      const [windowData, tallyData] = await Promise.all([
+      const [windowData, tallyData, visibilityData] = await Promise.all([
         wrappedApi.getAdminWindow(wrappedYear),
         wrappedApi.getAdminTally(wrappedYear),
+        wrappedApi.getAdminVisibility(wrappedYear),
       ]);
       setWrappedWindowStart(windowData.start);
       setWrappedWindowEnd(windowData.end);
@@ -134,12 +138,31 @@ const Admin = () => {
       setWrappedQuestions(tallyData.questions || []);
       setWrappedSubmittedCount(tallyData.submittedCount);
       setWrappedTotalMembers(tallyData.totalMembers);
+      setWrappedVisibility(visibilityData.visibility);
       setError("");
     } catch (err) {
       setError("Greide ikke laste Bokwrapped-status");
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleWrappedVisibility = async (next) => {
+    if (next === wrappedVisibility) return;
+    setSavingWrappedVisibility(true);
+    try {
+      const data = await wrappedApi.setAdminVisibility(wrappedYear, next);
+      setWrappedVisibility(data.visibility);
+      setSuccessMessage(
+        next === "open" ? "Bokwrapped er nå åpen for alle medlemmer!" : "Bokwrapped er nå skjult for alle unntatt admin!",
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke endre synlighet");
+      console.error(err);
+    } finally {
+      setSavingWrappedVisibility(false);
     }
   };
 
@@ -742,6 +765,19 @@ const Admin = () => {
             }
           >
             🎁 Bokwrapped
+          </button>
+          <button
+            onClick={() => setActiveTab("advent")}
+            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+              activeTab === "advent" ? "text-white" : "bg-card text-text-muted"
+            }`}
+            style={
+              activeTab === "advent"
+                ? { background: "var(--color-primary-solid)" }
+                : {}
+            }
+          >
+            🎄 Julekalender
           </button>
         </div>
 
@@ -1651,9 +1687,44 @@ const Admin = () => {
                   {savingWrappedWindow ? "Lagrer..." : "Lagre frist"}
                 </button>
               </div>
-              <p className="text-sm text-text-faint">
+              <p className="text-sm text-text-faint mb-4">
                 Banneret på forsiden vises kun i dette tidsrommet.
               </p>
+
+              <div className="flex items-center gap-3 flex-wrap p-3 rounded-xl" style={{ background: "var(--color-sunken)" }}>
+                <span className="text-sm font-bold text-text-muted">Synlighet:</span>
+                <div className="flex rounded-full overflow-hidden" style={{ border: "1px solid var(--color-border-strong)" }}>
+                  <button
+                    onClick={() => handleToggleWrappedVisibility("open")}
+                    disabled={savingWrappedVisibility || wrappedVisibility === null}
+                    className="px-4 py-1.5 text-sm font-bold disabled:opacity-50"
+                    style={
+                      wrappedVisibility === "open"
+                        ? { background: "var(--color-sage-solid)", color: "#fff" }
+                        : { background: "var(--color-card)", color: "var(--color-text-muted)" }
+                    }
+                  >
+                    🌍 Åpen for alle
+                  </button>
+                  <button
+                    onClick={() => handleToggleWrappedVisibility("admin-only")}
+                    disabled={savingWrappedVisibility || wrappedVisibility === null}
+                    className="px-4 py-1.5 text-sm font-bold disabled:opacity-50"
+                    style={
+                      wrappedVisibility === "admin-only"
+                        ? { background: "var(--color-terracotta-solid)", color: "#fff" }
+                        : { background: "var(--color-card)", color: "var(--color-text-muted)" }
+                    }
+                  >
+                    🔒 Kun admin
+                  </button>
+                </div>
+                {wrappedVisibility === "admin-only" && (
+                  <span className="text-xs" style={{ color: "var(--color-terracotta)" }}>
+                    Skjult for medlemmer, uavhengig av datoene over.
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="container-gradient">
@@ -1844,6 +1915,9 @@ const Admin = () => {
             </div>
           </div>
         )}
+
+        {/* Advent Calendar Tab */}
+        {activeTab === "advent" && <AdventAdminPanel />}
       </div>
 
       {/* Generated Password Modal */}
