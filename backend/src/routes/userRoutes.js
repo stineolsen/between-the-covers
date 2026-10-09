@@ -12,6 +12,7 @@ const {
   getPublicProfile,
   setAbsUsername,
 } = require("../controllers/userController");
+const { getUserBadges } = require("../controllers/badgeController");
 
 // Members list (for recommendation recipient selection)
 router.get("/members", protect, getMembers);
@@ -27,6 +28,9 @@ router.delete("/avatar", protect, deleteAvatar);
 
 // Public profile route
 router.get("/:userId/profile", protect, getPublicProfile);
+
+// Badges (general-purpose achievement system, not advent-specific)
+router.get("/:id/badges", protect, getUserBadges);
 
 // Admin: link a member's Audiobookshelf username
 router.put("/:userId/abs-username", protect, authorize("admin"), setAbsUsername);

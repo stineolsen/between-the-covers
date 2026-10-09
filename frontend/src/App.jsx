@@ -8,7 +8,9 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { SeasonalThemeProvider } from "./contexts/SeasonalThemeContext";
 import Navbar from "./components/common/Navbar";
+import SeasonalParticles from "./components/common/SeasonalParticles";
 import Footer from "./components/common/Footer";
 import ScrollToTop from "./components/common/ScrollToTop";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -34,16 +36,20 @@ import PublicProfile from "./pages/PublicProfile";
 import Members from "./pages/Members";
 import Admin from "./pages/Admin";
 import Howto from "./pages/Howto";
+import Bokwrapped from "./pages/Bokwrapped";
+import AdventCalendar from "./pages/AdventCalendar";
 
 function App() {
   return (
     <Router>
       <ThemeProvider>
+      <SeasonalThemeProvider>
       <AuthProvider>
         <CartProvider>
           <ToastProvider>
             <div className="min-h-screen flex flex-col animate-fadeIn pb-16 lg:pb-0">
               <ScrollToTop />
+              <SeasonalParticles />
               <Navbar />
               <Routes>
                 {/* Public Routes */}
@@ -187,6 +193,22 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/bokwrapped"
+                  element={
+                    <ProtectedRoute>
+                      <Bokwrapped />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/julekalender"
+                  element={
+                    <ProtectedRoute>
+                      <AdventCalendar />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Admin Only Route */}
                 <Route
@@ -206,6 +228,7 @@ function App() {
           </ToastProvider>
         </CartProvider>
       </AuthProvider>
+      </SeasonalThemeProvider>
       </ThemeProvider>
     </Router>
   );

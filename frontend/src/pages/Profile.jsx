@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { useToast } from "../contexts/useToast";
 import { usersApi } from "../api/usersApi";
+import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";
 import { booksApi } from "../api/booksApi";
@@ -247,6 +248,7 @@ const Profile = () => {
                 {user.status === "approved" ? "godkjent" : "venter"}
               </span>
             </div>
+            <ProfileBadgeShelf userId={user?._id} />
           </div>
 
           {/* Profile Form */}

@@ -7,17 +7,112 @@ import { usersApi } from "../api/usersApi";
 import { booksApi } from "../api/booksApi";
 import { importApi } from "../api/importApi";
 import { notificationApi } from "../api/notificationApi";
+import wrappedApi from "../api/wrappedApi";
+import settingsApi from "../api/settingsApi";
+import { useSeasonalTheme } from "../contexts/SeasonalThemeContext";
+
+const QUESTION_TYPE_LABELS = {
+  text: "Fritekst",
+  number: "Tall",
+  "book-library": "Bok (bibliotek)",
+  "book-bookclub": "Bok (bokklubb)",
+};
 import ProductForm from "../components/shop/ProductForm";
 import AdminBookForm from "../components/admin/AdminBookForm";
 import AddBookModal from "../components/books/AddBookModal";
 import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
+import AdventAdminPanel from "../components/admin/AdventAdminPanel";
+import VisibilityToggle from "../components/admin/VisibilityToggle";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 const FORMAT_LABELS = { ebook: '📱 E-bok', audiobook: '🎧 Lydbok' };
 
+// Two-level nav: a short row of always-visible group buttons, each opening
+// its own row of tabs below when it holds more than one. A group with a
+// single tab (alerts/wrapped/advent) just activates that tab directly -
+// no redundant one-item tab row.
+const ADMIN_NAV = [
+  {
+    key: "store",
+    label: "Butikk",
+    icon: "🛍️",
+    tabs: [
+      { key: "products", label: "Varer" },
+      { key: "orders", label: "Bestillinger" },
+    ],
+  },
+  {
+    key: "people",
+    label: "Brukere",
+    icon: "👥",
+    tabs: [
+      { key: "users", label: "Brukere" },
+      { key: "passwords", label: "Tilbakestill passord" },
+    ],
+  },
+  {
+    key: "booksGroup",
+    label: "Bøker",
+    icon: "📚",
+    tabs: [
+      { key: "requests", label: "Bokforespørsler" },
+      { key: "books", label: "Legg til bok" },
+      { key: "import", label: "Importer" },
+    ],
+  },
+  { key: "alerts", label: "Send varsel", icon: "🔔", tabs: [{ key: "alerts", label: "Send varsel" }] },
+  {
+    key: "season",
+    label: "Sesong",
+    icon: "🎉",
+    tabs: [
+      { key: "wrapped", label: "🎁 Bokwrapped" },
+      { key: "advent", label: "🎄 Julekalender" },
+      { key: "seasonTheme", label: "🎨 Sesongtema" },
+    ],
+  },
+];
+const TAB_TO_GROUP = Object.fromEntries(
+  ADMIN_NAV.flatMap((group) => group.tabs.map((tab) => [tab.key, group.key])),
+);
+
+// Swatch colors mirror index.css's :root[data-season="..."] blocks (the
+// --color-primary-solid value for each) - kept as plain hex here rather
+// than read from CSS, since this is purely a preview swatch, not the
+// theme's source of truth.
+const SEASON_THEME_OPTIONS = [
+  { key: null, label: "Standard design", swatch: "#93264d" },
+  { key: "halloween", label: "Halloween", swatch: "#5b3a7a" },
+  { key: "jul", label: "Jul", swatch: "#b5182f" },
+  { key: "nyttaar", label: "Nyttår", swatch: "#2a3a6a" },
+];
+
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("requests");
+  const activeGroupKey = TAB_TO_GROUP[activeTab];
+  const activeGroup = ADMIN_NAV.find((g) => g.key === activeGroupKey);
+  const selectGroup = (group) => {
+    if (group.key !== activeGroupKey) setActiveTab(group.tabs[0].key);
+  };
+  const { season, applySeason } = useSeasonalTheme();
+  const [savingSeasonTheme, setSavingSeasonTheme] = useState(false);
+  const handleSetSeasonTheme = async (next) => {
+    if (next === season) return;
+    setSavingSeasonTheme(true);
+    try {
+      const data = await settingsApi.setSeasonalTheme(next);
+      applySeason(data.theme);
+      const label = SEASON_THEME_OPTIONS.find((o) => o.key === data.theme)?.label || "Standard design";
+      setSuccessMessage(`Sesongtema satt til ${label}!`);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke lagre sesongtema");
+      console.error(err);
+    } finally {
+      setSavingSeasonTheme(false);
+    }
+  };
   const [pendingUsers, setPendingUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -55,6 +150,20 @@ const Admin = () => {
   const [searchingBooks, setSearchingBooks] = useState(false);
   const [selectedBookForLink, setSelectedBookForLink] = useState(null);
   const [now] = useState(() => Date.now());
+  const [wrappedWindowStart, setWrappedWindowStart] = useState("");
+  const [wrappedWindowEnd, setWrappedWindowEnd] = useState("");
+  const [savingWrappedWindow, setSavingWrappedWindow] = useState(false);
+  const [wrappedVisibility, setWrappedVisibility] = useState(null); // "open" | "admin-only" | null (loading)
+  const [savingWrappedVisibility, setSavingWrappedVisibility] = useState(false);
+  const [wrappedTally, setWrappedTally] = useState(null);
+  const [wrappedQuestions, setWrappedQuestions] = useState([]);
+  const [wrappedSubmittedCount, setWrappedSubmittedCount] = useState(0);
+  const [wrappedTotalMembers, setWrappedTotalMembers] = useState(0);
+  const [showQuestionForm, setShowQuestionForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [questionForm, setQuestionForm] = useState({ label: "", type: "text", helper: "" });
+  const [savingQuestion, setSavingQuestion] = useState(false);
+  const wrappedYear = new Date().getFullYear();
 
   const { visibleRequests, archivedRequestsCount } = useMemo(() => {
     const cutoff = now - 14 * 24 * 60 * 60 * 1000;
@@ -97,6 +206,145 @@ const Admin = () => {
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       setError("Greide ikke lagre importdato");
+      console.error(err);
+    }
+  };
+
+  const fetchWrappedAdmin = async () => {
+    try {
+      setLoading(true);
+      const [windowData, tallyData, visibilityData] = await Promise.all([
+        wrappedApi.getAdminWindow(wrappedYear),
+        wrappedApi.getAdminTally(wrappedYear),
+        wrappedApi.getAdminVisibility(wrappedYear),
+      ]);
+      setWrappedWindowStart(windowData.start);
+      setWrappedWindowEnd(windowData.end);
+      setWrappedTally(tallyData.tally);
+      setWrappedQuestions(tallyData.questions || []);
+      setWrappedSubmittedCount(tallyData.submittedCount);
+      setWrappedTotalMembers(tallyData.totalMembers);
+      setWrappedVisibility(visibilityData.visibility);
+      setError("");
+    } catch (err) {
+      setError("Greide ikke laste Bokwrapped-status");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleWrappedVisibility = async (next) => {
+    if (next === wrappedVisibility) return;
+    setSavingWrappedVisibility(true);
+    try {
+      const data = await wrappedApi.setAdminVisibility(wrappedYear, next);
+      setWrappedVisibility(data.visibility);
+      const messages = {
+        open: "Bokwrapped er nå åpen for alle medlemmer!",
+        "admin-only": "Bokwrapped er nå skjult for alle unntatt admin!",
+        hidden: "Bokwrapped er nå skjult for alle, også admin!",
+      };
+      setSuccessMessage(messages[next]);
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke endre synlighet");
+      console.error(err);
+    } finally {
+      setSavingWrappedVisibility(false);
+    }
+  };
+
+  const handleSaveWrappedWindow = async () => {
+    setSavingWrappedWindow(true);
+    try {
+      await wrappedApi.updateAdminWindow(wrappedYear, {
+        start: wrappedWindowStart,
+        end: wrappedWindowEnd,
+      });
+      setSuccessMessage("Innsamlingsvinduet er lagret!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke lagre innsamlingsvinduet");
+      console.error(err);
+    } finally {
+      setSavingWrappedWindow(false);
+    }
+  };
+
+  const handleAddQuestion = () => {
+    setEditingQuestion(null);
+    setQuestionForm({ label: "", type: "text", helper: "" });
+    setShowQuestionForm(true);
+  };
+
+  const handleEditQuestion = (question) => {
+    setEditingQuestion(question);
+    setQuestionForm({ label: question.label, type: question.type, helper: question.helper || "" });
+    setShowQuestionForm(true);
+  };
+
+  const handleSaveQuestion = async () => {
+    if (!questionForm.label.trim()) {
+      setError("Spørsmålet må ha en tekst");
+      return;
+    }
+    setSavingQuestion(true);
+    try {
+      if (editingQuestion) {
+        await wrappedApi.updateQuestion(wrappedYear, editingQuestion._id, questionForm);
+      } else {
+        await wrappedApi.createQuestion(wrappedYear, questionForm);
+      }
+      setShowQuestionForm(false);
+      setEditingQuestion(null);
+      await fetchWrappedAdmin();
+      setSuccessMessage("Spørsmål lagret!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError(err.response?.data?.message || "Greide ikke lagre spørsmålet");
+      console.error(err);
+    } finally {
+      setSavingQuestion(false);
+    }
+  };
+
+  const handleDeleteQuestion = async (question) => {
+    if (!window.confirm(`Er du sikker på at du vil slette spørsmålet «${question.label}»?`)) {
+      return;
+    }
+    try {
+      await wrappedApi.deleteQuestion(wrappedYear, question._id);
+      await fetchWrappedAdmin();
+      setSuccessMessage("Spørsmål slettet!");
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      setError("Greide ikke slette spørsmålet");
+      console.error(err);
+    }
+  };
+
+  const handleToggleQuestionActive = async (question) => {
+    try {
+      await wrappedApi.updateQuestion(wrappedYear, question._id, { active: !question.active });
+      await fetchWrappedAdmin();
+    } catch (err) {
+      setError("Greide ikke oppdatere spørsmålet");
+      console.error(err);
+    }
+  };
+
+  const handleMoveQuestion = async (index, direction) => {
+    const target = index + direction;
+    if (target < 0 || target >= wrappedQuestions.length) return;
+    const reordered = [...wrappedQuestions];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+    setWrappedQuestions(reordered);
+    try {
+      await wrappedApi.reorderQuestions(wrappedYear, reordered.map((q) => q._id));
+      await fetchWrappedAdmin();
+    } catch (err) {
+      setError("Greide ikke lagre rekkefølgen");
       console.error(err);
     }
   };
@@ -442,6 +690,8 @@ const Admin = () => {
       fetchAllMembers();
     } else if (activeTab === "import") {
       fetchImportStatus();
+    } else if (activeTab === "wrapped") {
+      fetchWrappedAdmin();
     }
   }, [activeTab]);
 
@@ -486,113 +736,41 @@ const Admin = () => {
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-4 mb-8 flex-wrap">
-          <button
-            onClick={() => setActiveTab("requests")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "requests" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "requests"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📋 Bokforespørsler
-          </button>
-          <button
-            onClick={() => setActiveTab("products")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "products" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "products"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🛍️ Varer
-          </button>
-          <button
-            onClick={() => setActiveTab("orders")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "orders" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "orders"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📦 Bestillinger
-          </button>
-          <button
-            onClick={() => setActiveTab("users")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "users" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "users"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            👥 Brukere
-          </button>
-          <button
-            onClick={() => setActiveTab("passwords")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "passwords" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "passwords"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🔑 Tilbakestill passord
-          </button>
-          <button
-            onClick={() => setActiveTab("books")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "books" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "books"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📚 Legg til bok
-          </button>
-          <button
-            onClick={() => setActiveTab("import")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "import" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "import"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            📥 Importer
-          </button>
-          <button
-            onClick={() => setActiveTab("alerts")}
-            className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
-              activeTab === "alerts" ? "text-white" : "bg-card text-text-muted"
-            }`}
-            style={
-              activeTab === "alerts"
-                ? { background: "var(--color-primary-solid)" }
-                : {}
-            }
-          >
-            🔔 Send varsel
-          </button>
+        {/* Top-level groups, each expanding to its own row of tabs below
+            when it has more than one - keeps the always-visible button row
+            short regardless of how many admin sections exist. */}
+        <div className="flex gap-4 mb-4 flex-wrap">
+          {ADMIN_NAV.map((group) => (
+            <button
+              key={group.key}
+              onClick={() => selectGroup(group)}
+              className={`px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg ${
+                activeGroupKey === group.key ? "text-white" : "bg-card text-text-muted"
+              }`}
+              style={activeGroupKey === group.key ? { background: "var(--color-primary-solid)" } : {}}
+            >
+              {group.icon} {group.label}
+            </button>
+          ))}
         </div>
+
+        {activeGroup && activeGroup.tabs.length > 1 && (
+          <div className="flex gap-1 mb-8 flex-wrap" style={{ borderBottom: "1px solid var(--color-border)" }}>
+            {activeGroup.tabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className="text-sm font-bold px-1 pb-2 mr-5"
+                style={{
+                  color: activeTab === tab.key ? "var(--color-primary)" : "var(--color-text-muted)",
+                  borderBottom: activeTab === tab.key ? "2px solid var(--color-primary)" : "2px solid transparent",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {error && (
           <div
@@ -1456,6 +1634,278 @@ const Admin = () => {
                 {alertResult.failed > 0 && ` (${alertResult.failed} feilet)`}.
               </div>
             )}
+          </div>
+        )}
+        {/* Bokwrapped Tab */}
+        {activeTab === "wrapped" && (
+          <div className="grid gap-6 animate-fadeIn">
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">
+                🎁 Bokwrapped {wrappedYear}
+              </h3>
+              <p className="text-text-muted mb-4">
+                Styr hvor lenge innsamlingen er åpen på forsiden, og se hvordan nominasjonene
+                fordeler seg så langt.
+              </p>
+              <div className="flex items-end gap-3 flex-wrap mb-2">
+                <div>
+                  <label className="block text-sm font-bold text-text-muted mb-2">
+                    Åpner
+                  </label>
+                  <input
+                    type="date"
+                    value={wrappedWindowStart}
+                    onChange={(e) => setWrappedWindowStart(e.target.value)}
+                    className="input-field py-2 w-auto"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-text-muted mb-2">
+                    Frist
+                  </label>
+                  <input
+                    type="date"
+                    value={wrappedWindowEnd}
+                    onChange={(e) => setWrappedWindowEnd(e.target.value)}
+                    className="input-field py-2 w-auto"
+                  />
+                </div>
+                <button
+                  onClick={handleSaveWrappedWindow}
+                  disabled={savingWrappedWindow}
+                  className="btn-secondary px-4 py-2 text-sm"
+                >
+                  {savingWrappedWindow ? "Lagrer..." : "Lagre frist"}
+                </button>
+              </div>
+              <p className="text-sm text-text-faint mb-4">
+                Banneret på forsiden vises kun i dette tidsrommet.
+              </p>
+
+              <VisibilityToggle value={wrappedVisibility} busy={savingWrappedVisibility} onChange={handleToggleWrappedVisibility} />
+            </div>
+
+            <div className="container-gradient">
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <h3 className="text-2xl font-bold gradient-text">❓ Spørsmål</h3>
+                {!showQuestionForm && (
+                  <button onClick={handleAddQuestion} className="btn-secondary px-4 py-2 text-sm">
+                    ＋ Legg til spørsmål
+                  </button>
+                )}
+              </div>
+              <p className="text-text-muted mb-4">
+                Velg hvilke kategorier medlemmene svarer på i steg 3, og hvilken type svar hver
+                skal ha.
+              </p>
+
+              {showQuestionForm && (
+                <div
+                  className="p-4 rounded-xl mb-4 grid gap-3"
+                  style={{ background: "var(--color-sunken)" }}
+                >
+                  <div>
+                    <label className="block text-sm font-bold text-text-muted mb-2">
+                      Spørsmål
+                    </label>
+                    <input
+                      type="text"
+                      value={questionForm.label}
+                      onChange={(e) => setQuestionForm({ ...questionForm, label: e.target.value })}
+                      className="input-field"
+                      placeholder="f.eks. Årets beste bok"
+                    />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-bold text-text-muted mb-2">
+                        Svartype
+                      </label>
+                      <select
+                        value={questionForm.type}
+                        onChange={(e) => setQuestionForm({ ...questionForm, type: e.target.value })}
+                        className="input-field py-2"
+                      >
+                        <option value="text">Fritekst</option>
+                        <option value="number">Tall</option>
+                        <option value="book-library">Bok fra biblioteket</option>
+                        <option value="book-bookclub">Bok fra årets bokklubbøker</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-text-muted mb-2">
+                        Hjelpetekst <span className="font-normal">(valgfritt)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={questionForm.helper}
+                        onChange={(e) => setQuestionForm({ ...questionForm, helper: e.target.value })}
+                        className="input-field"
+                        placeholder="f.eks. navn + bok"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSaveQuestion}
+                      disabled={savingQuestion}
+                      className="btn-primary px-4 py-2 text-sm"
+                    >
+                      {savingQuestion ? "Lagrer..." : "Lagre"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowQuestionForm(false);
+                        setEditingQuestion(null);
+                      }}
+                      className="text-sm font-bold text-text-muted"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2">
+                {wrappedQuestions.map((question, index) => (
+                  <div
+                    key={question._id}
+                    className="flex items-center gap-3 p-3 rounded-xl"
+                    style={{
+                      background: "var(--color-sunken)",
+                      opacity: question.active ? 1 : 0.5,
+                    }}
+                  >
+                    <div className="flex flex-col">
+                      <button
+                        onClick={() => handleMoveQuestion(index, -1)}
+                        disabled={index === 0}
+                        className="text-xs leading-none disabled:opacity-30"
+                        title="Flytt opp"
+                      >
+                        ▲
+                      </button>
+                      <button
+                        onClick={() => handleMoveQuestion(index, 1)}
+                        disabled={index === wrappedQuestions.length - 1}
+                        className="text-xs leading-none disabled:opacity-30"
+                        title="Flytt ned"
+                      >
+                        ▼
+                      </button>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm truncate">{question.label}</p>
+                      <p className="text-xs text-text-faint">
+                        {QUESTION_TYPE_LABELS[question.type]}
+                        {question.helper && ` · ${question.helper}`}
+                        {!question.active && " · skjult"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleEditQuestion(question)}
+                      className="text-sm font-bold flex-shrink-0"
+                      style={{ color: "var(--color-primary)" }}
+                    >
+                      Rediger
+                    </button>
+                    <button
+                      onClick={() => handleToggleQuestionActive(question)}
+                      className="text-sm font-bold flex-shrink-0 text-text-muted"
+                    >
+                      {question.active ? "Skjul" : "Vis"}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteQuestion(question)}
+                      className="text-sm font-bold flex-shrink-0"
+                      style={{ color: "var(--color-terracotta)" }}
+                    >
+                      Slett
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="container-gradient">
+              <h3 className="text-2xl font-bold gradient-text mb-2">📊 Nominasjoner</h3>
+              <p className="text-text-muted mb-4">
+                {wrappedSubmittedCount} av {wrappedTotalMembers} medlemmer har sendt inn
+                nominasjonene sine.
+              </p>
+              {!wrappedTally ? (
+                <p className="text-text-muted">Laster...</p>
+              ) : (
+                <div className="grid gap-5 md:grid-cols-2">
+                  {wrappedQuestions.map((question) => {
+                    const answers = wrappedTally[question._id] || [];
+                    return (
+                      <div
+                        key={question._id}
+                        className="p-4 rounded-xl"
+                        style={{ background: "var(--color-sunken)" }}
+                      >
+                        <h4 className="font-bold text-sm mb-2">{question.label}</h4>
+                        {answers.length === 0 ? (
+                          <p className="text-sm text-text-faint">Ingen svar ennå</p>
+                        ) : (
+                          <ul className="space-y-1.5">
+                            {answers.map((a) => (
+                              <li key={a.text} className="text-sm flex justify-between gap-3">
+                                <span className="truncate" title={a.respondents.join(", ")}>
+                                  {a.text}
+                                </span>
+                                <span
+                                  className="font-bold flex-shrink-0"
+                                  style={{ color: "var(--color-primary)" }}
+                                >
+                                  {a.count}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Advent Calendar Tab */}
+        {activeTab === "advent" && <AdventAdminPanel />}
+
+        {/* Seasonal Theme Tab */}
+        {activeTab === "seasonTheme" && (
+          <div className="container-gradient animate-fadeIn">
+            <h3 className="text-2xl font-bold gradient-text mb-2">🎨 Sesongtema</h3>
+            <p className="text-text-muted mb-4">
+              Bytter navigasjonsfargen, de utfylte knappene og et par dekorative overganger
+              site-wide, for alle medlemmer med en gang. Resten av designet er uendret.
+            </p>
+            <div className="flex gap-3 flex-wrap">
+              {SEASON_THEME_OPTIONS.map((opt) => (
+                <button
+                  key={opt.key}
+                  onClick={() => handleSetSeasonTheme(opt.key)}
+                  disabled={savingSeasonTheme}
+                  className="flex items-center gap-2 px-5 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg disabled:opacity-50"
+                  style={
+                    season === opt.key
+                      ? { background: opt.swatch, color: "#fff" }
+                      : { background: "var(--color-card)", color: "var(--color-text-muted)", border: "1px solid var(--color-border-strong)" }
+                  }
+                >
+                  {season !== opt.key && (
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: opt.swatch }} />
+                  )}
+                  {opt.label}
+                  {season === opt.key && <span>✓</span>}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </div>
