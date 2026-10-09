@@ -2,7 +2,17 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/useAuth";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useSeasonalTheme } from "../../contexts/SeasonalThemeContext";
 import UserAvatar from "./UserAvatar";
+
+// Classic spiderweb-in-a-corner: 5 spokes radiating from the origin plus 3
+// concentric rings connecting them (straight segments, not true arcs - a
+// common, cheap stylization that still reads clearly as a web at this size).
+const COBWEB_PATH =
+  "M0,0 L100,0 M0,0 L92.4,38.3 M0,0 L70.7,70.7 M0,0 L38.3,92.4 M0,0 L0,100 " +
+  "M30,0 L27.7,11.5 L21.2,21.2 L11.5,27.7 L0,30 " +
+  "M55,0 L50.8,21 L38.9,38.9 L21,50.8 L0,55 " +
+  "M80,0 L73.9,30.6 L56.6,56.6 L30.6,73.9 L0,80";
 
 const icons = {
   home: (
@@ -70,6 +80,7 @@ const PRIMARY_LINKS = [
 const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { season } = useSeasonalTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -89,6 +100,11 @@ const Navbar = () => {
         className="sticky top-0 z-50 shadow-md"
         style={{ background: "var(--color-nav-bg)" }}
       >
+        {season === "halloween" && (
+          <svg className="halloween-cobweb" viewBox="0 0 100 100" aria-hidden="true">
+            <path d={COBWEB_PATH} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="1.2" strokeLinecap="round" />
+          </svg>
+        )}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-18">
             {/* Logo/Brand */}
@@ -128,7 +144,7 @@ const Navbar = () => {
                           ? "var(--color-nav-text)"
                           : "var(--color-nav-text-muted)",
                         borderColor: isCurrent(link.to)
-                          ? "var(--color-secondary)"
+                          ? "var(--color-nav-accent)"
                           : "transparent",
                       }}
                     >

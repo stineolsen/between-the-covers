@@ -96,11 +96,23 @@ const FireworksLayer = () => {
   );
 };
 
+// Fog (halloween) - a seamless two-band horizontal drift, see
+// .halloween-fog in index.css for the loop mechanics.
+const FogLayer = () => (
+  <div className="seasonal-particles" aria-hidden="true">
+    <div className="halloween-fog">
+      <div className="halloween-fog-band" />
+      <div className="halloween-fog-band" />
+    </div>
+  </div>
+);
+
 const SeasonalParticles = () => {
   const { season } = useSeasonalTheme();
 
   if (season === "jul") return <SnowLayer />;
   if (season === "nyttaar") return <FireworksLayer />;
+  if (season === "halloween") return <FogLayer />;
   return null;
 };
 

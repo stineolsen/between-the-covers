@@ -119,14 +119,19 @@
    regardless of light/dark - each season's values are picked to work on
    either ground, the same way the dark-invariant *-solid tokens already do. */
 :root[data-season="halloween"] {
-  --color-nav-bg: #2b1a3a;
-  --color-nav-accent: #f08a24;
-  --color-primary-solid: #d9641e;
-  --color-primary-solid-deep: #a84a15;
-  --color-secondary-solid: #5b3a7a;
-  --color-secondary-solid-deep: #432a5c;
-  --gradient-primary: linear-gradient(135deg, #d9641e 0%, #5b3a7a 100%);
-  --gradient-secondary: linear-gradient(135deg, #d9641e33 0%, #5b3a7a33 100%);
+  /* Roles swapped from the original version: nav chrome is now orange-led,
+     buttons/badges (the *-solid tokens) are now purple-led. Values are the
+     same ones as before, just reassigned - #a84a15 was primary-solid-deep
+     (orange) and is now nav-bg; #5b3a7a/#432a5c were secondary-solid(-deep)
+     (purple) and are now primary-solid(-deep). */
+  --color-nav-bg: #a84a15;
+  --color-nav-accent: #d9b3f0;
+  --color-primary-solid: #5b3a7a;
+  --color-primary-solid-deep: #432a5c;
+  --color-secondary-solid: #d9641e;
+  --color-secondary-solid-deep: #a84a15;
+  --gradient-primary: linear-gradient(135deg, #5b3a7a 0%, #d9641e 100%);
+  --gradient-secondary: linear-gradient(135deg, #5b3a7a33 0%, #d9641e33 100%);
 }
 :root[data-season="jul"] {
   --color-nav-bg: #7a0f1f;
@@ -242,10 +247,54 @@
   }
 }
 
+/* Fog (halloween) - a seamless horizontal drift: two identical bands side
+   by side inside a 200%-wide flex row, sliding left by exactly 50% of that
+   row's width (= 100% of the viewport). The moment the first band exits
+   left, the second is already in the exact position the first started in,
+   so the loop has no visible seam. Lives in .seasonal-particles like the
+   other site-wide effects, clipped to the viewport by its overflow:hidden. */
+.halloween-fog {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 30vh;
+  display: flex;
+  width: 200%;
+  animation: fog-drift 55s linear infinite;
+  will-change: transform;
+}
+.halloween-fog-band {
+  flex: 0 0 50%;
+  height: 100%;
+  /* Theme's own purple tones (nav-bg / secondary-solid), not pale white/
+     lavender - the latter nearly vanished against the light paper
+     background. mix-blend-mode:multiply darkens whatever's underneath
+     instead of just compositing a flat tint, so it reads as smoke/shadow
+     on both the light and dark ground without needing separate tuning
+     for each. */
+  background:
+    radial-gradient(ellipse 35% 60% at 15% 70%, rgba(91, 58, 122, 0.55), transparent 70%),
+    radial-gradient(ellipse 45% 70% at 50% 60%, rgba(43, 26, 58, 0.5), transparent 70%),
+    radial-gradient(ellipse 35% 55% at 85% 75%, rgba(91, 58, 122, 0.55), transparent 70%);
+  filter: blur(10px);
+  mix-blend-mode: multiply;
+}
+@keyframes fog-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .seasonal-particles,
   .home-ghosts {
     display: none;
+  }
+  .halloween-cobweb {
+    animation: none;
   }
 }
 
@@ -309,6 +358,31 @@
   }
   75% {
     transform: translate3d(0, 6px, 0) rotate(-3deg);
+  }
+}
+
+/* Cobweb (halloween) - static corner decoration in the nav (Navbar.jsx),
+   site-wide and always in the same spot, unlike the other effects. A very
+   slow sway, pivoting at the corner point it's anchored to. Kept visible
+   (not hidden) under reduced motion - it's a static shape either way, only
+   the sway stops. */
+.halloween-cobweb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 84px;
+  height: 84px;
+  pointer-events: none;
+  transform-origin: 0 0;
+  animation: cobweb-sway 9s ease-in-out infinite;
+}
+@keyframes cobweb-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(1.5deg);
   }
 }
 

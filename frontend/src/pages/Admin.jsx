@@ -83,7 +83,7 @@ const TAB_TO_GROUP = Object.fromEntries(
 // theme's source of truth.
 const SEASON_THEME_OPTIONS = [
   { key: null, label: "Standard design", swatch: "#93264d" },
-  { key: "halloween", label: "Halloween", swatch: "#d9641e" },
+  { key: "halloween", label: "Halloween", swatch: "#5b3a7a" },
   { key: "jul", label: "Jul", swatch: "#b5182f" },
   { key: "nyttaar", label: "Nyttår", swatch: "#2a3a6a" },
 ];
