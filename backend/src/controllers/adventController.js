@@ -19,25 +19,40 @@ function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function calendarEntry(door, result) {
+// True only for an admin while this year is set to "admin-only" - lets
+// them bypass the door-lock check to play-test in production without
+// exposing anything to other members (who'd get a 404 from the
+// requireFeatureVisible middleware before ever reaching these handlers).
+// The moment a year is flipped to "open", this always returns false, so
+// admins play by the same real-time rules as everyone else once launched.
+async function isAdminTestMode(req, year) {
+  if (req.user?.role !== "admin") return false;
+  const visibility = await getVisibility(visibilityKey(year));
+  return visibility === "admin-only";
+}
+
+function calendarEntry(door, result, testMode) {
   const opensAt = doorOpensAt(door.year, door.day);
-  if (now() < opensAt) {
+  const locked = now() < opensAt;
+  if (locked && !testMode) {
     return { day: door.day, state: "locked", opensAt };
   }
 
   const deadline = doorDeadline(door.year, door.day, LEADERBOARD_DEADLINE_DAYS_AFTER_OPEN);
   const deadlinePassed = now() >= deadline;
 
+  let entry;
   if (result?.status === "solved") {
-    return { day: door.day, state: "solved", points: result.points, countsForLeaderboard: result.countsForLeaderboard };
+    entry = { day: door.day, state: "solved", points: result.points, countsForLeaderboard: result.countsForLeaderboard };
+  } else if (result?.status === "failed") {
+    entry = { day: door.day, state: "failed", points: 0 };
+  } else if (deadlinePassed) {
+    entry = { day: door.day, state: "expired", attemptsUsed: result?.attemptsUsed || 0 };
+  } else {
+    entry = { day: door.day, state: "open", attemptsUsed: result?.attemptsUsed || 0, deadline };
   }
-  if (result?.status === "failed") {
-    return { day: door.day, state: "failed", points: 0 };
-  }
-  if (deadlinePassed) {
-    return { day: door.day, state: "expired", attemptsUsed: result?.attemptsUsed || 0 };
-  }
-  return { day: door.day, state: "open", attemptsUsed: result?.attemptsUsed || 0, deadline };
+  if (testMode) entry.testPreview = true;
+  return entry;
 }
 
 // @desc    Calendar overview for a year, with per-door state for the caller
@@ -46,6 +61,7 @@ function calendarEntry(door, result) {
 exports.getCalendar = async (req, res) => {
   try {
     const year = Number(req.params.year);
+    const testMode = await isAdminTestMode(req, year);
     const doors = await AdventDay.find({ year }).sort({ day: 1 });
     const results = await AdventResult.find({
       user: req.user._id,
@@ -53,8 +69,8 @@ exports.getCalendar = async (req, res) => {
     });
     const resultByDoor = new Map(results.map((r) => [r.adventDay.toString(), r]));
 
-    const days = doors.map((door) => calendarEntry(door, resultByDoor.get(door._id.toString())));
-    res.status(200).json({ success: true, year, days });
+    const days = doors.map((door) => calendarEntry(door, resultByDoor.get(door._id.toString()), testMode));
+    res.status(200).json({ success: true, year, days, testMode });
   } catch (error) {
     console.error("Advent calendar error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke hente kalenderen" });
@@ -70,7 +86,8 @@ exports.getDay = async (req, res) => {
     const day = Number(req.params.day);
     const door = await AdventDay.findOne({ year, day });
     if (!door) return res.status(404).json({ success: false, message: "Luke finnes ikke" });
-    if (now() < doorOpensAt(year, day)) {
+    const testMode = await isAdminTestMode(req, year);
+    if (now() < doorOpensAt(year, day) && !testMode) {
       return res.status(404).json({ success: false, message: "Luken er ikke åpnet ennå" });
     }
 
@@ -80,7 +97,7 @@ exports.getDay = async (req, res) => {
 
     let result = await AdventResult.findOne({ user: req.user._id, adventDay: door._id });
     if (!result) {
-      result = await AdventResult.create({ user: req.user._id, adventDay: door._id, openedAt: now() });
+      result = await AdventResult.create({ user: req.user._id, adventDay: door._id, openedAt: now(), isTestPlay: testMode });
     }
     const attempts = await AdventAttempt.find({ user: req.user._id, adventDay: door._id }).sort({ attemptNo: 1 });
 
@@ -111,6 +128,7 @@ exports.getDay = async (req, res) => {
       hints: [door.hint1, door.hint2, door.hint3].slice(0, hintsVisible),
       attempts: attempts.map((a) => ({ attemptNo: a.attemptNo, action: a.action, result: a.result })),
       imageLevel,
+      testPreview: testMode,
     };
     if (revealed) {
       payload.title = door.title;
@@ -136,7 +154,8 @@ exports.getDayImage = async (req, res) => {
     const day = Number(req.params.day);
     const door = await AdventDay.findOne({ year, day });
     if (!door) return res.sendStatus(404);
-    if (now() < doorOpensAt(year, day)) return res.sendStatus(404);
+    const testMode = await isAdminTestMode(req, year);
+    if (now() < doorOpensAt(year, day) && !testMode) return res.sendStatus(404);
 
     const [result, attemptsUsed] = await Promise.all([
       AdventResult.findOne({ user: req.user._id, adventDay: door._id }),
@@ -185,13 +204,14 @@ exports.submitAttempt = async (req, res) => {
 
     const door = await AdventDay.findOne({ year, day });
     if (!door) return res.status(404).json({ success: false, message: "Luke finnes ikke" });
-    if (now() < doorOpensAt(year, day)) {
+    const testMode = await isAdminTestMode(req, year);
+    if (now() < doorOpensAt(year, day) && !testMode) {
       return res.status(404).json({ success: false, message: "Luken er ikke åpnet ennå" });
     }
 
     let result = await AdventResult.findOne({ user: req.user._id, adventDay: door._id });
     if (!result) {
-      result = await AdventResult.create({ user: req.user._id, adventDay: door._id, openedAt: now() });
+      result = await AdventResult.create({ user: req.user._id, adventDay: door._id, openedAt: now(), isTestPlay: testMode });
     }
     if (result.status !== "in_progress") {
       return res.status(400).json({ success: false, message: "Denne luken er allerede ferdigspilt" });
@@ -265,6 +285,7 @@ exports.submitAttempt = async (req, res) => {
       finished,
       status: result.status,
       points: result.points,
+      testPreview: testMode,
     };
     if (finished) {
       payload.title = door.title;
@@ -324,6 +345,7 @@ exports.getLeaderboard = async (req, res) => {
       adventDay: { $in: doorIds },
       status: "solved",
       countsForLeaderboard: true,
+      isTestPlay: { $ne: true },
     }).populate("user", "displayName username avatar");
 
     const byUser = new Map();

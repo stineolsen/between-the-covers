@@ -41,7 +41,7 @@ const DoorTile = ({ door, active, onClick }) => {
   return (
     <button
       onClick={onClick}
-      className="aspect-[3/4] rounded-xl p-2 flex flex-col justify-between text-left transition-transform hover:-translate-y-0.5"
+      className="relative aspect-[3/4] rounded-xl p-2 flex flex-col justify-between text-left transition-transform hover:-translate-y-0.5"
       style={{
         border: "1px solid var(--color-border)",
         outline: active ? "2px solid var(--color-primary)" : "none",
@@ -49,6 +49,14 @@ const DoorTile = ({ door, active, onClick }) => {
         ...stateStyles[door.state],
       }}
     >
+      {door.testPreview && (
+        <span
+          className="absolute top-1 right-1 text-[0.55rem] font-bold px-1 rounded"
+          style={{ background: "var(--color-terracotta-solid)", color: "#fff" }}
+        >
+          TEST
+        </span>
+      )}
       <span className="text-xl font-semibold" style={{ fontFamily: "'Fraunces', serif" }}>
         {door.day}
       </span>
@@ -175,6 +183,11 @@ const DayPanel = ({ detail, loading, onAttempt, submitting }) => {
           <span className="text-[0.65rem] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: "var(--color-sunken)", color: "var(--color-text-muted)" }}>
             {STATE_LABEL[finished ? detail.status : detail.deadlinePassed ? "expired" : "open"]}
           </span>
+          {detail.testPreview && (
+            <span className="text-[0.65rem] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full" style={{ background: "var(--color-terracotta-solid)", color: "#fff" }}>
+              Test - teller ikke
+            </span>
+          )}
         </div>
         {!finished && !detail.deadlinePassed && (
           <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>Frist: {formatDeadline(detail.deadline)}</p>
@@ -247,6 +260,7 @@ const AdventCalendar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [calendar, setCalendar] = useState([]);
+  const [calendarTestMode, setCalendarTestMode] = useState(false);
   const [loadingCalendar, setLoadingCalendar] = useState(true);
   const [activeDay, setActiveDay] = useState(() => {
     const d = Number(searchParams.get("day"));
@@ -265,7 +279,10 @@ const AdventCalendar = () => {
   const loadCalendar = useCallback(() => {
     adventApi
       .getCalendar(year)
-      .then((data) => setCalendar(data.days || []))
+      .then((data) => {
+        setCalendar(data.days || []);
+        setCalendarTestMode(!!data.testMode);
+      })
       .catch(() => toast.error("Klarte ikke hente kalenderen"))
       .finally(() => setLoadingCalendar(false));
   }, [toast]);
@@ -357,6 +374,16 @@ const AdventCalendar = () => {
 
       {tab === "calendar" && (
         <>
+          {calendarTestMode && (
+            <div
+              className="mb-4 p-3 rounded-xl text-sm font-bold"
+              style={{ background: "var(--color-terracotta-tint)", color: "var(--color-terracotta)" }}
+            >
+              Test-modus: kalenderen er satt til "Kun admin", så alle låste luker kan spilles for
+              testing. Ingenting her teller på resultatlisten, badges eller feeden - flipp
+              synligheten til "Åpen for alle" i admin når kalenderen skal lanseres.
+            </div>
+          )}
           {loadingCalendar ? (
             <p style={{ color: "var(--color-text-muted)" }}>Laster...</p>
           ) : (

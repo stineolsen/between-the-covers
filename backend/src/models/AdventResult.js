@@ -17,6 +17,12 @@ const adventResultSchema = new mongoose.Schema(
     // False when the door was solved/failed after its own leaderboard
     // deadline had already passed (still playable, just doesn't score).
     countsForLeaderboard: { type: Boolean, default: true },
+    // Set once, at creation, when the user's first attempt happened while
+    // this year's visibility was "admin-only" (see adventController's
+    // isAdminTestMode) - lets an admin play-test locked doors in
+    // production without it touching the real leaderboard, badges, or
+    // feed once the calendar actually launches. Never cleared afterward.
+    isTestPlay: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

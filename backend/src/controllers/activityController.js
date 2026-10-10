@@ -38,8 +38,9 @@ exports.getActivity = async (req, res) => {
       // Solved doors only (never failed attempts - see
       // docs/julekalender-design.md section 8), and never the book
       // title/author: just the door number and the colour sequence, like
-      // sharing a Wordle result.
-      AdventResult.find({ status: 'solved' })
+      // sharing a Wordle result. isTestPlay excludes admin's own
+      // pre-launch play-testing (see adventController.isAdminTestMode).
+      AdventResult.find({ status: 'solved', isTestPlay: { $ne: true } })
         .sort({ finishedAt: -1 })
         .limit(30)
         .populate('user', 'displayName avatar username')

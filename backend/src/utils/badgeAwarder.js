@@ -51,6 +51,7 @@ async function awardDoorCountBadgesForUser(userId, year) {
     adventDay: { $in: doorIds },
     status: "solved",
     countsForLeaderboard: true,
+    isTestPlay: { $ne: true },
   });
 
   const earned = DOOR_COUNT_BADGE_THRESHOLDS.filter((threshold) => solvedCount >= threshold);
