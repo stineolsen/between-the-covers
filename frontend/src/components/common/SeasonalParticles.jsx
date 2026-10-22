@@ -108,8 +108,19 @@ const FogLayer = () => (
 );
 
 const SeasonalParticles = () => {
-  const { season } = useSeasonalTheme();
+  const { season, isAnniversary } = useSeasonalTheme();
 
+  // December 9th: snow (the Jul base) plus fireworks (the celebration),
+  // regardless of whatever season is actually configured - reuses both
+  // existing layers rather than designing a new effect for one day a year.
+  if (isAnniversary) {
+    return (
+      <>
+        <SnowLayer />
+        <FireworksLayer />
+      </>
+    );
+  }
   if (season === "jul") return <SnowLayer />;
   if (season === "nyttaar") return <FireworksLayer />;
   if (season === "halloween") return <FogLayer />;

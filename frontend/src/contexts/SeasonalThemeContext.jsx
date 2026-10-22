@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import settingsApi from "../api/settingsApi";
+import { osloToday } from "../utils/adventClock";
 
 const SeasonalThemeContext = createContext();
 
@@ -10,6 +11,16 @@ export const useSeasonalTheme = () => {
   }
   return context;
 };
+
+// The club's founding date - December 9th is an automatic, date-driven
+// anniversary (unlike the admin-picked seasons below), always showing the
+// Jul palette that day regardless of whatever season is actually selected,
+// plus a banner on Home (see AnniversaryBanner.jsx). Bump this only if the
+// founding year itself was ever wrong - it shouldn't need yearly upkeep.
+const FOUNDING_YEAR = 2024;
+const today = osloToday();
+const isAnniversary = today.month === 12 && today.day === 9;
+const anniversaryYear = today.year - FOUNDING_YEAR;
 
 // Site-wide seasonal "skin" (Halloween/Jul/Nyttår, or none) - a separate
 // concern from ThemeContext's light/dark mode. Admin-controlled, visible to
@@ -28,8 +39,13 @@ export const SeasonalThemeProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    if (season) {
-      document.documentElement.dataset.season = season;
+    // December 9th always shows the Jul palette, overriding whatever's
+    // actually configured - it's a fixed calendar date, not something that
+    // should depend on an admin remembering to coordinate their seasonal
+    // picks around it.
+    const effective = isAnniversary ? "jul" : season;
+    if (effective) {
+      document.documentElement.dataset.season = effective;
     } else {
       delete document.documentElement.dataset.season;
     }
@@ -42,7 +58,7 @@ export const SeasonalThemeProvider = ({ children }) => {
   const applySeason = (next) => setSeasonState(next);
 
   return (
-    <SeasonalThemeContext.Provider value={{ season, applySeason }}>
+    <SeasonalThemeContext.Provider value={{ season, applySeason, isAnniversary, anniversaryYear }}>
       {children}
     </SeasonalThemeContext.Provider>
   );

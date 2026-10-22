@@ -15,6 +15,7 @@ import BookCoverFallback from "../components/common/BookCoverFallback";
 import WrappedBanner from "../components/home/WrappedBanner";
 import AdventCalendarBanner from "../components/home/AdventCalendarBanner";
 import HomeGhosts from "../components/home/HomeGhosts";
+import AnniversaryBanner from "../components/home/AnniversaryBanner";
 
 const Home = () => {
   const { user } = useAuth();
@@ -114,6 +115,7 @@ const Home = () => {
           </Link>
         )}
 
+        <AnniversaryBanner />
         <WrappedBanner />
         <AdventCalendarBanner />
 
