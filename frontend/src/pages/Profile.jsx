@@ -61,6 +61,11 @@ const Profile = () => {
     notifyOnNewOrder: user?.notifyOnNewOrder || false,
     notifyOnListShared: user?.notifyOnListShared || false,
     notifyOnListComment: user?.notifyOnListComment || false,
+    notifyOnFeedReaction: user?.notifyOnFeedReaction || false,
+    notifyOnFeedComment: user?.notifyOnFeedComment || false,
+    notifyOnReviewLike: user?.notifyOnReviewLike || false,
+    notifyOnReviewComment: user?.notifyOnReviewComment || false,
+    notifyOnRecommendation: user?.notifyOnRecommendation || false,
   });
 
   const defaultAvatars = usersApi.getDefaultAvatars();
@@ -375,6 +380,88 @@ const Profile = () => {
                 </label>
               </div>
 
+              <div className="pt-2">
+                <p className="text-xs font-bold text-text-faint uppercase tracking-wide mb-3">
+                  E-post for aktivitetsstrømmen
+                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnFeedReaction"
+                      checked={formData.notifyOnFeedReaction}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnFeedReaction: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnFeedReaction" className="text-sm font-bold text-text-muted">
+                      😍 Varsle meg når noen reagerer på aktiviteten min
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnFeedComment"
+                      checked={formData.notifyOnFeedComment}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnFeedComment: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnFeedComment" className="text-sm font-bold text-text-muted">
+                      💬 Varsle meg når noen kommenterer aktiviteten min
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnReviewLike"
+                      checked={formData.notifyOnReviewLike}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnReviewLike: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnReviewLike" className="text-sm font-bold text-text-muted">
+                      ❤️ Varsle meg når noen liker anmeldelsen min
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnReviewComment"
+                      checked={formData.notifyOnReviewComment}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnReviewComment: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnReviewComment" className="text-sm font-bold text-text-muted">
+                      💬 Varsle meg når noen kommenterer anmeldelsen min
+                    </label>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="notifyOnRecommendation"
+                      checked={formData.notifyOnRecommendation}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notifyOnRecommendation: e.target.checked })
+                      }
+                      className="w-5 h-5"
+                    />
+                    <label htmlFor="notifyOnRecommendation" className="text-sm font-bold text-text-muted">
+                      📚 Varsle meg når noen anbefaler en bok til meg
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               {user?.role === "admin" && (
                 <div className="space-y-3 p-4 rounded-2xl bg-wine-tint">
                   <p className="text-xs font-bold text-primary uppercase tracking-wide">Admin-varsler</p>
@@ -428,6 +515,11 @@ const Profile = () => {
                       notifyOnNewOrder: user?.notifyOnNewOrder || false,
                       notifyOnListShared: user?.notifyOnListShared || false,
                       notifyOnListComment: user?.notifyOnListComment || false,
+                      notifyOnFeedReaction: user?.notifyOnFeedReaction || false,
+                      notifyOnFeedComment: user?.notifyOnFeedComment || false,
+                      notifyOnReviewLike: user?.notifyOnReviewLike || false,
+                      notifyOnReviewComment: user?.notifyOnReviewComment || false,
+                      notifyOnRecommendation: user?.notifyOnRecommendation || false,
                     });
                   }}
                   className="px-8 py-3 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg"
