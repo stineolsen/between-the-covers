@@ -11,6 +11,19 @@ if ("scrollRestoration" in window.history) {
   window.history.scrollRestoration = "manual";
 }
 
+// Paired with self.skipWaiting()/self.clients.claim() in sw.js: once a new
+// service worker takes over, reload once so the page actually runs the new
+// JS it just started being served, instead of silently keeping the old
+// bundle running in memory until the user manually refreshes.
+if ("serviceWorker" in navigator) {
+  let reloadedForNewSW = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloadedForNewSW) return;
+    reloadedForNewSW = true;
+    window.location.reload();
+  });
+}
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <App />
