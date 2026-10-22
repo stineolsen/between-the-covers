@@ -106,7 +106,7 @@ const NotificationBell = () => {
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-2 w-80 max-w-[90vw] rounded-2xl overflow-hidden z-20"
+          className="fixed left-3 right-3 top-[76px] sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-80 max-w-none sm:max-w-[90vw] rounded-2xl overflow-hidden z-20"
           style={{ background: "var(--color-card)", border: "1px solid var(--color-border)", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}
         >
           <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--color-border)" }}>
