@@ -1,10 +1,9 @@
 const List = require("../models/List");
 const Book = require("../models/Book");
 const Comment = require("../models/Comment");
-const ListNotification = require("../models/ListNotification");
 const User = require("../models/User");
 const { canViewList, canEditList } = require("../utils/listPermissions");
-const { notifyListShared } = require("../utils/emailService");
+const { createNotification } = require("../utils/notificationCenter");
 
 const bookIdOf = (entry) => (entry.book && entry.book._id ? entry.book._id.toString() : entry.book.toString());
 
@@ -157,11 +156,12 @@ exports.deleteList = async (req, res) => {
       return res.status(403).json({ success: false, message: "Bare eieren kan slette listen" });
     }
 
-    await Promise.all([
-      Comment.deleteMany({ list: list._id }),
-      ListNotification.deleteMany({ list: list._id }),
-      list.deleteOne(),
-    ]);
+    // Notification is intentionally generic (no "list" ref - see
+    // models/Notification.js), so there's no cascade-delete for it here
+    // the way there was for ListNotification; a stale notification's link
+    // just 404s if clicked after the list is gone, same as a deleted
+    // book/review would.
+    await Promise.all([Comment.deleteMany({ list: list._id }), list.deleteOne()]);
 
     res.status(200).json({ success: true, message: "Listen ble slettet" });
   } catch (error) {
@@ -308,16 +308,23 @@ exports.addCollaborators = async (req, res) => {
     list.collaborators.push(...newCollaboratorIds);
     await list.save();
 
-    // Notify the newly added collaborators (in-app + email), fire-and-forget for email
-    const notification = await ListNotification.create({
-      list: list._id,
-      type: "shared",
-      from: req.user._id,
-      recipients: newCollaboratorIds,
-      message: message?.trim() || undefined,
-    });
-
-    notifyListShared(list, req.user, newCollaboratorIds);
+    // Notify the newly added collaborators (in-app + push + email, see
+    // notificationCenter.createNotification) - one per recipient since
+    // Notification is per-user, not a single shared-recipients doc like
+    // the old ListNotification was.
+    const sharerName = req.user.displayName || req.user.username;
+    const notifyMessage = message?.trim()
+      ? `${sharerName} delte «${list.title}» med deg: ${message.trim()}`
+      : `${sharerName} delte «${list.title}» med deg`;
+    for (const collaboratorId of newCollaboratorIds) {
+      createNotification({
+        recipient: collaboratorId,
+        from: req.user._id,
+        type: "list-shared",
+        message: notifyMessage,
+        link: `/lists/${list._id}`,
+      }).catch((error) => console.error("List-shared notification failed:", error));
+    }
 
     const populated = await List.findById(list._id);
 
@@ -325,7 +332,6 @@ exports.addCollaborators = async (req, res) => {
       success: true,
       message: "Listen ble delt",
       list: populated,
-      notification,
     });
   } catch (error) {
     console.error("Add collaborators error:", error);

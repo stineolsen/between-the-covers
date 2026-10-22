@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
 const FeedReaction = require("../models/FeedReaction");
 const FeedComment = require("../models/FeedComment");
+const Review = require("../models/Review");
+const UserBook = require("../models/UserBook");
+const AdventResult = require("../models/AdventResult");
 const { FEED_ACTIVITY_TYPES, REACTION_EMOJI } = require("../constants/feedConfig");
+const { createNotification } = require("../utils/notificationCenter");
 
 // Shared by every handler below - the (type, id) pair identifies a feed
 // item (see FeedReaction.js for why), so every route here needs both
@@ -17,6 +21,27 @@ function parseActivityRef(req, res) {
     return null;
   }
   return { activityType: type, activityId: id };
+}
+
+// Who a reaction/comment on this feed item should notify, and where
+// clicking that notification should go. Meetings have no single owner (a
+// club-wide event, not one person's content) - reactions/comments on them
+// just don't notify anyone, same as reacting to your own post doesn't
+// (createNotification already no-ops when recipient === from).
+async function getActivityOwnerAndLink(activityType, activityId) {
+  if (activityType === "review") {
+    const review = await Review.findById(activityId).select("user book");
+    return review ? { owner: review.user, link: `/books/${review.book}` } : null;
+  }
+  if (activityType === "status") {
+    const userBook = await UserBook.findById(activityId).select("user book");
+    return userBook ? { owner: userBook.user, link: `/books/${userBook.book}` } : null;
+  }
+  if (activityType === "advent") {
+    const result = await AdventResult.findById(activityId).select("user");
+    return result ? { owner: result.user, link: "/julekalender" } : null;
+  }
+  return null;
 }
 
 async function reactionSummary(ref, userId) {
@@ -50,6 +75,21 @@ exports.toggleReaction = async (req, res) => {
     const existing = await FeedReaction.findOneAndDelete({ ...ref, user: req.user._id, emoji });
     if (!existing) {
       await FeedReaction.create({ ...ref, user: req.user._id, emoji });
+
+      // Only on adding a reaction, never on removing one.
+      getActivityOwnerAndLink(ref.activityType, ref.activityId)
+        .then((ownerInfo) => {
+          if (!ownerInfo) return;
+          const reactorName = req.user.displayName || req.user.username;
+          return createNotification({
+            recipient: ownerInfo.owner,
+            from: req.user._id,
+            type: "feed-reaction",
+            message: `${reactorName} reagerte ${emoji} på aktiviteten din`,
+            link: ownerInfo.link,
+          });
+        })
+        .catch((error) => console.error("Feed-reaction notification failed:", error));
     }
 
     res.status(200).json({ success: true, reactions: await reactionSummary(ref, req.user._id) });
@@ -94,6 +134,24 @@ exports.createComment = async (req, res) => {
 
     const comment = await FeedComment.create({ ...ref, user: req.user._id, content });
     await comment.populate("user", "username displayName avatar");
+
+    getActivityOwnerAndLink(ref.activityType, ref.activityId)
+      .then((ownerInfo) => {
+        if (!ownerInfo) return;
+        const commenterName = req.user.displayName || req.user.username;
+        // Reviews get their own notification type (you asked specifically
+        // about review comments) - everything else is a generic feed comment.
+        const type = ref.activityType === "review" ? "review-comment" : "feed-comment";
+        return createNotification({
+          recipient: ownerInfo.owner,
+          from: req.user._id,
+          type,
+          message: `${commenterName} kommenterte: ${content.trim()}`,
+          link: ownerInfo.link,
+        });
+      })
+      .catch((error) => console.error("Feed-comment notification failed:", error));
+
     res.status(201).json({ success: true, comment });
   } catch (error) {
     console.error("Create feed comment error:", error);

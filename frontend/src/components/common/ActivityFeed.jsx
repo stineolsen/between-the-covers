@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import activityApi from '../../api/activityApi';
 import { useToast } from '../../contexts/useToast';
+import { useAuth } from '../../contexts/useAuth';
 import UserAvatar from './UserAvatar';
 
 const relativeTime = (date) => {
@@ -212,6 +213,7 @@ const REACTION_EMOJI = ['❤️', '👏', '😂', '📚', '😍', '🤬', '🤯'
 
 const ActivityFooter = ({ activity }) => {
   const toast = useToast();
+  const { user, isAdmin } = useAuth();
   const [reactions, setReactions] = useState(activity.reactions || []);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
@@ -261,6 +263,16 @@ const ActivityFooter = ({ activity }) => {
       })
       .catch((err) => toast.error(err.response?.data?.message || 'Klarte ikke legge til kommentar'))
       .finally(() => setPosting(false));
+  };
+
+  const handleDeleteComment = (commentId) => {
+    activityApi
+      .deleteComment(commentId)
+      .then(() => {
+        setComments((prev) => (prev || []).filter((c) => c._id !== commentId));
+        setCommentCount((c) => Math.max(0, c - 1));
+      })
+      .catch((err) => toast.error(err.response?.data?.message || 'Klarte ikke slette kommentaren'));
   };
 
   return (
@@ -326,15 +338,34 @@ const ActivityFooter = ({ activity }) => {
 
       {commentsOpen && (
         <div className="mt-2 space-y-2">
-          {(comments || []).map((c) => (
-            <div key={c._id} className="flex items-start gap-2">
-              <AvatarLink user={c.user} className="w-6 h-6 rounded-full text-xs font-bold" />
-              <div className="flex-1 min-w-0 text-xs rounded-lg px-2.5 py-1.5" style={{ background: 'var(--color-sunken)' }}>
-                <NameLink user={c.user} className="font-semibold text-xs" />{' '}
-                <span style={{ color: 'var(--color-text-muted)' }}>{c.content}</span>
+          {(comments || []).map((c) => {
+            const canDelete = isAdmin || c.user?._id === user?._id;
+            return (
+              <div key={c._id} className="flex items-start gap-2">
+                <AvatarLink user={c.user} className="w-6 h-6 rounded-full text-xs font-bold" />
+                <div className="flex-1 min-w-0 text-xs rounded-lg px-2.5 py-1.5 flex items-start gap-2" style={{ background: 'var(--color-sunken)' }}>
+                  <div className="flex-1 min-w-0">
+                    <NameLink user={c.user} className="font-semibold text-xs" />{' '}
+                    <span style={{ color: 'var(--color-text-muted)' }}>{c.content}</span>
+                  </div>
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDeleteComment(c._id)}
+                      className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center hover:opacity-70"
+                      style={{ color: 'var(--color-text-faint)' }}
+                      title="Slett kommentar"
+                      aria-label="Slett kommentar"
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                        <line x1="5" y1="5" x2="19" y2="19" />
+                        <line x1="19" y1="5" x2="5" y2="19" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           <div className="flex items-center gap-2">
             <input
               value={newComment}

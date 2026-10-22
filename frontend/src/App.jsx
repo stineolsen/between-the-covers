@@ -11,6 +11,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { SeasonalThemeProvider } from "./contexts/SeasonalThemeContext";
 import Navbar from "./components/common/Navbar";
 import SeasonalParticles from "./components/common/SeasonalParticles";
+import NotificationPreferencesPopup from "./components/common/NotificationPreferencesPopup";
 import Footer from "./components/common/Footer";
 import ScrollToTop from "./components/common/ScrollToTop";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -50,6 +51,7 @@ function App() {
             <div className="min-h-screen flex flex-col animate-fadeIn pb-16 lg:pb-0">
               <ScrollToTop />
               <SeasonalParticles />
+              <NotificationPreferencesPopup />
               <Navbar />
               <Routes>
                 {/* Public Routes */}

@@ -4,6 +4,7 @@ import { useAuth } from "../../contexts/useAuth";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useSeasonalTheme } from "../../contexts/SeasonalThemeContext";
 import UserAvatar from "./UserAvatar";
+import NotificationBell from "./NotificationBell";
 
 // Classic spiderweb-in-a-corner: 5 spokes radiating from the origin plus 3
 // concentric rings connecting them (straight segments, not true arcs - a
@@ -154,6 +155,7 @@ const Navbar = () => {
                 </div>
 
                 <div className="flex items-center gap-2 sm:gap-3">
+                  <NotificationBell />
                   <button
                     onClick={toggleTheme}
                     className="w-10 h-10 rounded-lg flex items-center justify-center transition-colors"

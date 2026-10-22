@@ -1,8 +1,7 @@
 const Comment = require("../models/Comment");
 const List = require("../models/List");
-const ListNotification = require("../models/ListNotification");
 const { canViewList } = require("../utils/listPermissions");
-const { notifyListComment } = require("../utils/emailService");
+const { createNotification } = require("../utils/notificationCenter");
 
 // @desc    Get comments for a list, or for one book within a list
 // @route   GET /api/comments?listId=&bookId=
@@ -63,16 +62,16 @@ exports.createComment = async (req, res) => {
       .map((u) => (u._id ? u._id.toString() : u.toString()))
       .filter((id, index, all) => id !== authorId && all.indexOf(id) === index);
 
-    if (recipientIds.length > 0) {
-      await ListNotification.create({
-        list: list._id,
-        type: "comment",
+    const commenterName = req.user.displayName || req.user.username;
+    const notifyMessage = `${commenterName} kommenterte på «${list.title}»: ${comment.content}`;
+    for (const recipientId of recipientIds) {
+      createNotification({
+        recipient: recipientId,
         from: req.user._id,
-        recipients: recipientIds,
-        comment: comment._id,
-      });
-
-      notifyListComment(list, comment, req.user, recipientIds);
+        type: "list-comment",
+        message: notifyMessage,
+        link: `/lists/${list._id}`,
+      }).catch((error) => console.error("List-comment notification failed:", error));
     }
 
     res.status(201).json({ success: true, message: "Kommentar lagt til", comment });

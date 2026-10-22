@@ -1,6 +1,7 @@
 const BookRequest = require('../models/BookRequest');
 const Book = require('../models/Book');
 const { notifyAdminsNewRequest } = require('../utils/emailService');
+const { createNotification } = require('../utils/notificationCenter');
 
 const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -152,9 +153,20 @@ exports.markAsAdded = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Forespørsel ikke funnet' });
     }
 
-    // The requester (if opted in) gets notified ~5 minutes from now by the
+    // Email (if opted in) still goes out ~5 minutes from now via the
     // scheduled sweep in emailService.sendPendingRequestNotifications, once
-    // there's been time for the admin to actually finish adding the book.
+    // there's been time for the admin to actually finish adding the book -
+    // left as-is. The in-app bell notification doesn't need that delay, so
+    // it fires immediately here instead.
+    createNotification({
+      recipient: request.requestedBy,
+      from: null,
+      type: 'request-fulfilled',
+      message: request.addedBook
+        ? `Boken du ba om, «${request.addedBook.title}», er nå lagt til i biblioteket!`
+        : 'Boken du ba om er nå lagt til i biblioteket!',
+      link: request.addedBook ? `/books/${request.addedBook._id}` : '/books',
+    }).catch((error) => console.error('Request-fulfilled notification failed:', error));
 
     res.status(200).json({ success: true, message: 'Merket som lagt til', request });
   } catch (error) {

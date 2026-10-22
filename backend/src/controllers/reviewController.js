@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const Book = require("../models/Book");
+const { createNotification } = require("../utils/notificationCenter");
 
 // @desc    Get all reviews (with optional filters)
 // @route   GET /api/reviews
@@ -256,7 +257,7 @@ exports.deleteReview = async (req, res, next) => {
 // @access  Private
 exports.toggleLike = async (req, res, next) => {
   try {
-    const review = await Review.findById(req.params.id);
+    const review = await Review.findById(req.params.id).populate("book", "title");
 
     if (!review) {
       return res.status(404).json({
@@ -267,13 +268,25 @@ exports.toggleLike = async (req, res, next) => {
 
     await review.toggleLike(req.user._id);
 
+    const isLiked = review.likes.some((id) => id.toString() === req.user._id.toString());
+
+    // Only notify on the like itself, not on unliking.
+    if (isLiked) {
+      const likerName = req.user.displayName || req.user.username;
+      createNotification({
+        recipient: review.user,
+        from: req.user._id,
+        type: "review-like",
+        message: `${likerName} likte anmeldelsen din av «${review.book?.title || "en bok"}»`,
+        link: `/books/${review.book?._id}`,
+      }).catch((error) => console.error("Review-like notification failed:", error));
+    }
+
     res.status(200).json({
       success: true,
       message: "Like toggled successfully",
       likeCount: review.likeCount,
-      isLiked: review.likes.some(
-        (id) => id.toString() === req.user._id.toString(),
-      ),
+      isLiked,
     });
   } catch (error) {
     console.error("Toggle like error:", error);

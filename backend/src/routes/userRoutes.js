@@ -11,6 +11,7 @@ const {
   deleteAvatar,
   getPublicProfile,
   setAbsUsername,
+  setNotificationPreferences,
 } = require("../controllers/userController");
 const { getUserBadges } = require("../controllers/badgeController");
 
@@ -20,6 +21,7 @@ router.get("/members", protect, getMembers);
 // Profile routes
 router.get("/profile", protect, getProfile);
 router.put("/profile", protect, updateProfile);
+router.put("/notification-preferences", protect, setNotificationPreferences);
 
 // Avatar routes
 router.post("/avatar", protect, uploadSingle("avatar"), uploadAvatar);

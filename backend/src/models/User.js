@@ -103,6 +103,38 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Notification centre - new trigger types, set in bulk by the one-time
+    // preferences popup (see notificationPreferencesPromptedAt below)
+    // rather than defaulting to on. Push isn't a boolean here - it's
+    // governed purely by whether a PushSubscription row exists, same as
+    // the list-share/list-comment notifications already are.
+    notifyOnFeedReaction: {
+      type: Boolean,
+      default: false,
+    },
+    notifyOnFeedComment: {
+      type: Boolean,
+      default: false,
+    },
+    notifyOnReviewLike: {
+      type: Boolean,
+      default: false,
+    },
+    notifyOnReviewComment: {
+      type: Boolean,
+      default: false,
+    },
+    notifyOnRecommendation: {
+      type: Boolean,
+      default: false,
+    },
+    // Set the first time the user answers (or dismisses) the notification
+    // preferences popup, so it only ever shows once per user rather than
+    // nagging on every login.
+    notificationPreferencesPromptedAt: {
+      type: Date,
+      default: null,
+    },
     // Per-user annual reading goal (book count), shown as progress on Home
     // and Din lesehistorie. Null until the user sets one.
     readingGoal: {

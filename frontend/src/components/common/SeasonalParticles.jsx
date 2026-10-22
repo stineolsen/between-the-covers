@@ -19,6 +19,7 @@ const SnowLayer = () => {
         drift: randomBetween(-60, 60),
         rotateEnd: randomBetween(180, 540) * randomSign(),
         size: randomBetween(5, 10),
+        opacity: randomBetween(0.1, 0.5),
       })),
     [],
   );
@@ -37,6 +38,7 @@ const SnowLayer = () => {
             animationDelay: `${p.delay}s`,
             "--drift": p.drift,
             "--rotate-end": `${p.rotateEnd}deg`,
+            opacity: p.opacity,
           }}
         />
       ))}

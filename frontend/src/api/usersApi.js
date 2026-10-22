@@ -19,6 +19,12 @@ export const usersApi = {
     return response.data;
   },
 
+  // One-time notification-preferences popup (NotificationPreferencesPopup.jsx)
+  setNotificationPreferences: async (emailEnabled) => {
+    const response = await api.put("/api/users/notification-preferences", { emailEnabled });
+    return response.data;
+  },
+
   // Upload avatar image
   uploadAvatar: async (file) => {
     const formData = new FormData();

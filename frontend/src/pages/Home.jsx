@@ -8,7 +8,6 @@ import { countReadInYear } from "../utils/readingGoal";
 import NextMeeting from "../components/meetings/NextMeeting";
 import ActivityFeed from "../components/common/ActivityFeed";
 import RecommendationFeed from "../components/common/RecommendationFeed";
-import ListNotificationFeed from "../components/common/ListNotificationFeed";
 import MyRequestsFeed from "../components/common/MyRequestsFeed";
 import ReadingGoalCard from "../components/common/ReadingGoalCard";
 import BookCoverFallback from "../components/common/BookCoverFallback";
@@ -159,7 +158,6 @@ const Home = () => {
           </div>
 
           <div className="order-2 lg:order-1">
-            <ListNotificationFeed />
             <MyRequestsFeed />
             <RecommendationFeed />
             <ActivityFeed />

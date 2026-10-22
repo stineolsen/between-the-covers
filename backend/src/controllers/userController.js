@@ -103,6 +103,11 @@ exports.updateProfile = async (req, res, next) => {
       notifyOnNewOrder,
       notifyOnListShared,
       notifyOnListComment,
+      notifyOnFeedReaction,
+      notifyOnFeedComment,
+      notifyOnReviewLike,
+      notifyOnReviewComment,
+      notifyOnRecommendation,
       readingGoal,
     } = req.body;
 
@@ -153,6 +158,21 @@ exports.updateProfile = async (req, res, next) => {
     if (notifyOnListComment !== undefined) {
       user.notifyOnListComment = notifyOnListComment;
     }
+    if (notifyOnFeedReaction !== undefined) {
+      user.notifyOnFeedReaction = notifyOnFeedReaction;
+    }
+    if (notifyOnFeedComment !== undefined) {
+      user.notifyOnFeedComment = notifyOnFeedComment;
+    }
+    if (notifyOnReviewLike !== undefined) {
+      user.notifyOnReviewLike = notifyOnReviewLike;
+    }
+    if (notifyOnReviewComment !== undefined) {
+      user.notifyOnReviewComment = notifyOnReviewComment;
+    }
+    if (notifyOnRecommendation !== undefined) {
+      user.notifyOnRecommendation = notifyOnRecommendation;
+    }
     if (readingGoal !== undefined) {
       const goalNum = Number(readingGoal);
       if (readingGoal !== null && (!Number.isFinite(goalNum) || goalNum < 1)) {
@@ -171,6 +191,40 @@ exports.updateProfile = async (req, res, next) => {
       message: "Profile updated successfully",
       user,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    One-time notification-preferences popup (NotificationPreferencesPopup.jsx)
+//          - sets all five new notification-centre email flags at once from
+//          a single yes/no choice, and stamps notificationPreferencesPromptedAt
+//          so the popup never shows again for this user. Push isn't set
+//          here - "want push?" is answered by whether the browser flow
+//          (subscribeToPush) actually ran, not a stored flag.
+//          Fine-grained per-type editing can still go through updateProfile
+//          later from a settings page.
+// @route   PUT /api/users/notification-preferences
+// @access  Private
+exports.setNotificationPreferences = async (req, res, next) => {
+  try {
+    const { emailEnabled } = req.body;
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (emailEnabled !== undefined) {
+      user.notifyOnFeedReaction = !!emailEnabled;
+      user.notifyOnFeedComment = !!emailEnabled;
+      user.notifyOnReviewLike = !!emailEnabled;
+      user.notifyOnReviewComment = !!emailEnabled;
+      user.notifyOnRecommendation = !!emailEnabled;
+    }
+    user.notificationPreferencesPromptedAt = new Date();
+
+    await user.save();
+    res.status(200).json({ success: true, user });
   } catch (error) {
     next(error);
   }

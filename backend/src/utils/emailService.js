@@ -533,164 +533,40 @@ async function notifyAdminsNewOrder(order) {
   }
 }
 
-function buildListSharedHtml(list, sharedBy) {
-  const frontendUrl = getFrontendUrl();
-  const sharedByName = sharedBy.displayName || sharedBy.username;
-  const listLink = frontendUrl ? `${frontendUrl}/lists/${list._id}` : null;
+// buildListSharedHtml/notifyListShared and buildListCommentHtml/
+// notifyListComment used to live here. Both are retired - list-shared and
+// list-comment now go through notificationCenter.createNotification like
+// every other notification type (see listController.js's addCollaborators
+// and commentController.js's createComment).
 
-  const bodyHtml = `
-    <div style="margin:0 0 16px; padding:16px; background:#f9fafb; border-radius:12px;">
-      <div style="font-size:16px; font-weight:bold; color:#111827;">${escapeHtml(list.title)}</div>
-      ${list.description ? `<div style="font-size:14px; color:#6b7280; margin-top:4px;">${escapeHtml(list.description)}</div>` : ""}
-    </div>
-    ${
-      listLink
-        ? `<a href="${listLink}" style="display:inline-block; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">Se listen</a>`
-        : ""
-    }`;
-
-  return renderEmailLayout({ heading: `${escapeHtml(sharedByName)} delte en liste med deg! 📋`, bodyHtml, frontendUrl });
-}
-
-async function sendListSharedEmail(email, list, sharedBy) {
+// One generic template for every notification-centre email type (reactions,
+// comments, recommendations, etc.) instead of a bespoke function per type -
+// unlike list-shared/list-comment above, these don't need custom layout,
+// just a heading, a line of body text, and an optional link to the thing
+// that happened. Called from utils/notificationCenter.js.
+async function sendNotificationEmail(email, { heading, bodyText, link, linkLabel }) {
   const client = getClient();
   if (!client || !process.env.RESEND_FROM_EMAIL) {
-    console.error("Resend not configured - skipping list-shared email to", email);
+    console.error("Resend not configured - skipping notification email to", email);
     return;
   }
 
-  const sharedByName = sharedBy.displayName || sharedBy.username;
-  await client.emails.send({
-    from: process.env.RESEND_FROM_EMAIL,
-    to: email,
-    subject: `📋 ${sharedByName} delte «${list.title}» med deg`,
-    html: buildListSharedHtml(list, sharedBy),
-  });
-}
-
-// Fire-and-forget, mirrors notifyAdminsNewRequest's shape - never throws so
-// the controller action that triggered a share never fails because of email.
-async function notifyListShared(list, sharedBy, recipientUserIds) {
-  try {
-    const client = getClient();
-    if (!client || !process.env.RESEND_FROM_EMAIL) {
-      console.error("Resend not configured - skipping list-shared email notifications");
-      return;
-    }
-
-    const recipients = await User.find({
-      _id: { $in: recipientUserIds },
-      notifyOnListShared: true,
-      status: "approved",
-    }).select("email");
-
-    for (const recipient of recipients) {
-      try {
-        await sendListSharedEmail(recipient.email, list, sharedBy);
-      } catch (error) {
-        console.error("Failed to send list-shared email to", recipient.email, error);
-      }
-    }
-  } catch (error) {
-    console.error("notifyListShared failed:", error);
-  }
-
-  // Independent of the email try block above (and its notifyOnListShared /
-  // Resend-configured gating) - push opts in purely via having a subscription.
-  try {
-    const sharedByName = sharedBy.displayName || sharedBy.username;
-    const subscriberIds = await PushSubscription.distinct("user", { user: { $in: recipientUserIds } });
-    for (const userId of subscriberIds) {
-      await sendPushToUser(userId, {
-        title: `${sharedByName} delte en liste med deg! 📋`,
-        body: `Liste: ${list.title}`,
-        url: `/lists/${list._id}`,
-      });
-    }
-  } catch (error) {
-    console.error("notifyListShared push failed:", error);
-  }
-}
-
-function buildListCommentHtml(list, comment, commenter) {
   const frontendUrl = getFrontendUrl();
-  const commenterName = commenter.displayName || commenter.username;
-  const listLink = frontendUrl ? `${frontendUrl}/lists/${list._id}` : null;
-
+  const fullLink = link && frontendUrl ? `${frontendUrl}${link}` : null;
   const bodyHtml = `
-    <p style="font-size:14px; color:#6b7280; margin:0 0 8px;">${escapeHtml(commenterName)} kommenterte på <strong>${escapeHtml(list.title)}</strong>:</p>
-    <div style="margin:0 0 16px; padding:16px; background:#f9fafb; border-radius:12px;">
-      <div style="font-size:15px; color:#111827;">${escapeHtml(comment.content)}</div>
-    </div>
+    <p style="font-size:15px; color:#111827; margin:0 0 16px;">${escapeHtml(bodyText)}</p>
     ${
-      listLink
-        ? `<a href="${listLink}" style="display:inline-block; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">Se listen</a>`
+      fullLink
+        ? `<a href="${fullLink}" style="display:inline-block; padding:10px 20px; background:#667eea; color:#ffffff; border-radius:999px; text-decoration:none; font-weight:bold; font-size:14px;">${escapeHtml(linkLabel || "Se mer")}</a>`
         : ""
     }`;
 
-  return renderEmailLayout({ heading: `Ny kommentar på «${escapeHtml(list.title)}» 💬`, bodyHtml, frontendUrl });
-}
-
-async function sendListCommentEmail(email, list, comment, commenter) {
-  const client = getClient();
-  if (!client || !process.env.RESEND_FROM_EMAIL) {
-    console.error("Resend not configured - skipping list-comment email to", email);
-    return;
-  }
-
-  const commenterName = commenter.displayName || commenter.username;
   await client.emails.send({
     from: process.env.RESEND_FROM_EMAIL,
     to: email,
-    subject: `💬 ${commenterName} kommenterte på «${list.title}»`,
-    html: buildListCommentHtml(list, comment, commenter),
+    subject: heading,
+    html: renderEmailLayout({ heading, bodyHtml, frontendUrl }),
   });
-}
-
-// Fire-and-forget, same shape as notifyListShared.
-async function notifyListComment(list, comment, commenter, recipientUserIds) {
-  try {
-    if (!recipientUserIds || recipientUserIds.length === 0) return;
-
-    const client = getClient();
-    if (!client || !process.env.RESEND_FROM_EMAIL) {
-      console.error("Resend not configured - skipping list-comment email notifications");
-      return;
-    }
-
-    const recipients = await User.find({
-      _id: { $in: recipientUserIds },
-      notifyOnListComment: true,
-      status: "approved",
-    }).select("email");
-
-    for (const recipient of recipients) {
-      try {
-        await sendListCommentEmail(recipient.email, list, comment, commenter);
-      } catch (error) {
-        console.error("Failed to send list-comment email to", recipient.email, error);
-      }
-    }
-  } catch (error) {
-    console.error("notifyListComment failed:", error);
-  }
-
-  // Independent of the email try block above, same reasoning as notifyListShared.
-  try {
-    if (!recipientUserIds || recipientUserIds.length === 0) return;
-
-    const commenterName = commenter.displayName || commenter.username;
-    const subscriberIds = await PushSubscription.distinct("user", { user: { $in: recipientUserIds } });
-    for (const userId of subscriberIds) {
-      await sendPushToUser(userId, {
-        title: `Ny kommentar på «${list.title}» 💬`,
-        body: `${commenterName}: ${comment.content}`,
-        url: `/lists/${list._id}`,
-      });
-    }
-  } catch (error) {
-    console.error("notifyListComment push failed:", error);
-  }
 }
 
 module.exports = {
@@ -700,6 +576,5 @@ module.exports = {
   sendFeatureAlert,
   notifyAdminsNewRequest,
   notifyAdminsNewOrder,
-  notifyListShared,
-  notifyListComment,
+  sendNotificationEmail,
 };

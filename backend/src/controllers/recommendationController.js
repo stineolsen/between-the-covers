@@ -1,6 +1,7 @@
 const Recommendation = require('../models/Recommendation');
 const Book = require('../models/Book');
 const UserBook = require('../models/UserBook');
+const { createNotification } = require('../utils/notificationCenter');
 
 // @desc    Send a book recommendation to other members
 // @route   POST /api/recommendations
@@ -32,6 +33,21 @@ exports.createRecommendation = async (req, res) => {
       recipients: filteredRecipients,
       message: message?.trim() || undefined
     });
+
+    // Recommendation itself stays the persistent "books suggested to you"
+    // inbox (RecommendationFeed) - this is just the bell alert that one
+    // arrived, same as every other notification type.
+    const senderName = req.user.displayName || req.user.username;
+    const notifyMessage = `${senderName} anbefalte deg «${book.title}»`;
+    for (const recipientId of filteredRecipients) {
+      createNotification({
+        recipient: recipientId,
+        from: req.user._id,
+        type: 'recommendation',
+        message: notifyMessage,
+        link: `/books/${book._id}`,
+      }).catch((error) => console.error('Recommendation notification failed:', error));
+    }
 
     res.status(201).json({ success: true, message: 'Anbefaling sendt!', recommendation });
   } catch (error) {
