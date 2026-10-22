@@ -5,10 +5,23 @@ const Howto = () => {
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Header */}
+
         <div className="text-center mb-8 animate-fadeIn">
           <h1 className="text-5xl font-bold text-primary mb-3 drop-shadow-lg">
-            Slik bruker du lydbokbiblioteket
+          How to...
           </h1>
+          <p className="text-xl text-secondary font-medium max-w-2xl mx-auto">
+            Denne guiden viser deg hvordan du kan høre på lydbøker fra
+            lydbokbiblioteket, enten i nettleser eller på mobil/nettbrett.
+            Du finner også guide for hvordan man skrur på varseler for nettappen. 
+          </p>
+        </div>
+
+      
+        <div className="text-center mb-8 animate-fadeIn">
+          <h2 className="text-5xl font-bold text-primary mb-3 drop-shadow-lg">
+            Slik bruker du lydbokbiblioteket
+          </h2>
           <p className="text-xl text-secondary font-medium max-w-2xl mx-auto">
             Denne guiden viser deg hvordan du kan høre på lydbøker fra
             lydbokbiblioteket – enten i nettleser eller på mobil/nettbrett.
@@ -108,11 +121,11 @@ const Howto = () => {
               <span aria-hidden="true">⬆️</span> nederst i Safari
             </p>
             <p className="text-gray-700">
-              2. Velg <i>«Legg til på Hjem-skjerm»</i>
+              2. Trykk på vis mer og velg <i>«Legg til på Hjem-skjerm»</i>
             </p>
             <p className="text-gray-700">
-              3. Trykk <i>«Legg til»</i> - appen dukker nå opp som et vanlig
-              app-ikon
+              3. Pass på at "Åpne som nettapp" er på, trykk <i>«Legg til»</i>. Appen dukker nå opp som et vanlig
+              app-ikon på hjemskjermen
             </p>
             <p className="text-gray-700">
               4. Åpne appen fra det nye ikonet (ikke Safari-bokmerket), og skru

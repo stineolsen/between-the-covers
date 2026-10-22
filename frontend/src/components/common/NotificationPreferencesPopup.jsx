@@ -63,7 +63,7 @@ const NotificationPreferencesPopup = () => {
             <Link to="/howto#installer-app" className="font-semibold underline" style={{ color: "var(--color-primary)" }}>
               Se hvordan her
             </Link>
-            {" "}hvis du ikke har gjort det ennå - ellers fungerer e-post og
+            {" "}hvis du ikke har gjort det ennå, ellers fungerer e-post og
             varselklokken som vanlig.
           </p>
         )}
