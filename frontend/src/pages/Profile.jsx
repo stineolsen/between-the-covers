@@ -11,6 +11,8 @@ import {
   getPushSubscriptionState,
   subscribeToPush,
   unsubscribeFromPush,
+  isIOS,
+  isInstalledAsPWA,
 } from "../utils/pushNotifications";
 
 const Profile = () => {
@@ -584,7 +586,7 @@ const Profile = () => {
           )}
         </div>
         {/* Push Notifications Section */}
-        {pushState !== "unsupported" && (
+        {pushState !== "unsupported" ? (
           <div className="container-gradient mt-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -612,6 +614,20 @@ const Profile = () => {
               </button>
             </div>
           </div>
+        ) : (
+          isIOS() && !isInstalledAsPWA() && (
+            <div className="container-gradient mt-6">
+              <h3 className="text-lg font-bold text-text mb-1">🔔 Push-varsler</h3>
+              <p className="text-text-muted text-sm">
+                Apple krever at appen legges til på hjemskjermen før push-varsler
+                kan skrus på i Safari.{" "}
+                <Link to="/howto#installer-app" className="font-semibold underline" style={{ color: "var(--color-primary)" }}>
+                  Se hvordan her
+                </Link>
+                , og kom tilbake hit når du har gjort det.
+              </p>
+            </div>
+          )
         )}
         {/* Change Password Section */}
         <div className="container-gradient mt-6">

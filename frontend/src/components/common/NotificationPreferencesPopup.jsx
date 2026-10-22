@@ -1,7 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../contexts/useAuth";
 import { usersApi } from "../../api/usersApi";
-import { subscribeToPush, isPushSupported } from "../../utils/pushNotifications";
+import {
+  subscribeToPush,
+  isPushSupported,
+  isIOS,
+  isInstalledAsPWA,
+} from "../../utils/pushNotifications";
 
 // Shown exactly once per user, the first time they load the app after this
 // feature shipped - derived directly from user.notificationPreferencesPromptedAt
@@ -49,6 +55,18 @@ const NotificationPreferencesPopup = () => {
         <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
           Du har alltid varslene i klokken øverst. Vil du i tillegg ha dem på e-post eller push?
         </p>
+
+        {isIOS() && !isInstalledAsPWA() && (
+          <p className="text-xs mb-3 rounded-lg px-3 py-2" style={{ background: "var(--color-wine-tint)", color: "var(--color-text-muted)" }}>
+            📱 For å få push-varsler på iPhone/iPad må appen først legges til
+            på hjemskjermen (Apple krever dette). {" "}
+            <Link to="/howto#installer-app" className="font-semibold underline" style={{ color: "var(--color-primary)" }}>
+              Se hvordan her
+            </Link>
+            {" "}hvis du ikke har gjort det ennå - ellers fungerer e-post og
+            varselklokken som vanlig.
+          </p>
+        )}
 
         <div className="flex flex-col gap-2 mb-4">
           <button onClick={() => finish(true, { tryPush: true })} disabled={saving} className="btn-primary text-sm disabled:opacity-50">

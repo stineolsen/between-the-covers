@@ -84,6 +84,53 @@ const Howto = () => {
           </p>
         </div>
 
+        {/* Push-varsler */}
+        <div
+          id="installer-app"
+          className="mt-12 p-8 rounded-2xl text-center animate-fadeIn"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(231, 193, 236, 0.4), rgba(241, 199, 204, 0.4))",
+          }}
+        >
+          <h3 className="text-2xl font-bold text-primary mb-3">
+            🔔 Legg til appen på hjemskjermen (for push-varsler)
+          </h3>
+          <p className="text-gray-700 max-w-3xl mx-auto leading-relaxed text-lg mb-4">
+            På iPhone/iPad må Between The Covers være lagt til på hjemskjermen
+            for at push-varsler skal fungere - Apple tillater ikke push rett i
+            Safari.
+          </p>
+          <div className="max-w-xl mx-auto text-left space-y-2 mb-6">
+            <p className="font-bold text-primary">📱 iPhone/iPad (Safari):</p>
+            <p className="text-gray-700">
+              1. Trykk på Del-ikonet{" "}
+              <span aria-hidden="true">⬆️</span> nederst i Safari
+            </p>
+            <p className="text-gray-700">
+              2. Velg <i>«Legg til på Hjem-skjerm»</i>
+            </p>
+            <p className="text-gray-700">
+              3. Trykk <i>«Legg til»</i> - appen dukker nå opp som et vanlig
+              app-ikon
+            </p>
+            <p className="text-gray-700">
+              4. Åpne appen fra det nye ikonet (ikke Safari-bokmerket), og skru
+              på push-varsler fra profilen din
+            </p>
+          </div>
+          <div className="max-w-xl mx-auto text-left space-y-2">
+            <p className="font-bold text-primary">🤖 Android (Chrome):</p>
+            <p className="text-gray-700">
+              1. Trykk på menyknappen (⋮) øverst til høyre
+            </p>
+            <p className="text-gray-700">
+              2. Velg <i>«Installer app»</i> eller{" "}
+              <i>«Legg til på startskjermen»</i>
+            </p>
+          </div>
+        </div>
+
         <div className="mt-12 p-8 rounded-2xl text-center animate-fadeIn">
           <Link to="/books" className="btn-primary inline-block">
             Sjekk ut bøkene i bibiloteket her

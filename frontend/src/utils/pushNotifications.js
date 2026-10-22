@@ -13,6 +13,21 @@ export async function isPushSupported() {
   return "serviceWorker" in navigator && "PushManager" in window;
 }
 
+// iOS only exposes the Push API to a site once it's been added to the home
+// screen (running in standalone display mode) - in an ordinary Safari tab
+// `PushManager` is simply undefined, so isPushSupported() alone can't tell
+// a user why push isn't available to them there.
+export function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+
+export function isInstalledAsPWA() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
 // Reflects the real browser/subscription state rather than a stored
 // preference, since permission can be revoked outside the app (e.g. in
 // browser settings) and a DB flag alone would drift from reality.
