@@ -4,6 +4,8 @@ const Meeting = require('../models/Meeting');
 const AdventResult = require('../models/AdventResult');
 const AdventAttempt = require('../models/AdventAttempt');
 const AdventDay = require('../models/AdventDay');
+const FeedReaction = require('../models/FeedReaction');
+const FeedComment = require('../models/FeedComment');
 
 // @desc    Get recent activity feed for all club members
 // @route   GET /api/activity
@@ -47,15 +49,19 @@ exports.getActivity = async (req, res) => {
         .populate('adventDay', 'day year'),
     ]);
 
-    // Map to unified activity shape
+    // Map to unified activity shape. Every item carries activityType +
+    // activityId identifying the source document it was built from -
+    // reactions/comments key off that pair (see FeedReaction.js), since
+    // the feed itself is computed here rather than stored.
     const reviewActivities = reviews
       .filter(r => r.user && r.book)
       .map(r => ({
         type: 'review',
+        activityType: 'review',
+        activityId: r._id,
         user: r.user,
         book: r.book,
         rating: r.rating,
-        reviewId: r._id,
         date: r.createdAt
       }));
 
@@ -68,6 +74,8 @@ exports.getActivity = async (req, res) => {
           ub.createdAt;
         return {
           type: 'status',
+          activityType: 'status',
+          activityId: ub._id,
           status: ub.status,
           user: ub.user,
           book: ub.book,
@@ -77,6 +85,8 @@ exports.getActivity = async (req, res) => {
 
     const meetingActivities = meetings.map(m => ({
       type: 'meeting',
+      activityType: 'meeting',
+      activityId: m._id,
       meeting: {
         _id: m._id,
         title: m.title,
@@ -104,6 +114,8 @@ exports.getActivity = async (req, res) => {
 
     const adventActivities = validAdventResults.map(r => ({
       type: 'advent',
+      activityType: 'advent',
+      activityId: r._id,
       user: r.user,
       day: r.adventDay.day,
       year: r.adventDay.year,
@@ -121,6 +133,46 @@ exports.getActivity = async (req, res) => {
     ]
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, limit);
+
+    // Batch-fetch reactions/comment counts only for the page actually
+    // being returned, not every candidate above - one query each instead
+    // of N+1 per item.
+    if (activities.length > 0) {
+      const orClause = activities.map(a => ({ activityType: a.activityType, activityId: a.activityId }));
+
+      const [reactions, commentCounts] = await Promise.all([
+        FeedReaction.find({ $or: orClause }),
+        FeedComment.aggregate([
+          { $match: { $or: orClause } },
+          { $group: { _id: { activityType: '$activityType', activityId: '$activityId' }, count: { $sum: 1 } } },
+        ]),
+      ]);
+
+      const reactionsByKey = new Map();
+      for (const r of reactions) {
+        const key = `${r.activityType}_${r.activityId}`;
+        if (!reactionsByKey.has(key)) reactionsByKey.set(key, new Map());
+        const byEmoji = reactionsByKey.get(key);
+        if (!byEmoji.has(r.emoji)) byEmoji.set(r.emoji, { emoji: r.emoji, count: 0, reactedByMe: false });
+        const entry = byEmoji.get(r.emoji);
+        entry.count += 1;
+        if (r.user.toString() === req.user._id.toString()) entry.reactedByMe = true;
+      }
+
+      const commentCountByKey = new Map(
+        commentCounts.map(c => [`${c._id.activityType}_${c._id.activityId}`, c.count]),
+      );
+
+      for (const activity of activities) {
+        const key = `${activity.activityType}_${activity.activityId}`;
+        const byEmoji = reactionsByKey.get(key);
+        // Only emoji someone's actually used - see feedController's
+        // reactionSummary for why this stopped padding with the full
+        // REACTION_EMOJI palette.
+        activity.reactions = byEmoji ? Array.from(byEmoji.values()) : [];
+        activity.commentCount = commentCountByKey.get(key) || 0;
+      }
+    }
 
     res.status(200).json({ success: true, activities });
   } catch (error) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import activityApi from '../../api/activityApi';
+import { useToast } from '../../contexts/useToast';
 import UserAvatar from './UserAvatar';
 
 const relativeTime = (date) => {
@@ -31,9 +32,27 @@ const Stars = ({ rating }) => {
   );
 };
 
-const Avatar = ({ user }) => (
-  <UserAvatar user={user} className="w-7 h-7 sm:w-9 sm:h-9 rounded-full font-bold text-sm flex-shrink-0" />
-);
+// Both wrap to the member's public profile - omitted (falls back to plain
+// text/avatar) when a user wasn't populated, which happens for a couple of
+// edge-case feed rows (e.g. a deleted account).
+const NameLink = ({ user, className = 'font-semibold' }) => {
+  const name = user?.displayName || user?.username || 'Ukjent';
+  if (!user?._id) return <span className={className}>{name}</span>;
+  return (
+    <Link to={`/members/${user._id}`} className={`${className} hover:underline`}>
+      {name}
+    </Link>
+  );
+};
+
+const AvatarLink = ({ user, className, title }) => {
+  if (!user?._id) return <UserAvatar user={user} className={className} title={title} />;
+  return (
+    <Link to={`/members/${user._id}`} className="flex-shrink-0">
+      <UserAvatar user={user} className={className} title={title} />
+    </Link>
+  );
+};
 
 const BookThumb = ({ book }) => {
   if (!book?.coverImage) return null;
@@ -48,18 +67,23 @@ const BookThumb = ({ book }) => {
   );
 };
 
-const ActivityItem = ({ activity }) => {
+const RESULT_COLOR = {
+  correct: 'var(--color-sage)',
+  author: 'var(--color-secondary-deep)',
+  wrong: 'var(--color-terracotta)',
+};
+
+const ActivityBody = ({ activity }) => {
   const { type } = activity;
 
   if (type === 'review') {
     const { user, book, rating } = activity;
-    const name = user?.displayName || user?.username || 'Ukjent';
     return (
       <div className="flex items-center gap-3">
-        <Avatar user={user} />
+        <AvatarLink user={user} className="w-7 h-7 sm:w-9 sm:h-9 rounded-full font-bold text-sm" />
         <div className="flex-1 min-w-0">
           <p className="text-sm text-text leading-snug">
-            <span className="font-semibold">{name}</span>
+            <NameLink user={user} />
             {' ga '}
             <Stars rating={rating} />
             {' til '}
@@ -78,7 +102,6 @@ const ActivityItem = ({ activity }) => {
 
   if (type === 'status') {
     const { user, book, status } = activity;
-    const name = user?.displayName || user?.username || 'Ukjent';
     const verb =
       status === 'read' ? 'har lest' :
       status === 'currently-reading' ? 'leser nå' :
@@ -87,10 +110,10 @@ const ActivityItem = ({ activity }) => {
     const suffix = status === 'to-read' ? ' på leserlisten' : '';
     return (
       <div className="flex items-center gap-3">
-        <Avatar user={user} />
+        <AvatarLink user={user} className="w-7 h-7 sm:w-9 sm:h-9 rounded-full font-bold text-sm" />
         <div className="flex-1 min-w-0">
           <p className="text-sm text-text leading-snug">
-            <span className="font-semibold">{name}</span>
+            <NameLink user={user} />
             {` ${verb} `}
             {book ? (
               <Link to={`/books/${book._id}`} className="font-semibold text-primary hover:underline">
@@ -133,7 +156,7 @@ const ActivityItem = ({ activity }) => {
           {count > 0 && (
             <div className="flex gap-1 mt-1.5 flex-wrap">
               {attendees.slice(0, 5).map((att, i) => (
-                <UserAvatar
+                <AvatarLink
                   key={att._id || i}
                   user={att}
                   title={att.displayName || att.username}
@@ -152,7 +175,185 @@ const ActivityItem = ({ activity }) => {
     );
   }
 
+  if (type === 'advent') {
+    const { user, day, points, squares } = activity;
+    return (
+      <div className="flex items-center gap-3">
+        <AvatarLink user={user} className="w-7 h-7 sm:w-9 sm:h-9 rounded-full font-bold text-sm" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-text leading-snug">
+            <NameLink user={user} />
+            {` løste luke ${day}`}
+            {points > 0 && <span className="text-text-muted"> — {points} poeng</span>}
+          </p>
+          <div className="flex items-center gap-1 mt-1">
+            {(squares || []).map((result, i) => (
+              <span
+                key={i}
+                className="w-3.5 h-3.5 rounded-sm"
+                style={{ background: RESULT_COLOR[result] || 'var(--color-border)' }}
+              />
+            ))}
+          </div>
+          <p className="text-xs text-text-faint mt-1">{relativeTime(activity.date)}</p>
+        </div>
+      </div>
+    );
+  }
+
   return null;
+};
+
+// Mirrors backend/src/constants/feedConfig.js's REACTION_EMOJI - keep
+// both lists in sync. Only emoji someone's actually reacted with get a
+// persistent pill (see ActivityFooter below); the rest are reachable
+// through the "+" picker so eleven options don't clutter every item.
+const REACTION_EMOJI = ['❤️', '👏', '😂', '📚', '😍', '🤬', '🤯', '🤮', '🙌', '👀', '💯'];
+
+const ActivityFooter = ({ activity }) => {
+  const toast = useToast();
+  const [reactions, setReactions] = useState(activity.reactions || []);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comments, setComments] = useState(null); // null = not fetched yet
+  const [commentCount, setCommentCount] = useState(activity.commentCount || 0);
+  const [newComment, setNewComment] = useState('');
+  const [posting, setPosting] = useState(false);
+
+  const handleReact = (emoji) => {
+    setPickerOpen(false);
+    setReactions((prev) => {
+      const existing = prev.find((r) => r.emoji === emoji);
+      if (!existing) return [...prev, { emoji, count: 1, reactedByMe: true }];
+      const updated = { ...existing, count: existing.count + (existing.reactedByMe ? -1 : 1), reactedByMe: !existing.reactedByMe };
+      return updated.count <= 0 ? prev.filter((r) => r.emoji !== emoji) : prev.map((r) => (r.emoji === emoji ? updated : r));
+    });
+    activityApi
+      .toggleReaction(activity.activityType, activity.activityId, emoji)
+      .then((data) => setReactions(data.reactions))
+      .catch(() => toast.error('Klarte ikke registrere reaksjonen'));
+  };
+
+  const toggleComments = () => {
+    if (comments !== null) {
+      setCommentsOpen((open) => !open);
+      return;
+    }
+    activityApi
+      .getComments(activity.activityType, activity.activityId)
+      .then((data) => {
+        setComments(data.comments || []);
+        setCommentsOpen(true);
+      })
+      .catch(() => toast.error('Klarte ikke hente kommentarer'));
+  };
+
+  const submitComment = () => {
+    const content = newComment.trim();
+    if (!content || posting) return;
+    setPosting(true);
+    activityApi
+      .addComment(activity.activityType, activity.activityId, content)
+      .then((data) => {
+        setComments((prev) => [...(prev || []), data.comment]);
+        setCommentCount((c) => c + 1);
+        setNewComment('');
+      })
+      .catch((err) => toast.error(err.response?.data?.message || 'Klarte ikke legge til kommentar'))
+      .finally(() => setPosting(false));
+  };
+
+  return (
+    <div className="mt-2 pl-10 sm:pl-12">
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {reactions.map((r) => (
+          <button
+            key={r.emoji}
+            onClick={() => handleReact(r.emoji)}
+            className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors"
+            style={
+              r.reactedByMe
+                ? { background: 'var(--color-wine-tint)', border: '1px solid var(--color-primary)' }
+                : { background: 'var(--color-sunken)', border: '1px solid transparent' }
+            }
+          >
+            <span>{r.emoji}</span>
+            <span className="font-bold" style={{ color: 'var(--color-text-muted)' }}>{r.count}</span>
+          </button>
+        ))}
+
+        <div className="relative">
+          <button
+            onClick={() => setPickerOpen((open) => !open)}
+            onBlur={() => setTimeout(() => setPickerOpen(false), 150)}
+            className="w-6 h-6 rounded-full flex items-center justify-center"
+            style={{ background: 'var(--color-sunken)', color: 'var(--color-text-faint)' }}
+            title="Reager"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="8.5" cy="10" r="1" fill="currentColor" stroke="none" />
+              <circle cx="15.5" cy="10" r="1" fill="currentColor" stroke="none" />
+              <path d="M8 14.5c1 1.2 2.4 1.8 4 1.8s3-.6 4-1.8" />
+            </svg>
+          </button>
+          {pickerOpen && (
+            <div
+              className="absolute left-0 top-full mt-1 z-10 flex flex-wrap gap-0.5 p-1.5 rounded-xl"
+              style={{ width: '9.5rem', background: 'var(--color-card)', border: '1px solid var(--color-border)', boxShadow: '0 10px 24px rgba(0,0,0,0.14)' }}
+            >
+              {REACTION_EMOJI.map((emoji) => (
+                <button
+                  key={emoji}
+                  onMouseDown={() => handleReact(emoji)}
+                  className="text-base w-7 h-7 flex items-center justify-center rounded-lg hover:opacity-70"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={toggleComments}
+          className="text-xs font-semibold px-2 py-0.5"
+          style={{ color: 'var(--color-text-faint)' }}
+        >
+          {commentCount > 0 ? `${commentCount} kommentar${commentCount !== 1 ? 'er' : ''}` : 'Kommenter'}
+        </button>
+      </div>
+
+      {commentsOpen && (
+        <div className="mt-2 space-y-2">
+          {(comments || []).map((c) => (
+            <div key={c._id} className="flex items-start gap-2">
+              <AvatarLink user={c.user} className="w-6 h-6 rounded-full text-xs font-bold" />
+              <div className="flex-1 min-w-0 text-xs rounded-lg px-2.5 py-1.5" style={{ background: 'var(--color-sunken)' }}>
+                <NameLink user={c.user} className="font-semibold text-xs" />{' '}
+                <span style={{ color: 'var(--color-text-muted)' }}>{c.content}</span>
+              </div>
+            </div>
+          ))}
+          <div className="flex items-center gap-2">
+            <input
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitComment();
+              }}
+              placeholder="Skriv en kommentar ..."
+              className="input-field flex-1 text-xs py-1.5"
+              disabled={posting}
+            />
+            <button onClick={submitComment} disabled={posting || !newComment.trim()} className="btn-primary text-xs py-1.5 px-3 disabled:opacity-50">
+              Send
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const ActivityFeed = () => {
@@ -181,8 +382,9 @@ const ActivityFeed = () => {
           <p className="text-center text-text-faint py-6">Ingen aktivitet ennå 🌱</p>
         ) : (
           activities.map((activity, i) => (
-            <div key={i}>
-              <ActivityItem activity={activity} />
+            <div key={`${activity.activityType}-${activity.activityId}`}>
+              <ActivityBody activity={activity} />
+              <ActivityFooter activity={activity} />
               {i < activities.length - 1 && (
                 <div className="border-b mt-4" style={{ borderColor: "var(--color-border)" }} />
               )}
