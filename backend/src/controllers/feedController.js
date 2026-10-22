@@ -23,23 +23,48 @@ function parseActivityRef(req, res) {
   return { activityType: type, activityId: id };
 }
 
-// Who a reaction/comment on this feed item should notify, and where
-// clicking that notification should go. Meetings have no single owner (a
-// club-wide event, not one person's content) - reactions/comments on them
-// just don't notify anyone, same as reacting to your own post doesn't
-// (createNotification already no-ops when recipient === from).
+// Who a reaction/comment on this feed item should notify, where clicking
+// that notification should go, and a short noun phrase ("anmeldelsen din av
+// «Title»") describing what the activity actually is - so the notification
+// message can say what was reacted to/commented on, not just "aktiviteten
+// din". Meetings have no single owner (a club-wide event, not one person's
+// content) - reactions/comments on them just don't notify anyone, same as
+// reacting to your own post doesn't (createNotification already no-ops when
+// recipient === from).
 async function getActivityOwnerAndLink(activityType, activityId) {
   if (activityType === "review") {
-    const review = await Review.findById(activityId).select("user book");
-    return review ? { owner: review.user, link: `/books/${review.book}` } : null;
+    const review = await Review.findById(activityId).select("user book").populate("book", "title");
+    if (!review) return null;
+    const bookId = review.book?._id || review.book;
+    return {
+      owner: review.user,
+      link: bookId ? `/books/${bookId}` : "/books",
+      context: review.book?.title ? `anmeldelsen din av «${review.book.title}»` : "anmeldelsen din",
+    };
   }
   if (activityType === "status") {
+    // UserBook auto-populates "book" via a pre(/^find/) hook (see
+    // models/UserBook.js), so userBook.book is already a full document here
+    // (with title, since that's in the hook's own populate select).
     const userBook = await UserBook.findById(activityId).select("user book");
-    return userBook ? { owner: userBook.user, link: `/books/${userBook.book}` } : null;
+    if (!userBook) return null;
+    const bookId = userBook.book?._id || userBook.book;
+    return {
+      owner: userBook.user,
+      link: bookId ? `/books/${bookId}` : "/books",
+      context: userBook.book?.title ? `leseoppdateringen din om «${userBook.book.title}»` : "leseoppdateringen din",
+    };
   }
   if (activityType === "advent") {
-    const result = await AdventResult.findById(activityId).select("user");
-    return result ? { owner: result.user, link: "/julekalender" } : null;
+    const result = await AdventResult.findById(activityId).select("user adventDay").populate("adventDay", "day");
+    if (!result) return null;
+    // Never mention the book here - the whole point of the calendar is
+    // guessing it, and the feed itself never reveals it either.
+    return {
+      owner: result.user,
+      link: "/julekalender",
+      context: result.adventDay?.day ? `julekalenderluken din (luke ${result.adventDay.day})` : "julekalenderluken din",
+    };
   }
   return null;
 }
@@ -85,7 +110,7 @@ exports.toggleReaction = async (req, res) => {
             recipient: ownerInfo.owner,
             from: req.user._id,
             type: "feed-reaction",
-            message: `${reactorName} reagerte ${emoji} på aktiviteten din`,
+            message: `${reactorName} reagerte ${emoji} på ${ownerInfo.context}`,
             link: ownerInfo.link,
           });
         })
@@ -146,7 +171,7 @@ exports.createComment = async (req, res) => {
           recipient: ownerInfo.owner,
           from: req.user._id,
           type,
-          message: `${commenterName} kommenterte: ${content.trim()}`,
+          message: `${commenterName} kommenterte på ${ownerInfo.context}: ${content.trim()}`,
           link: ownerInfo.link,
         });
       })

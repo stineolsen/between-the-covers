@@ -1,14 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { booksApi } from "../../api/booksApi";
+import commentsApi from "../../api/commentsApi";
 import BookCoverFallback from "../common/BookCoverFallback";
 import CommentThread from "./CommentThread";
 
 const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
   const book = entry.book;
   const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(null);
+
+  // Known before the thread is ever expanded, so the collapsed row can show
+  // a count badge instead of nothing - CommentThread itself keeps this in
+  // sync afterward via onCountChange once it's actually mounted.
+  useEffect(() => {
+    commentsApi
+      .getComments({ listId, bookId: book._id })
+      .then((data) => setCommentCount(data.count ?? (data.comments || []).length))
+      .catch(() => setCommentCount(0));
+  }, [listId, book._id]);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: book._id,
@@ -67,10 +79,13 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
 
         <button
           onClick={() => setShowComments((v) => !v)}
-          className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-[var(--color-sunken)] transition-all"
+          className="flex-shrink-0 flex items-center gap-1 text-xs font-semibold px-2 sm:px-3 py-1.5 rounded-lg hover:bg-[var(--color-sunken)] transition-all"
           style={{ color: "var(--color-text-muted)" }}
+          title="Kommentarer"
         >
-          💬 {showComments ? "Skjul" : "Kommenter"}
+          <span>💬</span>
+          {commentCount > 0 && <span className="font-bold">{commentCount}</span>}
+          <span className="hidden sm:inline">{showComments ? "Skjul" : "Kommenter"}</span>
         </button>
 
         {canEdit && (
@@ -87,7 +102,7 @@ const BookRankingRow = ({ listId, entry, rank, canEdit, onRemove }) => {
 
       {showComments && (
         <div className="px-4 pb-4 pt-1 border-t" style={{ borderColor: "var(--color-border)" }}>
-          <CommentThread listId={listId} bookId={book._id} />
+          <CommentThread listId={listId} bookId={book._id} onCountChange={setCommentCount} />
         </div>
       )}
     </div>

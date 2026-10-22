@@ -55,6 +55,7 @@ exports.createComment = async (req, res) => {
       content,
     });
     await comment.populate("user", "username displayName avatar");
+    if (bookId) await comment.populate("book", "title");
 
     // Notify the list owner + collaborators (not the commenter themself)
     const authorId = req.user._id.toString();
@@ -63,7 +64,11 @@ exports.createComment = async (req, res) => {
       .filter((id, index, all) => id !== authorId && all.indexOf(id) === index);
 
     const commenterName = req.user.displayName || req.user.username;
-    const notifyMessage = `${commenterName} kommenterte på «${list.title}»: ${comment.content}`;
+    // Distinguish a comment on one book within the list from a comment on
+    // the list as a whole - otherwise both looked identical in the bell.
+    const notifyMessage = comment.book?.title
+      ? `${commenterName} kommenterte på «${comment.book.title}» i listen «${list.title}»: ${comment.content}`
+      : `${commenterName} kommenterte på listen «${list.title}»: ${comment.content}`;
     for (const recipientId of recipientIds) {
       createNotification({
         recipient: recipientId,

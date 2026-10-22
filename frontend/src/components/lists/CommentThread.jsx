@@ -3,7 +3,10 @@ import { useToast } from "../../contexts/useToast";
 import commentsApi from "../../api/commentsApi";
 import CommentCard from "./CommentCard";
 
-const CommentThread = ({ listId, bookId }) => {
+// onCountChange is optional - lets a parent that shows a comment count
+// before this thread is ever expanded (e.g. BookRankingRow's compact badge)
+// stay in sync once comments are actually loaded/added/removed here.
+const CommentThread = ({ listId, bookId, onCountChange }) => {
   const toast = useToast();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +17,11 @@ const CommentThread = ({ listId, bookId }) => {
     setLoading(true);
     commentsApi
       .getComments({ listId, bookId })
-      .then((data) => setComments(data.comments || []))
+      .then((data) => {
+        const list = data.comments || [];
+        setComments(list);
+        onCountChange?.(list.length);
+      })
       .catch(() => toast.error("Klarte ikke laste kommentarer"))
       .finally(() => setLoading(false));
   }, [listId, bookId]);
@@ -25,7 +32,11 @@ const CommentThread = ({ listId, bookId }) => {
     setPosting(true);
     try {
       const data = await commentsApi.createComment({ listId, bookId, content });
-      setComments((prev) => [...prev, data.comment]);
+      setComments((prev) => {
+        const next = [...prev, data.comment];
+        onCountChange?.(next.length);
+        return next;
+      });
       setContent("");
     } catch (err) {
       toast.error(err.response?.data?.message || "Klarte ikke legge til kommentar");
@@ -46,7 +57,11 @@ const CommentThread = ({ listId, bookId }) => {
   const handleDelete = async (commentId) => {
     try {
       await commentsApi.deleteComment(commentId);
-      setComments((prev) => prev.filter((c) => c._id !== commentId));
+      setComments((prev) => {
+        const next = prev.filter((c) => c._id !== commentId);
+        onCountChange?.(next.length);
+        return next;
+      });
     } catch (err) {
       toast.error(err.response?.data?.message || "Klarte ikke slette kommentaren");
     }
