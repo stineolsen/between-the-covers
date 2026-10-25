@@ -10,7 +10,11 @@ const BANNER_KEY = "site:banner";
 // damage a compromised admin account could do with it (it's rendered via
 // dangerouslySetInnerHTML for every member on every page load).
 const BANNER_SANITIZE_OPTIONS = {
-  allowedTags: ["b", "strong", "i", "em", "u", "a", "br", "p", "ul", "ol", "li", "span"],
+  // "div" matters here specifically because Chrome wraps each new line
+  // typed in a contentEditable box in its own <div> on Enter (not <br>) -
+  // without it in the allowlist, sanitize-html was unwrapping those divs
+  // and silently flattening every line break the admin typed.
+  allowedTags: ["b", "strong", "i", "em", "u", "a", "br", "p", "div", "ul", "ol", "li", "span"],
   allowedAttributes: { a: ["href", "target", "rel"], span: ["style"] },
   allowedStyles: { span: { color: [/^#[0-9a-fA-F]{3,6}$/] } },
   allowedSchemes: ["http", "https", "mailto"],

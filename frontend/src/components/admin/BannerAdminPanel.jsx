@@ -112,6 +112,7 @@ const BannerAdminPanel = () => {
               background: "var(--color-sunken)",
               border: "1px solid var(--color-border-strong)",
               color: "var(--color-text)",
+              whiteSpace: "pre-wrap",
             }}
           />
 

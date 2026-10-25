@@ -54,18 +54,6 @@ const Home = () => {
     <div className="min-h-screen relative">
       <HomeGhosts />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {banner?.html && (
-          <div
-            className="mb-6 p-4 rounded-2xl animate-fadeIn text-sm leading-relaxed"
-            style={{
-              background: "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
-            dangerouslySetInnerHTML={{ __html: banner.html }}
-          />
-        )}
-
         {/* Greeting */}
         <div className="mb-6 animate-fadeIn">
           <p
@@ -84,6 +72,25 @@ const Home = () => {
               : "Velkommen til Between the Covers"}
           </h1>
         </div>
+
+        {banner?.html && (
+          <div
+            className="mb-6 p-4 rounded-2xl animate-fadeIn text-sm leading-relaxed"
+            style={{
+              background: "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+            }}
+          >
+            <p
+              className="text-xs font-bold uppercase tracking-wide mb-2"
+              style={{ color: "var(--color-primary)" }}
+            >
+              📣 Melding fra Admin
+            </p>
+            <div style={{ whiteSpace: "pre-wrap" }} dangerouslySetInnerHTML={{ __html: banner.html }} />
+          </div>
+        )}
 
         {/* Bokklubbens bok — always first, including on mobile */}
         {!meetingLoading && featuredBook && (
