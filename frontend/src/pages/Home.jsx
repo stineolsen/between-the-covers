@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/useAuth";
 import { meetingsApi } from "../api/meetingsApi";
 import { booksApi } from "../api/booksApi";
 import { userBooksApi } from "../api/userBooksApi";
+import settingsApi from "../api/settingsApi";
 import { countReadInYear } from "../utils/readingGoal";
 import NextMeeting from "../components/meetings/NextMeeting";
 import ActivityFeed from "../components/common/ActivityFeed";
@@ -22,6 +23,11 @@ const Home = () => {
   const [meetingLoading, setMeetingLoading] = useState(true);
   const [readThisYear, setReadThisYear] = useState(0);
   const [currentlyReading, setCurrentlyReading] = useState([]);
+  const [banner, setBanner] = useState(null);
+
+  useEffect(() => {
+    settingsApi.getBanner().then((data) => setBanner(data.banner)).catch(() => {});
+  }, []);
 
   useEffect(() => {
     meetingsApi
@@ -48,6 +54,18 @@ const Home = () => {
     <div className="min-h-screen relative">
       <HomeGhosts />
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {banner?.html && (
+          <div
+            className="mb-6 p-4 rounded-2xl animate-fadeIn text-sm leading-relaxed"
+            style={{
+              background: "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+            }}
+            dangerouslySetInnerHTML={{ __html: banner.html }}
+          />
+        )}
+
         {/* Greeting */}
         <div className="mb-6 animate-fadeIn">
           <p

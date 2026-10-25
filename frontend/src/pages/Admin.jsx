@@ -23,6 +23,7 @@ import AddBookModal from "../components/books/AddBookModal";
 import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
 import AdventAdminPanel from "../components/admin/AdventAdminPanel";
 import VisibilityToggle from "../components/admin/VisibilityToggle";
+import BannerAdminPanel from "../components/admin/BannerAdminPanel";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -62,6 +63,7 @@ const ADMIN_NAV = [
     ],
   },
   { key: "alerts", label: "Send varsel", icon: "🔔", tabs: [{ key: "alerts", label: "Send varsel" }] },
+  { key: "homepage", label: "Forside", icon: "📣", tabs: [{ key: "banner", label: "📣 Melding på forsiden" }] },
   {
     key: "season",
     label: "Sesong",
@@ -1876,6 +1878,8 @@ const Admin = () => {
 
         {/* Advent Calendar Tab */}
         {activeTab === "advent" && <AdventAdminPanel />}
+
+        {activeTab === "banner" && <BannerAdminPanel />}
 
         {/* Seasonal Theme Tab */}
         {activeTab === "seasonTheme" && (
