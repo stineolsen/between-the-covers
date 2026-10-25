@@ -63,7 +63,7 @@ const ADMIN_NAV = [
     ],
   },
   { key: "alerts", label: "Send varsel", icon: "🔔", tabs: [{ key: "alerts", label: "Send varsel" }] },
-  { key: "homepage", label: "Forside", icon: "📣", tabs: [{ key: "banner", label: "📣 Melding på forsiden" }] },
+  { key: "homepage", label: "Forside", icon: "📣", tabs: [{ key: "banner", label: "Meldinger på forsiden" }] },
   {
     key: "season",
     label: "Sesong",

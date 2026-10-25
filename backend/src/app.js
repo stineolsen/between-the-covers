@@ -27,6 +27,7 @@ const pushRoutes = require("./routes/pushRoutes");
 const wrappedRoutes = require("./routes/wrappedRoutes");
 const adventRoutes = require("./routes/adventRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
+const announcementRoutes = require("./routes/announcementRoutes");
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use("/api/push", pushRoutes);
 app.use("/api/wrapped", wrappedRoutes);
 app.use("/api/advent", adventRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

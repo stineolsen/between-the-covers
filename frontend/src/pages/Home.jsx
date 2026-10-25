@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/useAuth";
 import { meetingsApi } from "../api/meetingsApi";
 import { booksApi } from "../api/booksApi";
 import { userBooksApi } from "../api/userBooksApi";
-import settingsApi from "../api/settingsApi";
+import announcementsApi from "../api/announcementsApi";
 import { countReadInYear } from "../utils/readingGoal";
 import NextMeeting from "../components/meetings/NextMeeting";
 import ActivityFeed from "../components/common/ActivityFeed";
@@ -23,10 +23,10 @@ const Home = () => {
   const [meetingLoading, setMeetingLoading] = useState(true);
   const [readThisYear, setReadThisYear] = useState(0);
   const [currentlyReading, setCurrentlyReading] = useState([]);
-  const [banner, setBanner] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
 
   useEffect(() => {
-    settingsApi.getBanner().then((data) => setBanner(data.banner)).catch(() => {});
+    announcementsApi.getActive().then((data) => setAnnouncements(data.announcements || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -73,8 +73,9 @@ const Home = () => {
           </h1>
         </div>
 
-        {banner?.html && (
+        {announcements.map((a) => (
           <div
+            key={a._id}
             className="mb-6 p-4 rounded-2xl animate-fadeIn text-sm leading-relaxed"
             style={{
               background: "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
@@ -88,9 +89,9 @@ const Home = () => {
             >
               📣 Melding fra Admin
             </p>
-            <div style={{ whiteSpace: "pre-wrap" }} dangerouslySetInnerHTML={{ __html: banner.html }} />
+            <div style={{ whiteSpace: "pre-wrap" }} dangerouslySetInnerHTML={{ __html: a.html }} />
           </div>
-        )}
+        ))}
 
         {/* Bokklubbens bok — always first, including on mobile */}
         {!meetingLoading && featuredBook && (
