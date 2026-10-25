@@ -70,13 +70,14 @@ async function getActivityOwnerAndLink(activityType, activityId) {
 }
 
 async function reactionSummary(ref, userId) {
-  const reactions = await FeedReaction.find(ref);
+  const reactions = await FeedReaction.find(ref).populate("user", "username displayName");
   const byEmoji = new Map();
   for (const r of reactions) {
-    if (!byEmoji.has(r.emoji)) byEmoji.set(r.emoji, { emoji: r.emoji, count: 0, reactedByMe: false });
+    if (!byEmoji.has(r.emoji)) byEmoji.set(r.emoji, { emoji: r.emoji, count: 0, reactedByMe: false, reactors: [] });
     const entry = byEmoji.get(r.emoji);
     entry.count += 1;
-    if (r.user.toString() === userId.toString()) entry.reactedByMe = true;
+    entry.reactors.push(r.user?.displayName || r.user?.username || "Ukjent");
+    if (r.user?._id?.toString() === userId.toString()) entry.reactedByMe = true;
   }
   // Only emoji someone's actually used - the frontend shows these as
   // pills and offers the rest of REACTION_EMOJI through a separate picker

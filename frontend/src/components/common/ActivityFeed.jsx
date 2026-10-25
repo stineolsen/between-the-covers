@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import activityApi from '../../api/activityApi';
 import { useToast } from '../../contexts/useToast';
@@ -222,18 +222,57 @@ const ActivityFooter = ({ activity }) => {
   const [newComment, setNewComment] = useState('');
   const [posting, setPosting] = useState(false);
 
+  // Hover (desktop) or long-press (touch) on a reaction pill reveals who
+  // reacted with it. longPressFired suppresses the click that would
+  // otherwise toggle the reaction right after a long-press reveals the list.
+  const [tooltipEmoji, setTooltipEmoji] = useState(null);
+  const longPressTimer = useRef(null);
+  const longPressFired = useRef(false);
+  const myName = user?.displayName || user?.username;
+
+  useEffect(() => () => clearTimeout(longPressTimer.current), []);
+
+  const startLongPress = (emoji) => {
+    longPressFired.current = false;
+    clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => {
+      longPressFired.current = true;
+      setTooltipEmoji(emoji);
+      longPressTimer.current = setTimeout(() => setTooltipEmoji(null), 2500);
+    }, 450);
+  };
+  const cancelLongPressTimer = () => clearTimeout(longPressTimer.current);
+
   const handleReact = (emoji) => {
     setPickerOpen(false);
     setReactions((prev) => {
       const existing = prev.find((r) => r.emoji === emoji);
-      if (!existing) return [...prev, { emoji, count: 1, reactedByMe: true }];
-      const updated = { ...existing, count: existing.count + (existing.reactedByMe ? -1 : 1), reactedByMe: !existing.reactedByMe };
+      if (!existing) {
+        return [...prev, { emoji, count: 1, reactedByMe: true, reactors: myName ? [myName] : [] }];
+      }
+      const updated = {
+        ...existing,
+        count: existing.count + (existing.reactedByMe ? -1 : 1),
+        reactedByMe: !existing.reactedByMe,
+        reactors: existing.reactedByMe
+          ? (existing.reactors || []).filter((n) => n !== myName)
+          : [...(existing.reactors || []), myName].filter(Boolean),
+      };
       return updated.count <= 0 ? prev.filter((r) => r.emoji !== emoji) : prev.map((r) => (r.emoji === emoji ? updated : r));
     });
     activityApi
       .toggleReaction(activity.activityType, activity.activityId, emoji)
       .then((data) => setReactions(data.reactions))
       .catch(() => toast.error('Klarte ikke registrere reaksjonen'));
+  };
+
+  const handlePillClick = (emoji) => {
+    if (longPressFired.current) {
+      longPressFired.current = false;
+      setTooltipEmoji(null);
+      return;
+    }
+    handleReact(emoji);
   };
 
   const toggleComments = () => {
@@ -279,19 +318,33 @@ const ActivityFooter = ({ activity }) => {
     <div className="mt-2 pl-10 sm:pl-12">
       <div className="flex items-center gap-1.5 flex-wrap">
         {reactions.map((r) => (
-          <button
-            key={r.emoji}
-            onClick={() => handleReact(r.emoji)}
-            className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors"
-            style={
-              r.reactedByMe
-                ? { background: 'var(--color-wine-tint)', border: '1px solid var(--color-primary)' }
-                : { background: 'var(--color-sunken)', border: '1px solid transparent' }
-            }
-          >
-            <span>{r.emoji}</span>
-            <span className="font-bold" style={{ color: 'var(--color-text-muted)' }}>{r.count}</span>
-          </button>
+          <div key={r.emoji} className="relative">
+            <button
+              onClick={() => handlePillClick(r.emoji)}
+              onMouseEnter={() => setTooltipEmoji(r.emoji)}
+              onMouseLeave={() => setTooltipEmoji(null)}
+              onTouchStart={() => startLongPress(r.emoji)}
+              onTouchEnd={cancelLongPressTimer}
+              onTouchMove={cancelLongPressTimer}
+              className="text-xs px-2 py-0.5 rounded-full flex items-center gap-1 transition-colors"
+              style={
+                r.reactedByMe
+                  ? { background: 'var(--color-wine-tint)', border: '1px solid var(--color-primary)' }
+                  : { background: 'var(--color-sunken)', border: '1px solid transparent' }
+              }
+            >
+              <span>{r.emoji}</span>
+              <span className="font-bold" style={{ color: 'var(--color-text-muted)' }}>{r.count}</span>
+            </button>
+            {tooltipEmoji === r.emoji && r.reactors?.length > 0 && (
+              <div
+                className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2.5 py-1.5 rounded-lg text-xs whitespace-nowrap z-10 pointer-events-none"
+                style={{ background: 'var(--color-text)', color: 'var(--color-card)' }}
+              >
+                {r.reactors.join(', ')}
+              </div>
+            )}
+          </div>
         ))}
 
         <div className="relative">

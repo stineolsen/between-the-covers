@@ -141,7 +141,7 @@ exports.getActivity = async (req, res) => {
       const orClause = activities.map(a => ({ activityType: a.activityType, activityId: a.activityId }));
 
       const [reactions, commentCounts] = await Promise.all([
-        FeedReaction.find({ $or: orClause }),
+        FeedReaction.find({ $or: orClause }).populate('user', 'username displayName'),
         FeedComment.aggregate([
           { $match: { $or: orClause } },
           { $group: { _id: { activityType: '$activityType', activityId: '$activityId' }, count: { $sum: 1 } } },
@@ -153,10 +153,11 @@ exports.getActivity = async (req, res) => {
         const key = `${r.activityType}_${r.activityId}`;
         if (!reactionsByKey.has(key)) reactionsByKey.set(key, new Map());
         const byEmoji = reactionsByKey.get(key);
-        if (!byEmoji.has(r.emoji)) byEmoji.set(r.emoji, { emoji: r.emoji, count: 0, reactedByMe: false });
+        if (!byEmoji.has(r.emoji)) byEmoji.set(r.emoji, { emoji: r.emoji, count: 0, reactedByMe: false, reactors: [] });
         const entry = byEmoji.get(r.emoji);
         entry.count += 1;
-        if (r.user.toString() === req.user._id.toString()) entry.reactedByMe = true;
+        entry.reactors.push(r.user?.displayName || r.user?.username || 'Ukjent');
+        if (r.user?._id?.toString() === req.user._id.toString()) entry.reactedByMe = true;
       }
 
       const commentCountByKey = new Map(

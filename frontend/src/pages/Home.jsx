@@ -87,7 +87,7 @@ const Home = () => {
               className="text-xs font-bold uppercase tracking-wide mb-2"
               style={{ color: "var(--color-primary)" }}
             >
-              📣 Melding fra Admin
+              Melding fra Admin
             </p>
             <div style={{ whiteSpace: "pre-wrap" }} dangerouslySetInnerHTML={{ __html: a.html }} />
           </div>
