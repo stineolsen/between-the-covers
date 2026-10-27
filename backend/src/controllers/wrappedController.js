@@ -12,6 +12,10 @@ const { getVisibility, setVisibility } = require("../utils/featureVisibility");
 const windowSettingKey = (year) => `wrapped:${year}:window`;
 const visibilitySettingKey = (year) => `wrapped:${year}:visibility`;
 
+// Books unticked in step 1 without a corrected date get parked on this
+// fixed timestamp (Oslo time) so they're easy to find again in the database.
+const PARKED_FINISHED_AT = new Date("2024-01-01T02:00:00+01:00");
+
 // December collection window for a given wrapped year - 1st through the
 // 27th by default (admin needs the rest of the holidays to generate the
 // actual wrapped), but adjustable per year via the Setting model, same
@@ -103,7 +107,34 @@ exports.getOverview = async (req, res) => {
 exports.confirmBooks = async (req, res) => {
   try {
     const year = Number(req.params.year);
-    const { excludedBookIds } = req.body;
+    const { excludedBookIds, parkUserBookIds } = req.body;
+
+    if (Array.isArray(parkUserBookIds) && parkUserBookIds.length > 0) {
+      // Only touch the user's own read books that still belong to this year
+      // (or have no date), so a stale request can't move anything else.
+      const toPark = await UserBook.find({
+        _id: { $in: parkUserBookIds },
+        user: req.user._id,
+        status: "read",
+        $or: [
+          { finishedAt: null },
+          {
+            finishedAt: {
+              $gte: new Date(`${year}-01-01T00:00:00`),
+              $lt: new Date(`${year + 1}-01-01T00:00:00`),
+            },
+          },
+        ],
+      });
+      const ids = toPark.map((ub) => ub._id);
+      const bookIds = toPark.map((ub) => ub.book?._id).filter(Boolean);
+      await UserBook.updateMany({ _id: { $in: ids } }, { $set: { finishedAt: PARKED_FINISHED_AT } });
+      // Keep the review's readingDate in sync, same as updateFinishedDate does
+      await Review.updateMany(
+        { user: req.user._id, book: { $in: bookIds } },
+        { $set: { readingDate: PARKED_FINISHED_AT } },
+      );
+    }
 
     const response = await getOrCreateResponse(req.user._id, year);
     response.excludedBookIds = Array.isArray(excludedBookIds) ? excludedBookIds : [];

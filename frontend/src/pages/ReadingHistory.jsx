@@ -128,6 +128,43 @@ const ReadingHistory = () => {
   }, {});
   const years = Object.keys(booksByYear).sort((a, b) => b - a);
 
+  const renderReadCard = (userBook) => (
+    <BookCard
+      key={userBook._id}
+      userBook={userBook}
+      badge="✓ Lest"
+      badgeColor="var(--color-sage-solid)"
+      footer={
+        <div className="flex items-center gap-2 text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>
+          <span>📅</span>
+          {editingDateId === userBook._id ? (
+            <DateEditor
+              initialDate={userBook.finishedAt}
+              onSave={(date) => { handleDateChange(userBook._id, date); setEditingDateId(null); }}
+              onCancel={() => setEditingDateId(null)}
+            />
+          ) : (
+            <>
+              <span>
+                {userBook.finishedAt
+                  ? new Date(userBook.finishedAt).toLocaleDateString("nb-NO", { year: "numeric", month: "long", day: "numeric" })
+                  : "–"}
+              </span>
+              <button
+                onClick={() => setEditingDateId(userBook._id)}
+                className="transition-colors"
+                style={{ color: "var(--color-text-faint)" }}
+                title="Endre dato"
+              >
+                ✏️
+              </button>
+            </>
+          )}
+        </div>
+      }
+    />
+  );
+
   const pillStyle = (active) =>
     active
       ? { background: "var(--color-primary-solid)", color: "white", border: "1.5px solid var(--color-primary-solid)" }
@@ -240,6 +277,13 @@ const ReadingHistory = () => {
                 </p>
                 <Link to="/books" className="btn-primary inline-block">Sjekk ut bøkene</Link>
               </div>
+            ) : yearFilter === "before" ? (
+              // "Før …" is one flat list sorted by date, no per-year headers
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-fadeIn">
+                {[...filteredBooks]
+                  .sort((a, b) => new Date(b.finishedAt) - new Date(a.finishedAt))
+                  .map(renderReadCard)}
+              </div>
             ) : (
               <div className="space-y-12">
                 {years.map((year) => (
@@ -260,42 +304,7 @@ const ReadingHistory = () => {
                       </div>
                     </div>
                     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {booksByYear[year].map((userBook) => (
-                        <BookCard
-                          key={userBook._id}
-                          userBook={userBook}
-                          badge="✓ Lest"
-                          badgeColor="var(--color-sage-solid)"
-                          footer={
-                            <div className="flex items-center gap-2 text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>
-                              <span>📅</span>
-                              {editingDateId === userBook._id ? (
-                                <DateEditor
-                                  initialDate={userBook.finishedAt}
-                                  onSave={(date) => { handleDateChange(userBook._id, date); setEditingDateId(null); }}
-                                  onCancel={() => setEditingDateId(null)}
-                                />
-                              ) : (
-                                <>
-                                  <span>
-                                    {userBook.finishedAt
-                                      ? new Date(userBook.finishedAt).toLocaleDateString("nb-NO", { year: "numeric", month: "long", day: "numeric" })
-                                      : "–"}
-                                  </span>
-                                  <button
-                                    onClick={() => setEditingDateId(userBook._id)}
-                                    className="transition-colors"
-                                    style={{ color: "var(--color-text-faint)" }}
-                                    title="Endre dato"
-                                  >
-                                    ✏️
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          }
-                        />
-                      ))}
+                      {booksByYear[year].map(renderReadCard)}
                     </div>
                   </div>
                 ))}

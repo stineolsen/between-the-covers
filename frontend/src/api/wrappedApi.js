@@ -6,8 +6,11 @@ export const wrappedApi = {
     return response.data;
   },
 
-  confirmBooks: async (year, excludedBookIds) => {
-    const response = await api.put(`/api/wrapped/${year}/confirm-books`, { excludedBookIds });
+  confirmBooks: async (year, excludedBookIds, parkUserBookIds = []) => {
+    const response = await api.put(`/api/wrapped/${year}/confirm-books`, {
+      excludedBookIds,
+      parkUserBookIds,
+    });
     return response.data;
   },
 

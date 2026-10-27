@@ -52,7 +52,9 @@ const ConfirmReadingListStep = ({ year, onNext }) => {
       await userBooksApi.updateFinishedDate(userBookId, iso);
       setRows((prev) =>
         prev.map((r) =>
-          r.userBookId === userBookId ? { ...r, finishedAt: iso, flagged: false } : r,
+          r.userBookId === userBookId
+            ? { ...r, finishedAt: iso, flagged: false, dateEdited: true }
+            : r,
         ),
       );
       setEditingId(null);
@@ -85,9 +87,15 @@ const ConfirmReadingListStep = ({ year, onNext }) => {
     }
   };
 
-  const persist = async () => {
-    const excludedBookIds = rows.filter((r) => !r.checked).map((r) => r.book?._id);
-    await wrappedApi.confirmBooks(year, excludedBookIds);
+  // Unticked books whose date wasn't corrected get parked on 01.01.2024 when
+  // the step is confirmed (not on draft save, so they can still be re-ticked).
+  const persist = async ({ parkUnticked = false } = {}) => {
+    const unticked = rows.filter((r) => !r.checked);
+    const excludedBookIds = unticked.map((r) => r.book?._id);
+    const parkUserBookIds = parkUnticked
+      ? unticked.filter((r) => !r.dateEdited).map((r) => r.userBookId)
+      : [];
+    await wrappedApi.confirmBooks(year, excludedBookIds, parkUserBookIds);
   };
 
   const handleSaveDraft = async () => {
@@ -105,7 +113,7 @@ const ConfirmReadingListStep = ({ year, onNext }) => {
   const handleNext = async () => {
     setSaving(true);
     try {
-      await persist();
+      await persist({ parkUnticked: true });
       onNext();
     } catch (err) {
       toast.error(err.response?.data?.message || "Klarte ikke lagre leselisten");
