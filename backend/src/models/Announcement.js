@@ -9,6 +9,9 @@ const announcementSchema = new mongoose.Schema(
     // null = stays up until an admin deletes it; otherwise auto-expires.
     expiresAt: { type: Date, default: null },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
+    // Users who have collapsed this message - it stays collapsed for them
+    // until it expires or is deleted. Never sent to the client as-is.
+    dismissedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true },
 );

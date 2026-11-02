@@ -16,6 +16,11 @@ const announcementsApi = {
     return response.data;
   },
 
+  dismiss: async (id) => {
+    const response = await api.post(`/api/announcements/${id}/dismiss`);
+    return response.data;
+  },
+
   remove: async (id) => {
     const response = await api.delete(`/api/announcements/${id}`);
     return response.data;

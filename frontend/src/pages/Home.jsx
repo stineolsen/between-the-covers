@@ -16,6 +16,7 @@ import WrappedBanner from "../components/home/WrappedBanner";
 import AdventCalendarBanner from "../components/home/AdventCalendarBanner";
 import HomeGhosts from "../components/home/HomeGhosts";
 import AnniversaryBanner from "../components/home/AnniversaryBanner";
+import AnnouncementCard from "../components/home/AnnouncementCard";
 
 const Home = () => {
   const { user } = useAuth();
@@ -74,23 +75,7 @@ const Home = () => {
         </div>
 
         {announcements.map((a) => (
-          <div
-            key={a._id}
-            className="mb-6 p-4 rounded-2xl animate-fadeIn text-sm leading-relaxed"
-            style={{
-              background: "linear-gradient(135deg, var(--color-wine-tint), var(--color-gold-tint))",
-              border: "1px solid var(--color-border)",
-              color: "var(--color-text)",
-            }}
-          >
-            <p
-              className="text-xs font-bold uppercase tracking-wide mb-2"
-              style={{ color: "var(--color-primary)" }}
-            >
-              Melding fra Admin
-            </p>
-            <div style={{ whiteSpace: "pre-wrap" }} dangerouslySetInnerHTML={{ __html: a.html }} />
-          </div>
+          <AnnouncementCard key={a._id} announcement={a} />
         ))}
 
         {/* Bokklubbens bok — always first, including on mobile */}

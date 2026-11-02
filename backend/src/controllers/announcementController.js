@@ -12,6 +12,14 @@ const DURATION_DAYS = {
   forever: null,
 };
 
+// Users can't collapse a message until it has been up this long, so
+// everyone gets a proper look at it first.
+const DISMISSIBLE_AFTER_DAYS = 3;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+const dismissibleAt = (announcement) =>
+  new Date(new Date(announcement.createdAt).getTime() + DISMISSIBLE_AFTER_DAYS * DAY_MS);
+
 // @desc    Active (non-expired) announcements, newest first
 // @route   GET /api/announcements
 // @access  Private
@@ -20,7 +28,18 @@ exports.getActive = async (req, res) => {
     const announcements = await Announcement.find({
       $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }],
     }).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, announcements });
+    const userId = req.user._id.toString();
+    res.status(200).json({
+      success: true,
+      announcements: announcements.map((a) => {
+        const { dismissedBy, ...rest } = a.toObject();
+        return {
+          ...rest,
+          dismissibleAt: dismissibleAt(a),
+          dismissed: (dismissedBy || []).some((id) => id.toString() === userId),
+        };
+      }),
+    });
   } catch (error) {
     console.error("Get active announcements error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke hente meldinger" });
@@ -69,6 +88,32 @@ exports.createAnnouncement = async (req, res) => {
   } catch (error) {
     console.error("Create announcement error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke lagre meldingen" });
+  }
+};
+
+// @desc    Collapse an announcement for the current user
+// @route   POST /api/announcements/:id/dismiss
+// @access  Private
+exports.dismissAnnouncement = async (req, res) => {
+  try {
+    const announcement = await Announcement.findById(req.params.id);
+    if (!announcement) {
+      return res.status(404).json({ success: false, message: "Meldingen ble ikke funnet" });
+    }
+    if (new Date() < dismissibleAt(announcement)) {
+      return res.status(400).json({
+        success: false,
+        message: `Meldingen kan skjules ${DISMISSIBLE_AFTER_DAYS} dager etter at den ble lagt ut`,
+      });
+    }
+    await Announcement.updateOne(
+      { _id: announcement._id },
+      { $addToSet: { dismissedBy: req.user._id } },
+    );
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Dismiss announcement error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke skjule meldingen" });
   }
 };
 
