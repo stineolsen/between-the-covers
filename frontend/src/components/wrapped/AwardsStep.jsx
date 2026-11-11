@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useToast } from "../../contexts/useToast";
 import wrappedApi from "../../api/wrappedApi";
 import BookPicker from "./BookPicker";
+import MeetingAttendance from "./MeetingAttendance";
+import WrappedPreview from "./WrappedPreview";
 
-const AwardsStep = ({ year, onBack, onSubmitted }) => {
+const AwardsStep = ({ year, onBack, onEditList, onSubmitted }) => {
   const toast = useToast();
   const [questions, setQuestions] = useState([]);
   const [values, setValues] = useState({}); // questionId -> string | Book | null
@@ -135,6 +137,9 @@ const AwardsStep = ({ year, onBack, onSubmitted }) => {
           </div>
         ))}
       </div>
+
+      <MeetingAttendance year={year} />
+      <WrappedPreview year={year} onEditList={onEditList} />
 
       <div
         className="flex justify-between items-center pt-4"

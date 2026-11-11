@@ -6,11 +6,24 @@ const Review = require("../models/Review");
 const List = require("../models/List");
 const Setting = require("../models/Setting");
 const User = require("../models/User");
+const Meeting = require("../models/Meeting");
 const { DEFAULT_QUESTIONS } = require("../constants/defaultWrappedQuestions");
 const { getVisibility, setVisibility } = require("../utils/featureVisibility");
+const { getYearStats, liveSubset, buildAwardTally } = require("../utils/wrappedStats");
 
 const windowSettingKey = (year) => `wrapped:${year}:window`;
 const visibilitySettingKey = (year) => `wrapped:${year}:visibility`;
+const releaseSettingKey = (year) => `wrapped:${year}:release`;
+
+// Release day for the results: { at: ISO string, announced: bool }. No
+// setting means "not scheduled yet" - results stay locked for members
+// (admins can always preview). `announced` is flipped by the scheduler
+// once the release notification has gone out (see wrappedRelease.js).
+async function getRelease(year) {
+  const setting = await Setting.findOne({ key: releaseSettingKey(year) });
+  const at = setting?.value?.at ? new Date(setting.value.at) : null;
+  return { at, released: !!at && at <= new Date(), announced: !!setting?.value?.announced };
+}
 
 // Books unticked in step 1 without a corrected date get parked on this
 // fixed timestamp (Oslo time) so they're easy to find again in the database.
@@ -86,12 +99,20 @@ exports.getOverview = async (req, res) => {
     const response = await WrappedResponse.findOne({ user: userId, year });
     const excluded = new Set((response?.excludedBookIds || []).map((id) => id.toString()));
 
+    // The member's own star ratings, so step 1 can ask for the missing ones
+    const reviews = await Review.find({
+      user: userId,
+      book: { $in: candidates.map((ub) => ub.book?._id).filter(Boolean) },
+    }).select("book rating");
+    const ratingByBook = new Map(reviews.map((r) => [r.book.toString(), r.rating]));
+
     const books = candidates.map((ub) => ({
       userBookId: ub._id,
       book: ub.book,
       finishedAt: ub.finishedAt,
       flagged: !ub.finishedAt,
       checked: !excluded.has(ub.book?._id?.toString()),
+      rating: ratingByBook.get(ub.book?._id?.toString()) ?? null,
     }));
 
     res.status(200).json({ success: true, books });
@@ -128,7 +149,11 @@ exports.confirmBooks = async (req, res) => {
       });
       const ids = toPark.map((ub) => ub._id);
       const bookIds = toPark.map((ub) => ub.book?._id).filter(Boolean);
-      await UserBook.updateMany({ _id: { $in: ids } }, { $set: { finishedAt: PARKED_FINISHED_AT } });
+      await UserBook.updateMany(
+        { _id: { $in: ids } },
+        { $set: { finishedAt: PARKED_FINISHED_AT } },
+        { timestamps: false }, // not new activity - keep them out of the feed
+      );
       // Keep the review's readingDate in sync, same as updateFinishedDate does
       await Review.updateMany(
         { user: req.user._id, book: { $in: bookIds } },
@@ -539,62 +564,254 @@ exports.getAdminTally = async (req, res) => {
   try {
     const year = Number(req.params.year);
 
-    const [questions, responses, totalMembers] = await Promise.all([
-      WrappedQuestion.find({ year }).sort({ order: 1 }),
-      WrappedResponse.find({ year })
-        .populate("user", "displayName username")
-        .populate("answers.bookValue", "title author"),
+    const [{ questions, tally, submittedCount }, totalMembers] = await Promise.all([
+      buildAwardTally(year),
       User.countDocuments({ status: "approved" }),
     ]);
-
-    const submittedCount = responses.filter((r) => r.stepsCompleted?.awards).length;
-
-    const tally = {};
-    for (const question of questions) {
-      const groups = new Map();
-
-      for (const response of responses) {
-        const answer = response.answers.find(
-          (a) => a.question.toString() === question._id.toString(),
-        );
-        if (!answer) continue;
-
-        const respondentName = response.user?.displayName || response.user?.username || "Ukjent";
-        let groupKey;
-        let displayText;
-
-        if (question.type === "text") {
-          if (!answer.textValue) continue;
-          groupKey = answer.textValue.toLowerCase().replace(/\s+/g, " ");
-          displayText = answer.textValue;
-        } else if (question.type === "number") {
-          if (answer.numberValue === null || answer.numberValue === undefined) continue;
-          groupKey = String(answer.numberValue);
-          displayText = String(answer.numberValue);
-        } else {
-          if (!answer.bookValue) continue;
-          groupKey = answer.bookValue._id
-            ? answer.bookValue._id.toString()
-            : answer.bookValue.toString();
-          displayText = answer.bookValue.title
-            ? `${answer.bookValue.title} — ${answer.bookValue.author}`
-            : "Ukjent bok";
-        }
-
-        if (!groups.has(groupKey)) {
-          groups.set(groupKey, { text: displayText, count: 0, respondents: [] });
-        }
-        const group = groups.get(groupKey);
-        group.count += 1;
-        group.respondents.push(respondentName);
-      }
-
-      tally[question._id.toString()] = [...groups.values()].sort((a, b) => b.count - a.count);
-    }
 
     res.status(200).json({ success: true, submittedCount, totalMembers, questions, tally });
   } catch (error) {
     console.error("Get wrapped admin tally error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke telle opp nominasjonene" });
+  }
+};
+
+// @desc    Release date for a year's results (drives the countdown)
+// @route   GET /api/wrapped/:year/release
+// @access  Private
+exports.getReleaseInfo = async (req, res) => {
+  try {
+    const { at, released } = await getRelease(Number(req.params.year));
+    res.status(200).json({ success: true, releaseAt: at, released });
+  } catch (error) {
+    console.error("Get wrapped release error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente slippdatoen" });
+  }
+};
+
+// @desc    The member's reading year so far - available all year round
+// @route   GET /api/wrapped/:year/live
+// @access  Private
+exports.getLiveStats = async (req, res) => {
+  try {
+    // Always fresh: members check this right after correcting dates/ratings
+    const { perUser } = await getYearStats(Number(req.params.year), { fresh: true });
+    const mine = perUser.get(req.user._id.toString());
+    res.status(200).json({ success: true, stats: mine ? liveSubset(mine) : null });
+  } catch (error) {
+    console.error("Get wrapped live stats error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente leseåret ditt" });
+  }
+};
+
+// @desc    The full Bokwrapped results (personal + club) - locked until release day
+// @route   GET /api/wrapped/:year/results
+// @access  Private (admins can preview before release)
+exports.getResults = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const release = await getRelease(year);
+    const isAdmin = req.user.role === "admin";
+
+    if (!release.released && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        released: false,
+        releaseAt: release.at,
+        message: "Bokwrapped er ikke sluppet ennå",
+      });
+    }
+
+    const { perUser, club } = await getYearStats(year);
+    // An admin may preview someone else's wrapped to check it before release
+    const userId = isAdmin && req.query.user ? String(req.query.user) : req.user._id.toString();
+
+    res.status(200).json({
+      success: true,
+      year,
+      released: release.released,
+      releaseAt: release.at,
+      personal: perUser.get(userId) || null,
+      club,
+    });
+  } catch (error) {
+    console.error("Get wrapped results error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente Bokwrapped" });
+  }
+};
+
+// @desc    Admin: get the results release date
+// @route   GET /api/wrapped/:year/admin/release
+// @access  Private (admin only)
+exports.getAdminRelease = async (req, res) => {
+  try {
+    const release = await getRelease(Number(req.params.year));
+    res.status(200).json({ success: true, ...release });
+  } catch (error) {
+    console.error("Get wrapped admin release error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente slippdatoen" });
+  }
+};
+
+// @desc    Admin: set (or clear) the results release date
+// @route   PUT /api/wrapped/:year/admin/release
+// @access  Private (admin only)
+exports.setAdminRelease = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const { at } = req.body;
+
+    if (!at) {
+      await Setting.deleteOne({ key: releaseSettingKey(year) });
+      return res.status(200).json({ success: true, at: null, released: false, announced: false });
+    }
+
+    const date = new Date(at);
+    if (Number.isNaN(date.getTime())) {
+      return res.status(400).json({ success: false, message: "Ugyldig dato" });
+    }
+
+    // Moving the date resets the announcement, unless it already went out
+    // for a release that has passed (so it isn't sent twice).
+    const current = await getRelease(year);
+    const announced = current.announced && date <= new Date();
+
+    await Setting.findOneAndUpdate(
+      { key: releaseSettingKey(year) },
+      { key: releaseSettingKey(year), value: { at: date.toISOString(), announced } },
+      { upsert: true },
+    );
+
+    res.status(200).json({ success: true, ...(await getRelease(year)) });
+  } catch (error) {
+    console.error("Set wrapped admin release error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke lagre slippdatoen" });
+  }
+};
+
+// @desc    Admin: list of members, for previewing someone else's results
+// @route   GET /api/wrapped/:year/admin/members
+// @access  Private (admin only)
+exports.getAdminMembers = async (req, res) => {
+  try {
+    const { perUser } = await getYearStats(Number(req.params.year));
+    const members = [...perUser.values()]
+      .map((s) => ({ ...s.user, count: s.count }))
+      .sort((a, b) => (a.displayName || a.username).localeCompare(b.displayName || b.username));
+    res.status(200).json({ success: true, members });
+  } catch (error) {
+    console.error("Get wrapped admin members error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente medlemmene" });
+  }
+};
+
+// @desc    Quick star rating from step 1 - creates a star-only review (kept
+//          out of the feed) or updates the rating on an existing one
+// @route   PUT /api/wrapped/:year/rating
+// @access  Private
+exports.setQuickRating = async (req, res) => {
+  try {
+    const { bookId, rating } = req.body;
+    const value = Number(rating);
+    if (!bookId || Number.isNaN(value)) {
+      return res.status(400).json({ success: false, message: "Mangler bok eller vurdering" });
+    }
+
+    // Only books the member has actually marked as read
+    const userBook = await UserBook.findOne({ user: req.user._id, book: bookId, status: "read" });
+    if (!userBook) {
+      return res.status(404).json({ success: false, message: "Fant ikke boka i leselisten din" });
+    }
+
+    let review = await Review.findOne({ user: req.user._id, book: bookId });
+    if (review) {
+      review.rating = value;
+    } else {
+      review = new Review({
+        book: bookId,
+        user: req.user._id,
+        rating: value,
+        readingDate: userBook.finishedAt,
+        hideFromFeed: true,
+      });
+    }
+    await review.save(); // post-save hook refreshes the book's average
+
+    res.status(200).json({ success: true, rating: review.rating });
+  } catch (error) {
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((err) => err.message);
+      return res.status(400).json({ success: false, message: messages.join(", ") });
+    }
+    console.error("Set wrapped quick rating error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke lagre vurderingen" });
+  }
+};
+
+// The year's meetings that have happened (not cancelled, not in the future)
+async function getYearMeetings(year) {
+  return Meeting.find({
+    date: { $gte: new Date(`${year}-01-01T00:00:00`), $lt: new Date(`${year + 1}-01-01T00:00:00`), $lte: new Date() },
+    status: { $ne: "cancelled" },
+  })
+    .select("title date book attendees")
+    .sort({ date: 1 })
+    .lean();
+}
+
+// @desc    The year's meetings, with what the member said they attended
+//          (or their RSVPs as a starting point)
+// @route   GET /api/wrapped/:year/meetings
+// @access  Private
+exports.getMeetings = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const userId = req.user._id.toString();
+    const [meetings, response] = await Promise.all([
+      getYearMeetings(year),
+      WrappedResponse.findOne({ user: req.user._id, year }).select("attendedMeetingIds attendanceConfirmed"),
+    ]);
+    const confirmed = new Set((response?.attendedMeetingIds || []).map((id) => id.toString()));
+
+    res.status(200).json({
+      success: true,
+      confirmed: !!response?.attendanceConfirmed,
+      meetings: meetings.map((m) => {
+        const rsvp = (m.attendees || []).some((a) => String(a?._id || a) === userId);
+        return {
+          _id: m._id,
+          title: m.title,
+          date: m.date,
+          book: m.book ? { _id: m.book._id, title: m.book.title } : null,
+          rsvp,
+          attended: response?.attendanceConfirmed ? confirmed.has(m._id.toString()) : rsvp,
+        };
+      }),
+    });
+  } catch (error) {
+    console.error("Get wrapped meetings error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente møtene" });
+  }
+};
+
+// @desc    Save which of the year's meetings the member actually attended
+// @route   PUT /api/wrapped/:year/meetings
+// @access  Private
+exports.saveMeetings = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const ids = Array.isArray(req.body.attendedMeetingIds) ? req.body.attendedMeetingIds.map(String) : [];
+    // Only keep ids of this year's meetings
+    const valid = new Set((await getYearMeetings(year)).map((m) => m._id.toString()));
+
+    const response = await getOrCreateResponse(req.user._id, year);
+    response.attendedMeetingIds = ids.filter((id) => valid.has(id));
+    response.attendanceConfirmed = true;
+    await response.save();
+
+    res.status(200).json({ success: true, attended: response.attendedMeetingIds.length });
+  } catch (error) {
+    console.error("Save wrapped meetings error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke lagre møtene" });
   }
 };

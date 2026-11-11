@@ -10,6 +10,7 @@ const NOTIFICATION_TYPES = [
   "review-like",
   "review-comment",
   "request-fulfilled",
+  "wrapped-release",
 ];
 
 // Maps a notification type to the User boolean field that gates its email
@@ -24,6 +25,7 @@ const EMAIL_GATE_FIELD = {
   "review-like": "notifyOnReviewLike",
   "review-comment": "notifyOnReviewComment",
   "request-fulfilled": "notifyOnRequestFulfilled",
+  "wrapped-release": "notifyOnFeatureAlerts",
 };
 
 module.exports = { NOTIFICATION_TYPES, EMAIL_GATE_FIELD };

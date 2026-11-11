@@ -44,12 +44,63 @@ export const wrappedApi = {
     return response.data;
   },
 
+  // Step 1: star rating for a read book (star-only reviews stay out of the feed)
+  setQuickRating: async (year, bookId, rating) => {
+    const response = await api.put(`/api/wrapped/${year}/rating`, { bookId, rating });
+    return response.data;
+  },
+
+  // Step 3: which of the year's meetings the member actually attended
+  getMeetings: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/meetings`);
+    return response.data;
+  },
+
+  saveMeetings: async (year, attendedMeetingIds) => {
+    const response = await api.put(`/api/wrapped/${year}/meetings`, { attendedMeetingIds });
+    return response.data;
+  },
+
   getStatus: async (year) => {
     const response = await api.get(`/api/wrapped/${year}/status`);
     return response.data;
   },
 
+  // Results side (release-gated) + live year-so-far stats
+  getRelease: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/release`);
+    return response.data;
+  },
+
+  getLive: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/live`);
+    return response.data;
+  },
+
+  // `userId` lets an admin preview another member's results before release
+  getResults: async (year, userId) => {
+    const response = await api.get(`/api/wrapped/${year}/results`, {
+      params: userId ? { user: userId } : {},
+    });
+    return response.data;
+  },
+
   // Admin only
+  getAdminRelease: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/admin/release`);
+    return response.data;
+  },
+
+  setAdminRelease: async (year, at) => {
+    const response = await api.put(`/api/wrapped/${year}/admin/release`, { at });
+    return response.data;
+  },
+
+  getAdminMembers: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/admin/members`);
+    return response.data;
+  },
+
   getAdminWindow: async (year) => {
     const response = await api.get(`/api/wrapped/${year}/admin/window`);
     return response.data;

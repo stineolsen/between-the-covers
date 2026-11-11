@@ -28,9 +28,11 @@ async function syncAbsListeningStats() {
       continue;
     }
 
-    const totalSeconds = await fetchAbsListeningSeconds(ABS_BASE_URL, ABS_TOKEN, absUser.id);
+    const { totalSeconds, byYear, books } = await fetchAbsListeningSeconds(ABS_BASE_URL, ABS_TOKEN, absUser.id);
     await User.findByIdAndUpdate(member._id, {
       absTotalListeningSeconds: totalSeconds,
+      absListeningSecondsByYear: byYear,
+      absListeningBooks: books,
       absLastSyncedAt: new Date(),
     });
     matched++;

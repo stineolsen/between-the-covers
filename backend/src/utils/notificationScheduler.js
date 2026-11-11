@@ -2,6 +2,7 @@ const cron = require("node-cron");
 const { sendDigestsFor, sendPendingRequestNotifications, checkForImmediateUpdates } = require("./emailService");
 const { syncAbsListeningStats } = require("./absListeningSync");
 const { sweepDueDoors } = require("./adventLibraryPublish");
+const { announceDueReleases } = require("./wrappedRelease");
 
 const TIMEZONE = "Europe/Oslo";
 
@@ -48,8 +49,12 @@ function startNotificationScheduler() {
     timezone: TIMEZONE,
   });
 
+  cron.schedule("* * * * *", runSafely("wrapped release announcement", announceDueReleases), {
+    timezone: TIMEZONE,
+  });
+
   console.log(
-    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, advent library sweep daily 04:00, Europe/Oslo)",
+    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, advent library sweep daily 04:00, wrapped release check every minute, Europe/Oslo)",
   );
 }
 

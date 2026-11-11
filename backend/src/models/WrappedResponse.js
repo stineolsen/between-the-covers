@@ -56,6 +56,19 @@ const wrappedResponseSchema = new mongoose.Schema(
       awards: { type: Boolean, default: false },
     },
 
+    // Meetings the member says they actually attended (step 3) - overrides
+    // the RSVP list for the Bokwrapped meeting stat once confirmed
+    attendedMeetingIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Meeting",
+      },
+    ],
+    attendanceConfirmed: {
+      type: Boolean,
+      default: false,
+    },
+
     submittedAt: {
       type: Date,
       default: null,

@@ -38,6 +38,7 @@ import Members from "./pages/Members";
 import Admin from "./pages/Admin";
 import Howto from "./pages/Howto";
 import Bokwrapped from "./pages/Bokwrapped";
+import WrappedResults from "./pages/WrappedResults";
 import AdventCalendar from "./pages/AdventCalendar";
 
 function App() {
@@ -200,6 +201,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Bokwrapped />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bokwrapped/:year/resultat"
+                  element={
+                    <ProtectedRoute>
+                      <WrappedResults />
                     </ProtectedRoute>
                   }
                 />

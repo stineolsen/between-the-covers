@@ -20,7 +20,7 @@ exports.getActivity = async (req, res) => {
     // UserBook pre-hook auto-populates 'book'; add 'user' manually
     // Meeting pre-hook auto-populates 'book', 'attendees', 'createdBy'
     const [reviews, userBooks, meetings, adventResults] = await Promise.all([
-      Review.find({})
+      Review.find({ hideFromFeed: { $ne: true } })
         .sort({ createdAt: -1 })
         .limit(30)
         .populate('book', 'title author coverImage'),

@@ -96,6 +96,7 @@ const Bokwrapped = () => {
           <AwardsStep
             year={year}
             onBack={() => goStep(2)}
+            onEditList={() => goStep(1)}
             onSubmitted={() => {
               setCompleted((c) => ({ ...c, awards: true }));
               setSearchParams({ step: "done" });

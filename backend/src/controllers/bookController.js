@@ -690,3 +690,45 @@ exports.uploadCover = async (req, res, next) => {
     next(error);
   }
 };
+
+const MAX_REMOTE_COVER_BYTES = 8 * 1024 * 1024;
+
+// @desc    Stream a book's cover through the API. Bokwrapped's share images
+//          draw covers onto a <canvas>, which the browser refuses to export
+//          if any image came from another origin without CORS headers - so
+//          external cover URLs are fetched here instead. Only ever serves
+//          the cover stored on the book itself, never an arbitrary URL.
+// @route   GET /api/books/:id/cover-image
+// @access  Private
+exports.getCoverImage = async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).select("coverImage");
+    if (!book?.coverImage) {
+      return res.status(404).json({ success: false, message: "Boka har ikke omslag" });
+    }
+
+    res.set("Cache-Control", "private, max-age=86400");
+
+    if (!book.coverImage.startsWith("http")) {
+      const filePath = path.join(__dirname, "../../uploads/books", path.basename(book.coverImage));
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ success: false, message: "Fant ikke omslaget" });
+      }
+      return res.sendFile(filePath);
+    }
+
+    const remote = await fetch(book.coverImage, { signal: AbortSignal.timeout(10000) });
+    const contentType = remote.headers.get("content-type") || "";
+    if (!remote.ok || !contentType.startsWith("image/")) {
+      return res.status(502).json({ success: false, message: "Klarte ikke hente omslaget" });
+    }
+    const buffer = Buffer.from(await remote.arrayBuffer());
+    if (buffer.length > MAX_REMOTE_COVER_BYTES) {
+      return res.status(502).json({ success: false, message: "Omslaget er for stort" });
+    }
+    res.type(contentType).send(buffer);
+  } catch (error) {
+    console.error("Get cover image error:", error);
+    res.status(502).json({ success: false, message: "Klarte ikke hente omslaget" });
+  }
+};

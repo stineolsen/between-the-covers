@@ -117,6 +117,14 @@ export const booksApi = {
   },
 
   // Helper: Get cover image URL (handles both local filenames and external URLs)
+  // Cover fetched through the API as a same-origin blob URL, so it can be
+  // drawn onto a canvas and exported (Bokwrapped share images). Caller
+  // revokes the URL when done.
+  getCoverBlobUrl: async (bookId) => {
+    const response = await api.get(`/api/books/${bookId}/cover-image`, { responseType: "blob" });
+    return URL.createObjectURL(response.data);
+  },
+
   getCoverUrl: (coverImage) => {
     if (!coverImage) return null;
     if (coverImage.startsWith("http")) return coverImage;

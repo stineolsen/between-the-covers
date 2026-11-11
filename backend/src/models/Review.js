@@ -54,6 +54,13 @@ const reviewSchema = new mongoose.Schema(
       default: false,
     },
 
+    // Star-only ratings given in bulk while filling in Bokwrapped - kept out
+    // of the activity feed so rating 40 books at once doesn't flood it
+    hideFromFeed: {
+      type: Boolean,
+      default: false,
+    },
+
     // Likes (array of user IDs)
     likes: [
       {

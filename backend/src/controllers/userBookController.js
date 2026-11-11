@@ -141,7 +141,9 @@ exports.updateFinishedDate = async (req, res) => {
     const userBook = await UserBook.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },
       { $set: { finishedAt: finishedAt ? new Date(finishedAt) : null } },
-      { new: true },
+      // A corrected date isn't new reading activity - keep updatedAt (the
+      // activity feed sorts on it) so date fixes don't flood the feed
+      { new: true, timestamps: false },
     );
 
     if (!userBook) {

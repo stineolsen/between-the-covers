@@ -153,6 +153,20 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // Same total split per calendar year ("2026" -> seconds), for the
+    // Bokwrapped listening-hours slide
+    absListeningSecondsByYear: {
+      type: Map,
+      of: Number,
+      default: {},
+    },
+    // Per-audiobook listening history from the same sync: { absId, title,
+    // author, duration (book length, s), totalSeconds, sessions, byYear }.
+    // totalSeconds / duration = how many times it's been listened through.
+    absListeningBooks: {
+      type: [mongoose.Schema.Types.Mixed],
+      default: [],
+    },
     absLastSyncedAt: {
       type: Date,
       default: null,
@@ -187,6 +201,9 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 userSchema.methods.toJSON = function () {
   const user = this.toObject();
   delete user.password;
+  // Per-book listening history is only read server-side (Bokwrapped) -
+  // keep it out of every user payload (login, /me, admin member edits).
+  delete user.absListeningBooks;
   return user;
 };
 

@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/useAuth";
 import { useToast } from "../contexts/useToast";
 import { usersApi } from "../api/usersApi";
 import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
+import YearSoFar from "../components/wrapped/YearSoFar";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";
 import { booksApi } from "../api/booksApi";
@@ -703,6 +704,10 @@ const Profile = () => {
             </form>
           )}
         </div>
+
+        {/* "Leseåret så langt" launches with 2027 - 2026's numbers are saved
+            for the Bokwrapped reveal */}
+        {new Date().getFullYear() >= 2027 && <YearSoFar />}
 
         {/* Bookshelf */}
         <div className="container-gradient mt-6">

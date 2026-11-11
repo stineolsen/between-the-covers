@@ -23,6 +23,7 @@ import AddBookModal from "../components/books/AddBookModal";
 import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
 import AdventAdminPanel from "../components/admin/AdventAdminPanel";
 import VisibilityToggle from "../components/admin/VisibilityToggle";
+import WrappedReleasePanel from "../components/admin/WrappedReleasePanel";
 import BannerAdminPanel from "../components/admin/BannerAdminPanel";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -1686,6 +1687,8 @@ const Admin = () => {
 
               <VisibilityToggle value={wrappedVisibility} busy={savingWrappedVisibility} onChange={handleToggleWrappedVisibility} />
             </div>
+
+            <WrappedReleasePanel />
 
             <div className="container-gradient">
               <div className="flex items-center justify-between mb-2 flex-wrap gap-2">

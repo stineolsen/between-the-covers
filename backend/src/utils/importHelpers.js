@@ -232,10 +232,18 @@ async function fetchAbsUsers(baseUrl, token) {
 
 // Sums the timeListening (seconds) of every session ABS has recorded for
 // this user, paging through /listening-sessions until exhausted.
+// Sums a member's listening-session history - overall, per calendar year,
+// and per audiobook (Bokwrapped shows the year's hours, how many books
+// they listened to and which ones they had on repeat). A session counts in
+// the year it started; ABS gives startedAt in ms, with the "YYYY-MM-DD"
+// date as a fallback for older sessions. Podcast sessions only count
+// toward the hour totals, not the per-book list.
 async function fetchAbsListeningSeconds(baseUrl, token, absUserId) {
   let page = 0;
   let numPages = 1;
   let totalSeconds = 0;
+  const byYear = {};
+  const booksById = new Map();
 
   do {
     const data = await absGet(
@@ -244,13 +252,41 @@ async function fetchAbsListeningSeconds(baseUrl, token, absUserId) {
       `/api/users/${absUserId}/listening-sessions?page=${page}&itemsPerPage=100`,
     );
     for (const session of data.sessions || []) {
-      totalSeconds += session.timeListening || 0;
+      const seconds = session.timeListening || 0;
+      totalSeconds += seconds;
+
+      const started = session.startedAt ? new Date(session.startedAt) : session.date ? new Date(session.date) : null;
+      const year = started && !Number.isNaN(started.getTime()) ? String(started.getFullYear()) : null;
+      if (year) byYear[year] = (byYear[year] || 0) + seconds;
+
+      if (session.mediaType && session.mediaType !== "book") continue;
+      if (!session.libraryItemId || !seconds) continue;
+      const book = booksById.get(session.libraryItemId) || {
+        absId: session.libraryItemId,
+        title: session.displayTitle || session.mediaMetadata?.title || null,
+        author: session.displayAuthor || session.mediaMetadata?.authorName || null,
+        duration: 0,
+        totalSeconds: 0,
+        sessions: 0,
+        byYear: {},
+      };
+      book.duration = Math.max(book.duration, Math.round(session.duration || 0));
+      book.totalSeconds += seconds;
+      book.sessions += 1;
+      if (year) book.byYear[year] = (book.byYear[year] || 0) + seconds;
+      booksById.set(session.libraryItemId, book);
     }
     numPages = data.numPages || 1;
     page++;
   } while (page < numPages);
 
-  return Math.round(totalSeconds);
+  for (const year of Object.keys(byYear)) byYear[year] = Math.round(byYear[year]);
+  const books = [...booksById.values()].map((book) => {
+    book.totalSeconds = Math.round(book.totalSeconds);
+    for (const year of Object.keys(book.byYear)) book.byYear[year] = Math.round(book.byYear[year]);
+    return book;
+  });
+  return { totalSeconds: Math.round(totalSeconds), byYear, books };
 }
 
 // ABS metadata shapes vary by version, so pull title/author/isbn as best-effort

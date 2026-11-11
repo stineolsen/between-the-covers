@@ -639,3 +639,78 @@ h3,
 .react-icons {
   vertical-align: middle;
 }
+
+/* Bokwrapped results - story slides */
+@keyframes wrappedRise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wrappedGrow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes wrappedPop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* A book falling onto the stack, with a little bounce on landing */
+@keyframes wrappedDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-60vh) rotate(var(--tilt, 0deg));
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(4px) rotate(var(--tilt, 0deg));
+  }
+  100% {
+    transform: translateY(0) rotate(var(--tilt, 0deg));
+  }
+}
+
+@keyframes wrappedProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.wrapped-rise {
+  animation: wrappedRise 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.wrapped-pop {
+  animation: wrappedPop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wrapped-rise,
+  .wrapped-pop,
+  .wrapped-motion {
+    animation: none !important;
+  }
+}

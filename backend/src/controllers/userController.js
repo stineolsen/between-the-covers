@@ -55,6 +55,8 @@ exports.setAbsUsername = async (req, res, next) => {
     // previously synced under the old mapping, so reset until the next sync.
     user.absUsername = absUsername?.trim() || null;
     user.absTotalListeningSeconds = 0;
+    user.absListeningSecondsByYear = {};
+    user.absListeningBooks = [];
     user.absLastSyncedAt = null;
     await user.save();
 

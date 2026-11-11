@@ -19,6 +19,15 @@ const {
   deleteQuestion,
   reorderQuestions,
   getAdminTally,
+  getReleaseInfo,
+  getLiveStats,
+  getResults,
+  getAdminRelease,
+  setAdminRelease,
+  getAdminMembers,
+  setQuickRating,
+  getMeetings,
+  saveMeetings,
 } = require("../controllers/wrappedController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 const { requireFeatureVisible } = require("../utils/featureVisibility");
@@ -38,6 +47,15 @@ router.get("/:year/bookclub-books", visible, getBookclubBooks);
 router.put("/:year/awards", visible, saveAwards);
 router.post("/:year/submit", visible, submit);
 router.get("/:year/status", visible, getStatus);
+router.put("/:year/rating", visible, setQuickRating);
+router.get("/:year/meetings", visible, getMeetings);
+router.put("/:year/meetings", visible, saveMeetings);
+
+// Results side - gated by the release date instead of the collection
+// visibility toggle (see getResults); live stats are open all year.
+router.get("/:year/release", getReleaseInfo);
+router.get("/:year/live", getLiveStats);
+router.get("/:year/results", getResults);
 
 router.get("/:year/admin/window", authorize("admin"), getAdminWindow);
 router.put("/:year/admin/window", authorize("admin"), setAdminWindow);
@@ -49,5 +67,8 @@ router.put("/:year/admin/questions/reorder", authorize("admin"), reorderQuestion
 router.put("/:year/admin/questions/:id", authorize("admin"), updateQuestion);
 router.delete("/:year/admin/questions/:id", authorize("admin"), deleteQuestion);
 router.get("/:year/admin/tally", authorize("admin"), getAdminTally);
+router.get("/:year/admin/release", authorize("admin"), getAdminRelease);
+router.put("/:year/admin/release", authorize("admin"), setAdminRelease);
+router.get("/:year/admin/members", authorize("admin"), getAdminMembers);
 
 module.exports = router;
