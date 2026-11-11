@@ -12,7 +12,7 @@ const WrappedDone = ({ onEdit }) => (
       Du er klar for Bokwrapped!
     </h3>
     <p className="max-w-sm mx-auto text-sm" style={{ color: "var(--color-text-muted)" }}>
-      Vi varsler deg her på forsiden så snart admin har generert oppsummeringen — like etter
+      Du får beskjed her på forsiden så snart oppsummeringen er klar — like etter
       nyttår.
     </p>
     <div className="flex items-center justify-center gap-5 mt-5">

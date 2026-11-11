@@ -811,7 +811,7 @@ export function buildSlides({ data, name }) {
       render: () => (
         <Center>
           <Kicker theme={THEMES.gold}>Ditt leseår {year}</Kicker>
-          <Headline>Vi fant ingen fullførte bøker fra deg i år</Headline>
+          <Headline>Ingen fullførte bøker er registrert på deg i år</Headline>
           <Rise delay={0.5} as="p" className="mt-4 text-lg">
             Kanskje neste år blir ditt år? Marker bøker som lest i appen, så teller de med. Men klubben har lest masse —
             bli med og se! 👉

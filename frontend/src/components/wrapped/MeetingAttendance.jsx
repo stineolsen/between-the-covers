@@ -53,7 +53,7 @@ const MeetingAttendance = ({ year }) => {
         </span>
       </div>
       <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
-        Vi har krysset av møtene du meldte deg på. Rett opp hvis du likevel ikke kom, eller kom uten å melde deg på.
+        Møtene du meldte deg på er krysset av. Rett opp hvis du likevel ikke kom, eller kom uten å melde deg på.
       </p>
       <div className="flex flex-col gap-1.5">
         {meetings.map((m) => (

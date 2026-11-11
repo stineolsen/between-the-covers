@@ -11,6 +11,7 @@ const NOTIFICATION_TYPES = [
   "review-comment",
   "request-fulfilled",
   "wrapped-release",
+  "feature-alert",
 ];
 
 // Maps a notification type to the User boolean field that gates its email
@@ -26,6 +27,9 @@ const EMAIL_GATE_FIELD = {
   "review-comment": "notifyOnReviewComment",
   "request-fulfilled": "notifyOnRequestFulfilled",
   "wrapped-release": "notifyOnFeatureAlerts",
+  // The admin "Send varsel" email goes out separately (emailService
+  // sendFeatureAlert), so this in-app/push copy must not email again
+  "feature-alert": null,
 };
 
 module.exports = { NOTIFICATION_TYPES, EMAIL_GATE_FIELD };

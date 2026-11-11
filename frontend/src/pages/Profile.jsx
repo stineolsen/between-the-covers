@@ -286,7 +286,7 @@ const Profile = () => {
                   onChange={handleChange}
                   rows="4"
                   className="input-field"
-                  placeholder="Fortell oss litt om deg..."
+                  placeholder="Fortell litt om deg selv..."
                 />
               </div>
 

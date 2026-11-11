@@ -1599,8 +1599,9 @@ const Admin = () => {
           <div className="container-gradient animate-fadeIn">
             <h3 className="text-2xl font-bold gradient-text mb-2">🔔 Send varsel</h3>
             <p className="text-text-muted mb-6">
-              Sender en e-post til alle medlemmer som har skrudd på «Varsle meg om nye funksjoner» i
-              profilen sin. Bruk dette til f.eks. å fortelle om nye funksjoner på siden.
+              Alle medlemmer, også du, får varselet i varselklokka 🔔 og som push-varsel (de som har
+              tillatt push på enheten sin). I tillegg får de som har skrudd på «Varsle meg om nye funksjoner» det på e-post.
+              Bruk dette til f.eks. å fortelle om nye funksjoner på siden.
             </p>
             <div className="space-y-4 mb-4">
               <div>
@@ -1633,8 +1634,16 @@ const Admin = () => {
             </button>
             {alertResult && (
               <div className="mt-4 p-4 rounded-xl text-sm" style={{ background: "var(--color-sage-tint)", color: "var(--color-sage)" }}>
-                Sendt til {alertResult.sent} av {alertResult.recipients} mottakere
-                {alertResult.failed > 0 && ` (${alertResult.failed} feilet)`}.
+                <p>
+                  📧 E-post: sendt til {alertResult.sent} av {alertResult.recipients} mottakere
+                  {alertResult.failed > 0 && ` (${alertResult.failed} feilet)`}.
+                </p>
+                {alertResult.notified !== undefined && (
+                  <p className="mt-1">
+                    🔔 Varselklokka: {alertResult.notified} medlemmer · 📱 Push: {alertResult.pushMembers} medlemmer med push
+                    på
+                  </p>
+                )}
               </div>
             )}
           </div>

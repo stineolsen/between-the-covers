@@ -41,7 +41,7 @@ const RankBookclubStep = ({ year, onBack, onNext }) => {
           Ranger årets bokklubbøker
         </h3>
         <p className="text-sm mb-5" style={{ color: "var(--color-text-muted)" }}>
-          Vi fant ingen bokklubbøker registrert for {year} ennå. Hopp videre for nå.
+          Ingen bokklubbøker er registrert for {year} ennå. Hopp videre for nå.
         </p>
         <div className="flex justify-between items-center pt-4" style={{ borderTop: "1px solid var(--color-border)" }}>
           <button onClick={onBack} className="btn-secondary text-sm">← Tilbake</button>

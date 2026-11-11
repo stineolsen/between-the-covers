@@ -275,7 +275,7 @@ const ConfirmReadingListStep = ({ year, onNext }) => {
         Stemmer dette?
       </h3>
       <p className="text-sm mb-4" style={{ color: "var(--color-text-muted)" }}>
-        Vi har markert disse bøkene som lest i {year} basert på datoene dine. Fjern de som egentlig hører til et annet
+        Disse bøkene er markert som lest i {year} ut fra datoene dine. Fjern de som egentlig hører til et annet
         år, og sjekk at månedene stemmer - Bokwrapped viser leseåret ditt måned for måned. Du kan også legge til bøker du
         har glemt å markere.
       </p>

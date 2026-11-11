@@ -108,7 +108,7 @@ const WrappedBanner = () => {
           </h3>
           <p className="text-sm opacity-90">
             {done
-              ? "Vi varsler deg her så snart admin har generert oppsummeringen etter nyttår."
+              ? "Du får beskjed her så snart oppsummeringen er klar etter nyttår."
               : "Bekreft leselisten, ranger bokklubbøkene og send inn dine Book Awards-nominasjoner."}
           </p>
         </div>
@@ -121,7 +121,7 @@ const WrappedBanner = () => {
             style={{ width: `${(status.completedCount / 3) * 100}%`, background: "#fff" }}
           />
         </div>
-        <span>Frist 27. des</span>
+        <span>Frist 30. des</span>
       </div>
     </Link>
   );
