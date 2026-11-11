@@ -12,6 +12,7 @@ const NOTIFICATION_TYPES = [
   "request-fulfilled",
   "wrapped-release",
   "feature-alert",
+  "badge-earned",
 ];
 
 // Maps a notification type to the User boolean field that gates its email
@@ -30,6 +31,8 @@ const EMAIL_GATE_FIELD = {
   // The admin "Send varsel" email goes out separately (emailService
   // sendFeatureAlert), so this in-app/push copy must not email again
   "feature-alert": null,
+  // New lesemerke - in-app only (no email; push is switched off by the caller)
+  "badge-earned": null,
 };
 
 module.exports = { NOTIFICATION_TYPES, EMAIL_GATE_FIELD };

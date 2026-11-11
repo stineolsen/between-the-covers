@@ -28,6 +28,7 @@ const wrappedRoutes = require("./routes/wrappedRoutes");
 const adventRoutes = require("./routes/adventRoutes");
 const settingsRoutes = require("./routes/settingsRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
+const badgeRoutes = require("./routes/badgeRoutes");
 
 const app = express();
 
@@ -92,6 +93,7 @@ app.use("/api/wrapped", wrappedRoutes);
 app.use("/api/advent", adventRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/badges", badgeRoutes);
 
 // Health check route
 app.get("/api/health", (req, res) => {

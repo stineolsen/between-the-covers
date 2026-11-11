@@ -2,6 +2,7 @@ const Recommendation = require('../models/Recommendation');
 const Book = require('../models/Book');
 const UserBook = require('../models/UserBook');
 const { createNotification } = require('../utils/notificationCenter');
+const { queueBadgeCheck } = require("../utils/badgeAwarder");
 
 // @desc    Send a book recommendation to other members
 // @route   POST /api/recommendations
@@ -48,6 +49,8 @@ exports.createRecommendation = async (req, res) => {
         link: `/books/${book._id}`,
       }).catch((error) => console.error('Recommendation notification failed:', error));
     }
+
+    queueBadgeCheck(req.user._id); // recommendations given
 
     res.status(201).json({ success: true, message: 'Anbefaling sendt!', recommendation });
   } catch (error) {

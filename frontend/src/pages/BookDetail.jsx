@@ -7,6 +7,7 @@ import { useAuth } from "../contexts/useAuth";
 import { useToast } from "../contexts/useToast";
 import ReviewList from "../components/reviews/ReviewList";
 import ReviewForm from "../components/reviews/ReviewForm";
+import MarkAsReadModal from "../components/books/MarkAsReadModal";
 import StatusSelector from "../components/books/StatusSelector";
 import RecommendModal from "../components/books/RecommendModal";
 import AddToListMenu from "../components/books/AddToListMenu";
@@ -37,6 +38,8 @@ const BookDetail = () => {
   const [userBookStatus, setUserBookStatus] = useState(null);
   const [userBookId, setUserBookId] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
+  // "When did you read it / stars / comment" dialog after marking as read
+  const [showReadDialog, setShowReadDialog] = useState(false);
 
   // Readers state
   const [readers, setReaders] = useState([]);
@@ -243,7 +246,8 @@ const BookDetail = () => {
         const result = await userBooksApi.setBookStatus(id, status);
         setUserBookStatus(status);
         setUserBookId(result.userBook?._id);
-        toast.success("Lese status oppdatert!");
+        if (status === "read" && result.userBook?._id) setShowReadDialog(true);
+        else toast.success("Lese status oppdatert!");
       }
     } catch (err) {
       console.error("Status oppdatering error:", err);
@@ -461,7 +465,16 @@ const BookDetail = () => {
                 >
                   📤 Anbefal denne boken
                 </button>
-                {showRecommendModal && (
+                {showReadDialog && book && (
+        <MarkAsReadModal
+          book={book}
+          userBookId={userBookId}
+          onClose={() => setShowReadDialog(false)}
+          onSaved={() => Promise.all([fetchBook(), fetchReviews(), fetchUserReview(), fetchReaders()])}
+        />
+      )}
+
+      {showRecommendModal && (
                   <RecommendModal
                     book={book}
                     onClose={() => setShowRecommendModal(false)}

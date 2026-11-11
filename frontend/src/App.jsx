@@ -39,6 +39,7 @@ import Admin from "./pages/Admin";
 import Howto from "./pages/Howto";
 import Bokwrapped from "./pages/Bokwrapped";
 import WrappedResults from "./pages/WrappedResults";
+import Badges from "./pages/Badges";
 import AdventCalendar from "./pages/AdventCalendar";
 
 function App() {
@@ -209,6 +210,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <WrappedResults />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/merker"
+                  element={
+                    <ProtectedRoute>
+                      <Badges />
                     </ProtectedRoute>
                   }
                 />

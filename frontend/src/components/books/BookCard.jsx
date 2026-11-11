@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 import { userBooksApi } from "../../api/userBooksApi";
 import BookCoverFallback from "../common/BookCoverFallback";
+import MarkAsReadModal from "./MarkAsReadModal";
 
 const BookCard = ({ book, userBookEntry, onStatusChange }) => {
   const coverUrl = book.coverImage ? booksApi.getCoverUrl(book.coverImage) : null;
@@ -10,6 +11,8 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
   const [showOverlay, setShowOverlay] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const longPressTimer = useRef(null);
+  // userBook id of a book just marked "Lest" - opens the date/stars/comment dialog
+  const [readDialogFor, setReadDialogFor] = useState(null);
 
   const currentStatus = userBookEntry?.status;
   const userBookId = userBookEntry?._id;
@@ -44,6 +47,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
       } else {
         const data = await userBooksApi.setBookStatus(book._id, status);
         onStatusChange?.(book._id, status, data.userBook?._id);
+        if (status === "read" && data.userBook?._id) setReadDialogFor(data.userBook._id);
       }
     } catch (err) {
       console.error(err);
@@ -59,6 +63,7 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
   const cancelLongPress = () => clearTimeout(longPressTimer.current);
 
   return (
+    <>
     <div
       className="relative h-full"
       onMouseEnter={() => setShowOverlay(true)}
@@ -234,6 +239,11 @@ const BookCard = ({ book, userBookEntry, onStatusChange }) => {
         </div>
       </Link>
     </div>
+    {/* Outside the card so taps in the dialog don't reach the card's handlers */}
+    {readDialogFor && (
+      <MarkAsReadModal book={book} userBookId={readDialogFor} onClose={() => setReadDialogFor(null)} />
+    )}
+    </>
   );
 };
 

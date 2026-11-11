@@ -10,6 +10,7 @@ const Meeting = require("../models/Meeting");
 const { DEFAULT_QUESTIONS } = require("../constants/defaultWrappedQuestions");
 const { getVisibility, setVisibility } = require("../utils/featureVisibility");
 const { getYearStats, liveSubset, buildAwardTally } = require("../utils/wrappedStats");
+const { queueBadgeCheck } = require("../utils/badgeAwarder");
 
 const windowSettingKey = (year) => `wrapped:${year}:window`;
 const visibilitySettingKey = (year) => `wrapped:${year}:visibility`;
@@ -329,6 +330,7 @@ exports.submit = async (req, res) => {
     response.stepsCompleted.awards = true;
     response.submittedAt = new Date();
     await response.save();
+    queueBadgeCheck(req.user._id); // the year's Bokwrapped badge
 
     res.status(200).json({ success: true, message: "Nominasjonene er sendt inn", response });
   } catch (error) {
@@ -736,6 +738,7 @@ exports.setQuickRating = async (req, res) => {
       });
     }
     await review.save(); // post-save hook refreshes the book's average
+    queueBadgeCheck(req.user._id);
 
     res.status(200).json({ success: true, rating: review.rating });
   } catch (error) {

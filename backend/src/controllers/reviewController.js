@@ -1,6 +1,7 @@
 const Review = require("../models/Review");
 const Book = require("../models/Book");
 const { createNotification } = require("../utils/notificationCenter");
+const { queueBadgeCheck } = require("../utils/badgeAwarder");
 
 // @desc    Get all reviews (with optional filters)
 // @route   GET /api/reviews
@@ -89,7 +90,7 @@ exports.getReview = async (req, res, next) => {
 // @access  Private (approved members only)
 exports.createReview = async (req, res, next) => {
   try {
-    const { bookId, rating, title, content, readingDate, spoilers } = req.body;
+    const { bookId, rating, title, content, readingDate, spoilers, hideFromFeed } = req.body;
 
     // Check if book exists
     const book = await Book.findById(bookId);
@@ -123,7 +124,12 @@ exports.createReview = async (req, res, next) => {
       content,
       readingDate,
       spoilers: spoilers || false,
+      // Stars-only ratings from the "mark as read" dialog - the read status
+      // itself already shows in the feed, so don't post it twice
+      hideFromFeed: hideFromFeed === true,
     });
+
+    queueBadgeCheck(req.user._id); // reviews and star ratings
 
     // Populate user info
     await review.populate("user", "username displayName avatar");
@@ -182,8 +188,12 @@ exports.updateReview = async (req, res, next) => {
     if (content !== undefined) review.content = content;
     if (readingDate !== undefined) review.readingDate = readingDate;
     if (spoilers !== undefined) review.spoilers = spoilers;
+    // Once a stars-only rating gets written text it's a real review - show it
+    if (review.hideFromFeed && review.content?.trim()) review.hideFromFeed = false;
 
     await review.save();
+
+    queueBadgeCheck(req.user._id); // written text can make it count as a review
 
     // Populate user info
     await review.populate("user", "username displayName avatar");
@@ -269,6 +279,9 @@ exports.toggleLike = async (req, res, next) => {
     await review.toggleLike(req.user._id);
 
     const isLiked = review.likes.some((id) => id.toString() === req.user._id.toString());
+
+    // Likes received count for the review author's badges
+    if (isLiked) queueBadgeCheck(review.user?._id || review.user);
 
     // Only notify on the like itself, not on unliking.
     if (isLiked) {

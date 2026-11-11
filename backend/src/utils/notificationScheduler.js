@@ -3,6 +3,7 @@ const { sendDigestsFor, sendPendingRequestNotifications, checkForImmediateUpdate
 const { syncAbsListeningStats } = require("./absListeningSync");
 const { sweepDueDoors } = require("./adventLibraryPublish");
 const { announceDueReleases } = require("./wrappedRelease");
+const { isBadgesLaunched, recalculateAllBadges } = require("./badgeAwarder");
 
 const TIMEZONE = "Europe/Oslo";
 
@@ -52,9 +53,19 @@ function startNotificationScheduler() {
   cron.schedule("* * * * *", runSafely("wrapped release announcement", announceDueReleases), {
     timezone: TIMEZONE,
   });
+  // Catches badges no member action triggers (Audiobookshelf hours from the
+  // 03:00 sync, meetings, a released Bokwrapped personality). Does nothing
+  // until lesemerker are launched.
+  cron.schedule(
+    "30 4 * * *",
+    runSafely("nightly badge check", async () => {
+      if (await isBadgesLaunched()) await recalculateAllBadges();
+    }),
+    { timezone: TIMEZONE },
+  );
 
   console.log(
-    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, advent library sweep daily 04:00, wrapped release check every minute, Europe/Oslo)",
+    "Notification scheduler started (daily 18:00, weekly/biweekly Mon 18:00, monthly 1st 18:00, request-fulfilled every minute, immediate check every 10 min, abs listening sync daily 03:00, advent library sweep daily 04:00, wrapped release check every minute, badge check daily 04:30, Europe/Oslo)",
   );
 }
 

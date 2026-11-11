@@ -11,7 +11,7 @@ const { EMAIL_GATE_FIELD } = require("../constants/notificationConfig");
 // fire-and-forget philosophy as emailService's notifyListShared/
 // notifyListComment, just consolidated into one place instead of repeated
 // per trigger.
-async function createNotification({ recipient, from, type, message, link }) {
+async function createNotification({ recipient, from, type, message, link, push = true }) {
   const recipientId = recipient?._id || recipient;
   const fromId = from?._id || from;
   if (!recipientId) return null;
@@ -25,9 +25,12 @@ async function createNotification({ recipient, from, type, message, link }) {
   // list-shared/list-comment behaviour - the user's "want push?" choice is
   // really expressed by whether they subscribed at all (see
   // NotificationPreferencesPopup.jsx), not a separate boolean here.
-  sendPushToUser(recipientId, { title: "Between the Covers", body: message, url: link || "/" }).catch((error) =>
-    console.error(`Notification push failed (${type}):`, error),
-  );
+  // Callers can opt out of push for low-stakes, high-volume types (badges)
+  if (push) {
+    sendPushToUser(recipientId, { title: "Between the Covers", body: message, url: link || "/" }).catch((error) =>
+      console.error(`Notification push failed (${type}):`, error),
+    );
+  }
 
   // Email: gated per-type by the matching notifyOn* flag.
   const gateField = EMAIL_GATE_FIELD[type];

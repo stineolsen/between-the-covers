@@ -256,7 +256,7 @@ const Profile = () => {
                 {user.status === "approved" ? "godkjent" : "venter"}
               </span>
             </div>
-            <ProfileBadgeShelf userId={user?._id} />
+            <ProfileBadgeShelf userId={user?._id} isOwn />
           </div>
 
           {/* Profile Form */}

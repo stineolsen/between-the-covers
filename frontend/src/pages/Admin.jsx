@@ -24,6 +24,7 @@ import MatchAbsItemModal from "../components/books/MatchAbsItemModal";
 import AdventAdminPanel from "../components/admin/AdventAdminPanel";
 import VisibilityToggle from "../components/admin/VisibilityToggle";
 import WrappedReleasePanel from "../components/admin/WrappedReleasePanel";
+import BadgesAdminPanel from "../components/admin/BadgesAdminPanel";
 import BannerAdminPanel from "../components/admin/BannerAdminPanel";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
@@ -72,6 +73,7 @@ const ADMIN_NAV = [
     tabs: [
       { key: "wrapped", label: "🎁 Bokwrapped" },
       { key: "advent", label: "🎄 Julekalender" },
+      { key: "badges", label: "🔖 Lesemerker" },
       { key: "seasonTheme", label: "🎨 Sesongtema" },
     ],
   },
@@ -1890,6 +1892,7 @@ const Admin = () => {
 
         {/* Advent Calendar Tab */}
         {activeTab === "advent" && <AdventAdminPanel />}
+        {activeTab === "badges" && <BadgesAdminPanel />}
 
         {activeTab === "banner" && <BannerAdminPanel />}
 

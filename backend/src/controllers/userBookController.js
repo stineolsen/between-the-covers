@@ -2,6 +2,7 @@ const UserBook = require("../models/UserBook");
 const Book = require("../models/Book");
 const Review = require("../models/Review");
 const User = require("../models/User");
+const { queueBadgeCheck } = require("../utils/badgeAwarder");
 
 // @desc    Get user's books (optionally filtered by status)
 // @route   GET /api/user-books
@@ -108,6 +109,8 @@ exports.setBookStatus = async (req, res) => {
       );
     }
 
+    queueBadgeCheck(req.user._id); // books read, DNF, reading goal
+
     res.status(200).json({
       success: true,
       message: "Reading status updated successfully",
@@ -159,6 +162,8 @@ exports.updateFinishedDate = async (req, res) => {
         { $set: { readingDate: new Date(finishedAt) } },
       );
     }
+
+    queueBadgeCheck(req.user._id); // a new date can complete a reading goal
 
     res
       .status(200)
