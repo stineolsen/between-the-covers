@@ -24,8 +24,9 @@ const MAX_OPDS_PAGES = 200;
 // replaces the whole subdocument and would silently wipe out any existing
 // libraryLinks.audiobook (e.g. one set by the Audiobookshelf sync, or the
 // admin "match"/"add as new book" flow for an unmatched audiobook).
-// series/seriesNumber/genres are NOT included here either - see
-// calibreFillableFields, they're fill-the-gaps only on an update.
+// series/seriesNumber/genres/publishedYear are NOT included here either -
+// see calibreFillableFields, they're fill-the-gaps only on an update.
+// pageCount is never written by the Calibre import at all.
 // title is NOT included either - the database's title is treated as
 // authoritative (an admin may have corrected it), so it's only ever set on
 // insert. Matching a book to its Calibre entry on later runs relies on
@@ -35,7 +36,6 @@ function calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNorma
   return {
     author: parsed.author,
     description: parsed.description,
-    publishedYear: parsed.publishedYear,
     publisher: parsed.publisher,
     // bulkWrite bypasses the Book schema's `language` default ("English"), so
     // this must never be null - MongoDB's text index reads this field as its
@@ -50,8 +50,8 @@ function calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNorma
   };
 }
 
-// series/seriesNumber/genres may have been manually corrected in the app
-// after a book was first imported, so on an update Calibre should only fill
+// series/seriesNumber/genres/publishedYear may have been manually corrected
+// in the app (or by the 2026 data clean-up) after a book was first imported, so on an update Calibre should only fill
 // these in where the database doesn't already have a value - never clobber
 // an existing one. `existing` is the matched book's current DB state (or, for
 // a same-run duplicate, the stub registered when it was inserted earlier in
@@ -61,10 +61,12 @@ function calibreFillableFields(parsed, existing) {
   const hasSeries = !!existing?.series?.trim();
   const hasSeriesNumber = existing?.seriesNumber != null;
   const hasGenres = Array.isArray(existing?.genres) && existing.genres.length > 0;
+  const hasPublishedYear = existing?.publishedYear != null;
 
   if (!hasSeries && parsed.series) fields.series = parsed.series;
   if (!hasSeriesNumber && parsed.seriesNumber != null) fields.seriesNumber = parsed.seriesNumber;
   if (!hasGenres && parsed.genres?.length) fields.genres = parsed.genres;
+  if (!hasPublishedYear && parsed.publishedYear != null) fields.publishedYear = parsed.publishedYear;
 
   return fields;
 }
@@ -99,6 +101,7 @@ function buildCalibreBookInsertOp(id, parsed, calibreWebBookBase, adminUserId, t
         _id: id,
         title: parsed.title,
         ...calibreMetadataFields(parsed, adminUserId, titleNormalized, authorNormalized),
+        publishedYear: parsed.publishedYear,
         series: parsed.series,
         seriesNumber: parsed.seriesNumber,
         genres: parsed.genres,
@@ -211,7 +214,7 @@ exports.runCalibreImport = async (req, res) => {
     // admin flow - updates it in place instead of creating a duplicate.
     const booksCollection = mongoose.connection.db.collection("books");
     const mongoBooks = await booksCollection
-      .find({}, { projection: { _id: 1, title: 1, author: 1, titleNormalized: 1, authorNormalized: 1, series: 1, seriesNumber: 1, genres: 1, calibreId: 1 } })
+      .find({}, { projection: { _id: 1, title: 1, author: 1, titleNormalized: 1, authorNormalized: 1, series: 1, seriesNumber: 1, genres: 1, publishedYear: 1, calibreId: 1 } })
       .toArray();
     const byNorm = new Map();
     const byCalibreId = new Map();
@@ -273,7 +276,7 @@ exports.runCalibreImport = async (req, res) => {
         // Register immediately so a later entry in this same run that
         // normalizes to the same key updates this one instead of also
         // inserting - bulkWrite ops don't see each other's effects. Carries
-        // series/seriesNumber/genres too, so if that later entry matches this
+        // series/seriesNumber/genres/publishedYear too, so if that later entry matches this
         // stub, calibreFillableFields checks against what was just inserted
         // rather than treating them as blank.
         const stub = {
@@ -285,6 +288,7 @@ exports.runCalibreImport = async (req, res) => {
           series: parsed.series,
           seriesNumber: parsed.seriesNumber,
           genres: parsed.genres,
+          publishedYear: parsed.publishedYear,
           calibreId: parsed.calibreId,
         };
         byNorm.set(key, stub);
