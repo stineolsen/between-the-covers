@@ -12,14 +12,6 @@ const DURATION_DAYS = {
   forever: null,
 };
 
-// Users can't collapse a message until it has been up this long, so
-// everyone gets a proper look at it first.
-const DISMISSIBLE_AFTER_DAYS = 3;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const dismissibleAt = (announcement) =>
-  new Date(new Date(announcement.createdAt).getTime() + DISMISSIBLE_AFTER_DAYS * DAY_MS);
-
 // @desc    Active (non-expired) announcements, newest first
 // @route   GET /api/announcements
 // @access  Private
@@ -35,7 +27,6 @@ exports.getActive = async (req, res) => {
         const { dismissedBy, ...rest } = a.toObject();
         return {
           ...rest,
-          dismissibleAt: dismissibleAt(a),
           dismissed: (dismissedBy || []).some((id) => id.toString() === userId),
         };
       }),
@@ -99,12 +90,6 @@ exports.dismissAnnouncement = async (req, res) => {
     const announcement = await Announcement.findById(req.params.id);
     if (!announcement) {
       return res.status(404).json({ success: false, message: "Meldingen ble ikke funnet" });
-    }
-    if (new Date() < dismissibleAt(announcement)) {
-      return res.status(400).json({
-        success: false,
-        message: `Meldingen kan skjules ${DISMISSIBLE_AFTER_DAYS} dager etter at den ble lagt ut`,
-      });
     }
     await Announcement.updateOne(
       { _id: announcement._id },

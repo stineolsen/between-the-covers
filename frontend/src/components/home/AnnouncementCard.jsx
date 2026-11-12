@@ -5,15 +5,14 @@ import announcementsApi from "../../api/announcementsApi";
 const htmlToText = (html) =>
   new DOMParser().parseFromString(html, "text/html").body.textContent || "";
 
-// Admin message on the homepage. After a few days (decided by the backend
-// via dismissibleAt) the user can collapse it to a one-line bar - it stays
-// collapsed for them until admin deletes it or it expires.
+// Admin message on the homepage. The user can collapse it to a one-line bar
+// right away - it stays collapsed for them until admin deletes it or it expires.
 const AnnouncementCard = ({ announcement }) => {
   const toast = useToast();
   const [dismissed, setDismissed] = useState(announcement.dismissed);
   const [expanded, setExpanded] = useState(false);
 
-  const canDismiss = !dismissed && new Date() >= new Date(announcement.dismissibleAt);
+  const canDismiss = !dismissed;
   const collapsed = dismissed && !expanded;
 
   const handleDismiss = async () => {
