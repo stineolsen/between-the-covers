@@ -8,6 +8,7 @@ import AddBookToListModal from "../components/lists/AddBookToListModal";
 import ShareListModal from "../components/lists/ShareListModal";
 import ListFormModal from "../components/lists/ListFormModal";
 import CommentThread from "../components/lists/CommentThread";
+import SpinWheelModal from "../components/lists/SpinWheelModal";
 import UserAvatar from "../components/common/UserAvatar";
 
 const ListDetail = () => {
@@ -22,6 +23,7 @@ const ListDetail = () => {
   const [showAddBookModal, setShowAddBookModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showWheel, setShowWheel] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   const fetchList = async () => {
@@ -92,6 +94,8 @@ const ListDetail = () => {
   }
 
   const ownerName = list.owner?.displayName || list.owner?.username || "Ukjent";
+  // Books deleted from the library leave an entry with no book behind
+  const wheelBooks = list.books.filter((entry) => entry.book).map((entry) => entry.book);
 
   return (
     <div className="min-h-screen py-8">
@@ -179,11 +183,18 @@ const ListDetail = () => {
         {/* Books */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-gray-900">📚 Bøker på listen</h2>
-          {canEdit && (
-            <button onClick={() => setShowAddBookModal(true)} className="btn-accent text-sm py-2 px-4">
-              ➕ Legg til bok
-            </button>
-          )}
+          <div className="flex gap-2 flex-wrap justify-end">
+            {wheelBooks.length >= 2 && (
+              <button onClick={() => setShowWheel(true)} className="btn-secondary text-sm py-2 px-4">
+                🎡 Snurr hjulet
+              </button>
+            )}
+            {canEdit && (
+              <button onClick={() => setShowAddBookModal(true)} className="btn-accent text-sm py-2 px-4">
+                ➕ Legg til bok
+              </button>
+            )}
+          </div>
         </div>
         <div className="mb-10">
           <BookRankingList
@@ -213,6 +224,7 @@ const ListDetail = () => {
       {showShareModal && (
         <ShareListModal list={list} onClose={() => setShowShareModal(false)} onShared={(updatedList) => setList(updatedList)} />
       )}
+      {showWheel && <SpinWheelModal listTitle={list.title} books={wheelBooks} onClose={() => setShowWheel(false)} />}
       {showEditModal && (
         <ListFormModal list={list} onClose={() => setShowEditModal(false)} onSaved={(updatedList) => setList(updatedList)} />
       )}
