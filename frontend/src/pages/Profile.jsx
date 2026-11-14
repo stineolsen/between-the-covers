@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/useAuth";
 import { useToast } from "../contexts/useToast";
 import { usersApi } from "../api/usersApi";
 import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
+import ProfileWrappedShares from "../components/wrapped/ProfileWrappedShares";
 import YearSoFar from "../components/wrapped/YearSoFar";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";
@@ -257,6 +258,7 @@ const Profile = () => {
               </span>
             </div>
             <ProfileBadgeShelf userId={user?._id} isOwn />
+            <ProfileWrappedShares userId={user?._id} isOwn />
           </div>
 
           {/* Profile Form */}

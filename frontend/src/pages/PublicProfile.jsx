@@ -5,6 +5,7 @@ import { booksApi } from "../api/booksApi";
 import { useAuth } from "../contexts/useAuth";
 import UserAvatar from "../components/common/UserAvatar";
 import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
+import ProfileWrappedShares from "../components/wrapped/ProfileWrappedShares";
 
 const TAG_CONFIG = {
   admin:          { label: 'Admin',          bg: 'linear-gradient(135deg, #f093fb, #f5576c)' },
@@ -131,6 +132,7 @@ const PublicProfile = () => {
           )}
 
           <ProfileBadgeShelf userId={user._id} />
+          <ProfileWrappedShares userId={user._id} />
 
           {/* Bio */}
           {user.bio && (

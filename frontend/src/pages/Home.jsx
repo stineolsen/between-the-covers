@@ -17,6 +17,7 @@ import AdventCalendarBanner from "../components/home/AdventCalendarBanner";
 import HomeGhosts from "../components/home/HomeGhosts";
 import AnniversaryBanner from "../components/home/AnniversaryBanner";
 import AnnouncementCard from "../components/home/AnnouncementCard";
+import ClubWrappedRow from "../components/home/ClubWrappedRow";
 
 const Home = () => {
   const { user } = useAuth();
@@ -127,6 +128,7 @@ const Home = () => {
 
         <AnniversaryBanner />
         <WrappedBanner />
+        <ClubWrappedRow />
         <AdventCalendarBanner />
 
         {/* Main grid: activity (main) + meeting/goal/shelf (side) */}

@@ -77,7 +77,22 @@ const WrappedResults = () => {
   }, [year, previewUser]);
 
   const name = data?.personal?.user?.displayName || data?.personal?.user?.username || user?.displayName || user?.username || "leser";
-  const slides = useMemo(() => (data ? buildSlides({ data, name }) : []), [data, name]);
+  // Only your own results can be shared - never an admin's preview of
+  // someone else. Before release only admins can, to preview the look
+  // (the backend keeps those cards hidden from members until release).
+  const canShare = (!!data?.released || user?.role === "admin") && !previewUser;
+  const slides = useMemo(
+    () =>
+      data
+        ? buildSlides({
+            data,
+            name,
+            canShare,
+            onSharedChange: (shared) => setData((d) => ({ ...d, shared })),
+          })
+        : [],
+    [data, name, canShare],
+  );
 
   if (locked) return <Countdown year={year} releaseAt={locked.releaseAt} />;
 

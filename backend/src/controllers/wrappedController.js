@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const WrappedResponse = require("../models/WrappedResponse");
 const WrappedQuestion = require("../models/WrappedQuestion");
 const UserBook = require("../models/UserBook");
@@ -7,6 +8,7 @@ const List = require("../models/List");
 const Setting = require("../models/Setting");
 const User = require("../models/User");
 const Meeting = require("../models/Meeting");
+const WrappedShare = require("../models/WrappedShare");
 const { DEFAULT_QUESTIONS } = require("../constants/defaultWrappedQuestions");
 const { getVisibility, setVisibility } = require("../utils/featureVisibility");
 const { getYearStats, liveSubset, buildAwardTally } = require("../utils/wrappedStats");
@@ -627,6 +629,7 @@ exports.getResults = async (req, res) => {
     const { perUser, club } = await getYearStats(year);
     // An admin may preview someone else's wrapped to check it before release
     const userId = isAdmin && req.query.user ? String(req.query.user) : req.user._id.toString();
+    const shared = !!(await WrappedShare.exists({ user: userId, year }));
 
     res.status(200).json({
       success: true,
@@ -635,6 +638,7 @@ exports.getResults = async (req, res) => {
       releaseAt: release.at,
       personal: perUser.get(userId) || null,
       club,
+      shared,
     });
   } catch (error) {
     console.error("Get wrapped results error:", error);
@@ -816,5 +820,144 @@ exports.saveMeetings = async (req, res) => {
   } catch (error) {
     console.error("Save wrapped meetings error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke lagre møtene" });
+  }
+};
+
+// ---------------------------------------------------------------- Sharing
+
+const SHARE_USER_FIELDS = "displayName username avatar";
+const SHARE_FAVORITES = 3;
+
+// The member's favourites: highest own rating first (stable, so ties keep
+// reading order), topped up with unrated books if fewer than 3 are rated.
+// Mirrored in the frontend's previewSnapshot (ShareWithClubSlide.jsx).
+function favoriteBooks(books) {
+  const rated = books.filter((b) => b.rating != null).sort((a, b) => b.rating - a.rating);
+  const unrated = books.filter((b) => b.rating == null);
+  return [...rated, ...unrated].slice(0, SHARE_FAVORITES).map((b) => ({
+    bookId: b._id,
+    title: b.title,
+    coverImage: b.coverImage || null,
+    rating: b.rating ?? null,
+  }));
+}
+
+// The mini card's contents, from the same stats the results story shows
+function shareSnapshot(personal) {
+  const best = personal.bestPercentile;
+  return {
+    count: personal.count,
+    pages: personal.pages,
+    avgRating: personal.avgRating,
+    topGenre: personal.topGenres?.[0]?.name || null,
+    personalities: (personal.personalities || []).map(({ key, label, emoji }) => ({ key, label, emoji })),
+    favorites: favoriteBooks(personal.books),
+    bestPercentile: best?.topPercent ? { topPercent: best.topPercent, label: best.label } : null,
+    readingGoal: personal.readingGoal ? { goal: personal.readingGoal, count: personal.count } : null,
+    bookclub:
+      personal.bookclub?.total > 0
+        ? {
+            read: personal.bookclub.read,
+            total: personal.bookclub.total,
+            meetingsAttended: personal.meetings?.attended || 0,
+            meetingsTotal: personal.meetings?.total || 0,
+          }
+        : null,
+  };
+}
+
+// Before release only admins see shared cards (their own preview share) -
+// members get nothing until release day, so nothing leaks early.
+const sharesVisibleTo = (req, released) => released || req.user.role === "admin";
+
+// @desc    Share my Bokwrapped summary with the club (profile + homepage)
+// @route   POST /api/wrapped/:year/share
+// @access  Private (after release; admins any time, to preview the look)
+exports.shareResults = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const release = await getRelease(year);
+    if (!sharesVisibleTo(req, release.released)) {
+      return res.status(403).json({ success: false, message: "Bokwrapped er ikke sluppet ennå" });
+    }
+
+    // Same (briefly cached) stats the member just saw in the story
+    const { perUser } = await getYearStats(year);
+    const personal = perUser.get(req.user._id.toString());
+    if (!personal || personal.count === 0) {
+      return res.status(400).json({ success: false, message: "Du har ingen leste bøker å dele for dette året" });
+    }
+
+    const share = await WrappedShare.findOneAndUpdate(
+      { user: req.user._id, year },
+      { $set: { snapshot: shareSnapshot(personal) } },
+      { upsert: true, new: true, setDefaultsOnInsert: true },
+    ).populate("user", SHARE_USER_FIELDS);
+
+    res.status(200).json({ success: true, share: { ...share.toObject(), released: release.released } });
+  } catch (error) {
+    console.error("Share wrapped error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke dele Bokwrapped" });
+  }
+};
+
+// @desc    Stop sharing my Bokwrapped summary
+// @route   DELETE /api/wrapped/:year/share
+// @access  Private
+exports.unshareResults = async (req, res) => {
+  try {
+    await WrappedShare.deleteOne({ user: req.user._id, year: Number(req.params.year) });
+    res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Unshare wrapped error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke fjerne delingen" });
+  }
+};
+
+// @desc    Every member's shared summary for a year - homepage row
+// @route   GET /api/wrapped/:year/shares
+// @access  Private
+exports.getYearShares = async (req, res) => {
+  try {
+    const year = Number(req.params.year);
+    const { released } = await getRelease(year);
+    if (!sharesVisibleTo(req, released)) {
+      return res.status(200).json({ success: true, released, shares: [] });
+    }
+    const shares = await WrappedShare.find({ year })
+      .sort({ createdAt: -1 })
+      .populate("user", SHARE_USER_FIELDS);
+    // A deleted member's share has no user left to show
+    res.status(200).json({ success: true, released, shares: shares.filter((s) => s.user) });
+  } catch (error) {
+    console.error("Get wrapped shares error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente delte Bokwrapped" });
+  }
+};
+
+// @desc    One member's shared summaries, newest year first - profile
+// @route   GET /api/wrapped/shares/user/:userId
+// @access  Private
+exports.getUserShares = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.userId)) {
+      return res.status(400).json({ success: false, message: "Ugyldig bruker" });
+    }
+    const shares = await WrappedShare.find({ user: req.params.userId })
+      .sort({ year: -1 })
+      .populate("user", SHARE_USER_FIELDS);
+    const releasedByYear = new Map();
+    for (const year of new Set(shares.map((s) => s.year))) {
+      releasedByYear.set(year, (await getRelease(year)).released);
+    }
+    res.status(200).json({
+      success: true,
+      shares: shares
+        .filter((s) => s.user && sharesVisibleTo(req, releasedByYear.get(s.year)))
+        .map((s) => ({ ...s.toObject(), released: releasedByYear.get(s.year) })),
+    });
+  } catch (error) {
+    console.error("Get user wrapped shares error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente delte Bokwrapped" });
   }
 };

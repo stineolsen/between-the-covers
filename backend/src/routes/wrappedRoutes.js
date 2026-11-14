@@ -28,6 +28,10 @@ const {
   setQuickRating,
   getMeetings,
   saveMeetings,
+  shareResults,
+  unshareResults,
+  getYearShares,
+  getUserShares,
 } = require("../controllers/wrappedController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 const { requireFeatureVisible } = require("../utils/featureVisibility");
@@ -56,6 +60,12 @@ router.put("/:year/meetings", visible, saveMeetings);
 router.get("/:year/release", getReleaseInfo);
 router.get("/:year/live", getLiveStats);
 router.get("/:year/results", getResults);
+
+// Sharing a summary with the club - shareResults checks the release itself
+router.get("/shares/user/:userId", getUserShares);
+router.get("/:year/shares", getYearShares);
+router.post("/:year/share", shareResults);
+router.delete("/:year/share", unshareResults);
 
 router.get("/:year/admin/window", authorize("admin"), getAdminWindow);
 router.put("/:year/admin/window", authorize("admin"), setAdminWindow);

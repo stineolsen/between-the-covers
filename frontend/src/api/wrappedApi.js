@@ -85,6 +85,27 @@ export const wrappedApi = {
     return response.data;
   },
 
+  // Sharing a summary with the club (profile + homepage)
+  shareResults: async (year) => {
+    const response = await api.post(`/api/wrapped/${year}/share`);
+    return response.data;
+  },
+
+  unshareResults: async (year) => {
+    const response = await api.delete(`/api/wrapped/${year}/share`);
+    return response.data;
+  },
+
+  getYearShares: async (year) => {
+    const response = await api.get(`/api/wrapped/${year}/shares`);
+    return response.data;
+  },
+
+  getUserShares: async (userId) => {
+    const response = await api.get(`/api/wrapped/shares/user/${userId}`);
+    return response.data;
+  },
+
   // Admin only
   getAdminRelease: async (year) => {
     const response = await api.get(`/api/wrapped/${year}/admin/release`);

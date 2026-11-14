@@ -21,6 +21,7 @@ import {
   nb,
   plural,
 } from "./slideParts";
+import ShareWithClubSlide from "./ShareWithClubSlide";
 
 const SPINE_COLORS = ["#f2c46d", "#e8799f", "#59c08a", "#4fc1de", "#e8825a", "#f1e6dc", "#c9a0dc"];
 
@@ -142,7 +143,10 @@ const MAX_SERIES_CHIPS = 36;
 
 const AWARD_THEMES = ["gold", "wine", "sage", "blue", "terracotta", "ink", "blush"];
 
-export function buildSlides({ data, name }) {
+// canShare: offer the "Del med bokklubben" last slide (released results,
+// the member's own, with at least one book). onSharedChange keeps the page's
+// copy of data.shared current, so "Se igjen" comes back to the right state.
+export function buildSlides({ data, name, canShare = false, onSharedChange }) {
   const { year, personal: p, club } = data;
   const slides = [];
   const add = (slide) => slides.push({ duration: 7000, ...slide, theme: THEMES[slide.theme] });
@@ -965,9 +969,12 @@ export function buildSlides({ data, name }) {
   }
 
   // ---------------------------------------------------------------- Outro
+  // With sharing on, the share slide comes last and carries the buttons
+  const shareLast = canShare && p && p.count > 0;
   add({
     key: "outro",
     theme: "wine",
+    duration: shareLast ? 4000 : 7000,
     render: ({ restart, close }) => (
       <Center className="items-center text-center">
         <Rise className="wrapped-pop text-7xl mb-4">
@@ -977,27 +984,47 @@ export function buildSlides({ data, name }) {
         <Rise delay={0.4} as="p" className="mt-3 text-lg">
           <span style={{ color: THEMES.wine.muted }}>Vi ses mellom permene i {year + 1}.</span>
         </Rise>
-        <Rise delay={0.8} className="flex flex-col gap-3 mt-10 w-full max-w-xs">
-          <button
-            type="button"
-            onClick={restart}
-            className="px-6 py-3 rounded-full font-bold"
-            style={{ background: THEMES.wine.fg, color: THEMES.wine.solid }}
-          >
-            ↺ Se igjen
-          </button>
-          <button
-            type="button"
-            onClick={close}
-            className="px-6 py-3 rounded-full font-bold border-2"
-            style={{ borderColor: THEMES.wine.fg, color: THEMES.wine.fg }}
-          >
-            Tilbake til forsiden
-          </button>
-        </Rise>
+        {!shareLast && (
+          <Rise delay={0.8} className="flex flex-col gap-3 mt-10 w-full max-w-xs">
+            <button
+              type="button"
+              onClick={restart}
+              className="px-6 py-3 rounded-full font-bold"
+              style={{ background: THEMES.wine.fg, color: THEMES.wine.solid }}
+            >
+              ↺ Se igjen
+            </button>
+            <button
+              type="button"
+              onClick={close}
+              className="px-6 py-3 rounded-full font-bold border-2"
+              style={{ borderColor: THEMES.wine.fg, color: THEMES.wine.fg }}
+            >
+              Tilbake til forsiden
+            </button>
+          </Rise>
+        )}
       </Center>
     ),
   });
+
+  if (shareLast) {
+    add({
+      key: "share-with-club",
+      theme: "wine",
+      render: ({ restart, close }) => (
+        <ShareWithClubSlide
+          year={year}
+          personal={p}
+          initiallyShared={!!data.shared}
+          preview={!data.released}
+          onSharedChange={onSharedChange}
+          restart={restart}
+          close={close}
+        />
+      ),
+    });
+  }
 
   return slides;
 }
