@@ -37,11 +37,18 @@ const toPayload = (form) => ({
   publishedYear: form.publishedYear ? Number(form.publishedYear) : null,
 });
 
+// "Luke 5 · 2025" for every door a book (or title) is already the answer to
+const usedLabel = (uses) => uses.map((u) => `luke ${u.day} · ${u.year}`).join(", ");
+
+const normTitle = (t) => (t || "").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+
 // Small inline search box for linking an existing library book as a new
 // door's answer - same /api/advent/search endpoint the player-facing guess
 // box uses. Optional: leave empty and the backend finds-or-creates a hidden
 // candidate Book from the typed title/author instead.
-const BookLinkField = ({ selectedBook, onSelect }) => {
+// usedBy: bookId -> doors that already use it, so a reused answer is visible
+// in the results before it's picked.
+const BookLinkField = ({ selectedBook, onSelect, usedBy }) => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [open, setOpen] = useState(false);
@@ -70,6 +77,11 @@ const BookLinkField = ({ selectedBook, onSelect }) => {
       <div className="flex items-center gap-2 input-field py-2 text-sm sm:col-span-2">
         <span className="flex-1">
           Lenket til: <strong>{selectedBook.title}</strong> — {selectedBook.author}
+          {usedBy?.get(selectedBook._id) && (
+            <span className="block text-xs font-bold" style={{ color: "var(--color-terracotta)" }}>
+              ⚠️ Allerede brukt: {usedLabel(usedBy.get(selectedBook._id))}
+            </span>
+          )}
         </span>
         <button type="button" onClick={() => { onSelect(null); setQuery(""); }} className="text-xs font-bold" style={{ color: "var(--color-terracotta)" }}>
           Fjern
@@ -104,6 +116,11 @@ const BookLinkField = ({ selectedBook, onSelect }) => {
             >
               <span className="block font-semibold">{b.title}</span>
               <span className="block text-xs" style={{ color: "var(--color-text-faint)" }}>{b.author}</span>
+              {usedBy?.get(b._id) && (
+                <span className="block text-xs font-bold" style={{ color: "var(--color-terracotta)" }}>
+                  ⚠️ Brukt: {usedLabel(usedBy.get(b._id))}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -145,6 +162,7 @@ const AdventAdminPanel = () => {
   const [createForm, setCreateForm] = useState(EMPTY_FORM);
   const [createBook, setCreateBook] = useState(null);
   const [createSaving, setCreateSaving] = useState(false);
+  const [usedAnswers, setUsedAnswers] = useState([]);
 
   const [publishing, setPublishing] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
@@ -200,13 +218,39 @@ const AdventAdminPanel = () => {
 
   const openCreate = () => {
     setCreating(true);
-    setCreateDay("");
+    // First free door this year as the starting pick
+    const taken = new Set(days.map((d) => d.day));
+    const firstFree = Array.from({ length: 24 }, (_, i) => i + 1).find((d) => !taken.has(d));
+    setCreateDay(firstFree ? String(firstFree) : "");
+    adventApi
+      .adminUsedAnswers()
+      .then((data) => setUsedAnswers(data.answers || []))
+      .catch(() => setUsedAnswers([]));
     setCreateForm(EMPTY_FORM);
     setCreateBook(null);
     setEditingDay(null);
   };
 
   const cancelCreate = () => setCreating(false);
+
+  // Linking a book fills in title/author if they're still empty
+  const selectCreateBook = (book) => {
+    setCreateBook(book);
+    if (book) {
+      setCreateForm((f) => ({ ...f, title: f.title || book.title || "", author: f.author || book.author || "" }));
+    }
+  };
+
+  const usedByBook = new Map();
+  const usedByTitle = new Map();
+  for (const a of usedAnswers) {
+    if (a.bookId) usedByBook.set(String(a.bookId), [...(usedByBook.get(String(a.bookId)) || []), a]);
+    const key = normTitle(a.title);
+    if (key) usedByTitle.set(key, [...(usedByTitle.get(key) || []), a]);
+  }
+  // A typed (not linked) title that's already been an answer
+  const titleReuse = !createBook && usedByTitle.get(normTitle(createForm.title));
+  const doorByDay = new Map(days.map((d) => [d.day, d]));
 
   const submitCreate = async () => {
     const day = Number(createDay);
@@ -376,22 +420,44 @@ const AdventAdminPanel = () => {
       {creating && (
         <div className="container-gradient">
           <h4 className="text-xl font-bold gradient-text mb-3">Ny luke for {year}</h4>
-          <div className="grid sm:grid-cols-2 gap-2 mb-2">
-            <input
-              type="number"
-              min="1"
-              max="24"
-              className="input-field py-2 text-sm sm:col-span-2"
-              placeholder="Luke-nummer (1-24)"
+          <div className="mb-2">
+            <label htmlFor="advent-create-day" className="block text-xs font-bold mb-1" style={{ color: "var(--color-text-muted)" }}>
+              Dato
+            </label>
+            <select
+              id="advent-create-day"
+              className="input-field py-2 text-sm w-full"
               value={createDay}
               onChange={(e) => setCreateDay(e.target.value)}
-            />
+            >
+              <option value="" disabled>
+                Velg dato…
+              </option>
+              {Array.from({ length: 24 }, (_, i) => i + 1).map((d) => {
+                const door = doorByDay.get(d);
+                const weekday = new Date(year, 11, d).toLocaleDateString("nb-NO", { weekday: "short" });
+                return (
+                  <option key={d} value={d} disabled={!!door}>
+                    {door ? "✓ " : ""}
+                    {d}. desember ({weekday}){door ? ` – laget: ${door.title}` : ""}
+                  </option>
+                );
+              })}
+            </select>
+            <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
+              {days.length} av 24 luker er laget for {year}. Datoer med ✓ finnes allerede.
+            </p>
           </div>
           <DoorFormFields
             form={createForm}
             setForm={setCreateForm}
-            extra={<BookLinkField selectedBook={createBook} onSelect={setCreateBook} />}
+            extra={<BookLinkField selectedBook={createBook} onSelect={selectCreateBook} usedBy={usedByBook} />}
           />
+          {titleReuse && (
+            <p className="text-xs font-bold mt-2" style={{ color: "var(--color-terracotta)" }}>
+              ⚠️ «{createForm.title}» er allerede brukt som svar: {usedLabel(titleReuse)}
+            </p>
+          )}
           <div className="flex gap-2 mt-3">
             <button onClick={submitCreate} disabled={createSaving} className="btn-primary px-4 py-2 text-sm disabled:opacity-50">
               {createSaving ? "Oppretter..." : "Opprett luke"}

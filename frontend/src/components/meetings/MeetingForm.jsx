@@ -2,6 +2,116 @@ import { useState, useEffect } from "react";
 import { meetingsApi } from "../../api/meetingsApi";
 import { booksApi } from "../../api/booksApi";
 
+// Accent/case-insensitive match: "nesbo" finds "Nesbø"
+const fold = (t) =>
+  (t || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ø/g, "o")
+    .replace(/æ/g, "ae");
+
+// Search-as-you-type over the (already loaded) library instead of one long
+// dropdown. Every word has to match the title or author.
+const BookSearchField = ({ books, selectedId, onSelect }) => {
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const selected = books.find((b) => b._id === selectedId);
+
+  const words = fold(query).split(/\s+/).filter(Boolean);
+  const results = words.length
+    ? books.filter((b) => {
+        const hay = fold(`${b.title} ${b.author}`);
+        return words.every((w) => hay.includes(w));
+      }).slice(0, 8)
+    : [];
+
+  if (selected) {
+    return (
+      <div className="input-field flex items-center gap-2">
+        <span className="flex-1 min-w-0 truncate">
+          <strong>{selected.title}</strong> – {selected.author}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            onSelect("");
+            setQuery("");
+          }}
+          className="text-xs font-bold flex-shrink-0"
+          style={{ color: "var(--color-terracotta)" }}
+        >
+          Fjern
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <input
+        type="search"
+        className="input-field w-full"
+        placeholder="Søk etter tittel eller forfatter…"
+        value={query}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        onKeyDown={(e) => {
+          // Enter picks the top hit instead of submitting the form
+          if (e.key === "Enter" && results.length) {
+            e.preventDefault();
+            onSelect(results[0]._id);
+            setOpen(false);
+          }
+        }}
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={open && results.length > 0}
+        aria-controls="meeting-book-results"
+      />
+      {open && words.length > 0 && (
+        <div
+          id="meeting-book-results"
+          role="listbox"
+          className="absolute left-0 right-0 mt-1 rounded-xl overflow-hidden z-20 max-h-72 overflow-y-auto"
+          style={{ background: "var(--color-card)", border: "1px solid var(--color-border)", boxShadow: "0 10px 24px rgba(0,0,0,0.14)" }}
+        >
+          {results.length === 0 ? (
+            <p className="px-3 py-2 text-sm" style={{ color: "var(--color-text-faint)" }}>
+              Ingen bøker funnet
+            </p>
+          ) : (
+            results.map((b) => (
+              <button
+                key={b._id}
+                type="button"
+                role="option"
+                aria-selected="false"
+                className="block w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-sunken)]"
+                style={{ borderBottom: "1px solid var(--color-border)" }}
+                onMouseDown={() => {
+                  onSelect(b._id);
+                  setOpen(false);
+                }}
+              >
+                <span className="block font-semibold">{b.title}</span>
+                <span className="block text-xs" style={{ color: "var(--color-text-faint)" }}>
+                  {b.author}
+                  {b.bookclubMonth ? ` · bokklubb ${b.bookclubMonth}` : ""}
+                </span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
   const isEditing = !!meeting;
 
@@ -231,21 +341,13 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
           <label className="block text-sm font-bold text-gray-700 mb-2">
             📚 Relatert bok (valgfritt)
           </label>
-          <select
-            name="bookId"
-            value={formData.bookId}
-            onChange={handleChange}
-            className="input-field"
-          >
-            <option value="">Ingen bok valgt</option>
-            {books.map((book) => (
-              <option key={book._id} value={book._id}>
-                {book.title} by {book.author}
-              </option>
-            ))}
-          </select>
+          <BookSearchField
+            books={books}
+            selectedId={formData.bookId}
+            onSelect={(bookId) => setFormData((prev) => ({ ...prev, bookId }))}
+          />
           <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
-            Link this meeting to a specific book we'll be discussing
+            Knytt møtet til boken dere skal snakke om
           </p>
         </div>
 

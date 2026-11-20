@@ -38,6 +38,11 @@ export const adventApi = {
   },
 
   // Admin only
+  adminUsedAnswers: async () => {
+    const response = await api.get(`/api/advent/admin/used-answers`);
+    return response.data;
+  },
+
   adminListDays: async (year) => {
     const response = await api.get(`/api/advent/${year}/admin`);
     return response.data;

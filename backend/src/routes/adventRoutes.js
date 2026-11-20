@@ -15,6 +15,7 @@ const {
   adminRecalculateBadges,
   adminGetVisibility,
   adminSetVisibility,
+  adminUsedAnswers,
 } = require("../controllers/adventController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 const { adventAttemptLimiter } = require("../middleware/adventRateLimit");
@@ -28,6 +29,8 @@ router.use(protect);
 const visible = requireFeatureVisible((req) => `advent:${req.params.year}:visibility`);
 
 router.get("/search", searchCandidates);
+// Before "/:year/:day", which would otherwise take "admin" as a year
+router.get("/admin/used-answers", authorize("admin"), adminUsedAnswers);
 
 // These admin/leaderboard routes must come before the generic "/:year/:day"
 // below - "admin" and "leaderboard" would otherwise be swallowed by :day

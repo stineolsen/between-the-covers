@@ -392,6 +392,23 @@ exports.adminListDays = async (req, res) => {
   }
 };
 
+// @desc    Every door's answer across all years - lets the admin see, when
+//          creating a door, which books (and titles) are already used
+// @route   GET /api/advent/admin/used-answers
+// @access  Private/Admin
+exports.adminUsedAnswers = async (req, res) => {
+  try {
+    const doors = await AdventDay.find({}).select("year day title author answerBookId").sort({ year: -1, day: 1 }).lean();
+    res.status(200).json({
+      success: true,
+      answers: doors.map((d) => ({ year: d.year, day: d.day, title: d.title, author: d.author, bookId: d.answerBookId })),
+    });
+  } catch (error) {
+    console.error("Advent admin used answers error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke hente brukte bøker" });
+  }
+};
+
 // @desc    Create a new door. Pass bookId to link an existing library book
 //          as the answer (left exactly as-is, visible or not - we never
 //          retroactively hide a book that's already public); omit it to
