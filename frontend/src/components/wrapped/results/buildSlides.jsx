@@ -664,7 +664,8 @@ export function buildSlides({ data, name, canShare = false, onSharedChange }) {
             )}
             {p.meetings.total > 0 && (
               <Rise delay={1} as="p" className="mt-6 text-lg">
-                og var påmeldt {p.meetings.attended} av {plural(p.meetings.total, "møte", "møter")}.
+                og var på {p.meetings.attended} av {plural(p.meetings.total, "bokklubbmøte", "bokklubbmøter")}
+                {p.meetings.sideEvents > 0 ? ` – pluss ${plural(p.meetings.sideEvents, "sideevent", "sideeventer")} 🎉` : ""}.
               </Rise>
             )}
           </Center>

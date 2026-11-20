@@ -4,6 +4,8 @@ import wrappedApi from "../../api/wrappedApi";
 
 // "Which meetings were you actually at?" - RSVPs are only sign-ups, so the
 // member confirms (pre-ticked from their RSVPs). Every change is saved.
+// Book club meetings and side events are listed separately: only the book
+// club meetings count toward "X av Y" and the meeting badges.
 const MeetingAttendance = ({ year }) => {
   const toast = useToast();
   const [meetings, setMeetings] = useState(null);
@@ -42,43 +44,58 @@ const MeetingAttendance = ({ year }) => {
   };
 
   if (!meetings || meetings.length === 0) return null;
-  const attendedCount = meetings.filter((m) => m.attended).length;
+  const clubMeetings = meetings.filter((m) => m.type !== "side");
+  const sideEvents = meetings.filter((m) => m.type === "side");
+  const attendedCount = clubMeetings.filter((m) => m.attended).length;
+
+  const row = (m) => (
+    <label
+      key={m._id}
+      className="flex items-center gap-3 p-2 rounded-lg cursor-pointer"
+      style={{ background: "var(--color-card)" }}
+    >
+      <input
+        type="checkbox"
+        checked={m.attended}
+        onChange={() => toggle(m._id)}
+        disabled={saving}
+        className="w-4 h-4 flex-shrink-0"
+      />
+      <span className="text-sm min-w-0">
+        <b className="block truncate">{m.book?.title || m.title}</b>
+        <span className="text-xs" style={{ color: "var(--color-text-faint)" }}>
+          {new Date(m.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}
+          {m.rsvp ? " · påmeldt" : ""}
+        </span>
+      </span>
+    </label>
+  );
 
   return (
     <div className="rounded-2xl p-4 mb-6" style={{ background: "var(--color-sunken)" }}>
       <div className="flex items-baseline justify-between gap-2 mb-1">
         <h4 className="text-sm font-bold">📅 Hvilke bokklubbmøter var du på i {year}?</h4>
         <span className="text-xs" style={{ color: "var(--color-text-faint)" }}>
-          {attendedCount} av {meetings.length}
+          {attendedCount} av {clubMeetings.length}
         </span>
       </div>
       <p className="text-xs mb-3" style={{ color: "var(--color-text-muted)" }}>
         Møtene du meldte deg på er krysset av. Rett opp hvis du likevel ikke kom, eller kom uten å melde deg på.
       </p>
-      <div className="flex flex-col gap-1.5">
-        {meetings.map((m) => (
-          <label
-            key={m._id}
-            className="flex items-center gap-3 p-2 rounded-lg cursor-pointer"
-            style={{ background: "var(--color-card)" }}
-          >
-            <input
-              type="checkbox"
-              checked={m.attended}
-              onChange={() => toggle(m._id)}
-              disabled={saving}
-              className="w-4 h-4 flex-shrink-0"
-            />
-            <span className="text-sm min-w-0">
-              <b className="block truncate">{m.book?.title || m.title}</b>
-              <span className="text-xs" style={{ color: "var(--color-text-faint)" }}>
-                {new Date(m.date).toLocaleDateString("nb-NO", { day: "numeric", month: "long" })}
-                {m.rsvp ? " · påmeldt" : ""}
-              </span>
+      {clubMeetings.length > 0 && <div className="flex flex-col gap-1.5">{clubMeetings.map(row)}</div>}
+      {sideEvents.length > 0 && (
+        <>
+          <div className="flex items-baseline justify-between gap-2 mt-4 mb-1.5">
+            <h5 className="text-xs font-bold uppercase tracking-wide" style={{ color: "var(--color-text-muted)" }}>
+              🎉 Sideeventer
+            </h5>
+            <span className="text-xs" style={{ color: "var(--color-text-faint)" }}>
+              teller ikke på oppmøtet
             </span>
-          </label>
-        ))}
-      </div>
+          </div>
+          <div className="flex flex-col gap-1.5">{sideEvents.map(row)}</div>
+        </>
+      )}
       <div className="flex items-center justify-end gap-3 mt-3 text-xs">
         {confirmed ? (
           <span className="font-bold" style={{ color: "var(--color-sage)" }}>

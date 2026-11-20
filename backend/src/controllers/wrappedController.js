@@ -761,7 +761,7 @@ async function getYearMeetings(year) {
     date: { $gte: new Date(`${year}-01-01T00:00:00`), $lt: new Date(`${year + 1}-01-01T00:00:00`), $lte: new Date() },
     status: { $ne: "cancelled" },
   })
-    .select("title date book attendees")
+    .select("title date book attendees type")
     .sort({ date: 1 })
     .lean();
 }
@@ -790,6 +790,7 @@ exports.getMeetings = async (req, res) => {
           title: m.title,
           date: m.date,
           book: m.book ? { _id: m.book._id, title: m.book.title } : null,
+          type: m.type === "side" ? "side" : "bookclub",
           rsvp,
           attended: response?.attendanceConfirmed ? confirmed.has(m._id.toString()) : rsvp,
         };

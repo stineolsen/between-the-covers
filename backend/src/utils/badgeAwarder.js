@@ -65,7 +65,8 @@ async function computeMetrics(userId) {
     UserBook.countDocuments({ user: uid, status: "dnf" }),
     Review.find({ user: uid }).select("content likeCount").lean(),
     Recommendation.countDocuments({ from: uid }),
-    Meeting.find({ date: { $gte: MEETINGS_FROM, $lte: new Date() }, status: { $ne: "cancelled" } })
+    // Side events don't count toward the meeting badges
+    Meeting.find({ date: { $gte: MEETINGS_FROM, $lte: new Date() }, status: { $ne: "cancelled" }, type: { $ne: "side" } })
       .select("attendees date")
       .lean(),
     WrappedResponse.find({ user: uid }).select("year stepsCompleted attendanceConfirmed attendedMeetingIds").lean(),

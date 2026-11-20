@@ -420,9 +420,12 @@ async function computeYear(year) {
     UserBook.find({ status: "read", finishedAt: { $gte: start, $lt: end } }).lean(),
     UserBook.find({ status: "dnf", updatedAt: { $gte: start, $lt: end } }).select("user").lean(),
     Book.find({ bookclubMonth: { $regex: String(year) } }).select("title author coverImage").lean(),
-    Meeting.find({ date: { $gte: start, $lt: end }, status: { $ne: "cancelled" } }).select("attendees date").lean(),
+    Meeting.find({ date: { $gte: start, $lt: end }, status: { $ne: "cancelled" } }).select("attendees date type").lean(),
     Book.find({ series: { $nin: [null, ""] } }).select("series seriesNumber").lean(),
   ]);
+  // Meetings from before the type field existed count as book club meetings
+  const clubMeetings = meetings.filter((m) => m.type !== "side");
+  const sideEvents = meetings.filter((m) => m.type === "side");
 
   const approvedIds = new Set(users.map((u) => idOf(u)));
   const responseByUser = new Map(responses.map((r) => [idOf(r.user), r]));
@@ -592,9 +595,14 @@ async function computeYear(year) {
     const bookclubRead = myBooks.filter((b) => b.bookclub).length;
     // What the member confirmed in step 3, otherwise their RSVPs
     const response = responseByUser.get(userId);
-    const meetingsAttended = response?.attendanceConfirmed
-      ? meetings.filter((m) => (response.attendedMeetingIds || []).some((id) => idOf(id) === idOf(m))).length
-      : meetings.filter((m) => (m.attendees || []).some((a) => idOf(a) === userId)).length;
+    const wasThere = (m) =>
+      response?.attendanceConfirmed
+        ? (response.attendedMeetingIds || []).some((id) => idOf(id) === idOf(m))
+        : (m.attendees || []).some((a) => idOf(a) === userId);
+    // Only real book club meetings count toward "X av Y møter"; side events
+    // are counted separately
+    const meetingsAttended = clubMeetings.filter(wasThere).length;
+    const sideEventsAttended = sideEvents.filter(wasThere).length;
     const listeningSeconds = Number(user.absListeningSecondsByYear?.[String(year)] || 0);
     const listening = buildListening(user.absListeningBooks || [], year, bookByAbsId);
 
@@ -631,7 +639,7 @@ async function computeYear(year) {
       listening,
       readingGoal: user.readingGoal || null,
       bookclub: { read: bookclubRead, total: bookclubBooks.length },
-      meetings: { attended: meetingsAttended, total: meetings.length },
+      meetings: { attended: meetingsAttended, total: clubMeetings.length, sideEvents: sideEventsAttended },
       uniqueShare: myBooks.length ? myBooks.filter((b) => b.readers === 1).length / myBooks.length : 0,
     });
   }

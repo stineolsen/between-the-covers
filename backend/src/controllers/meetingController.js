@@ -105,7 +105,7 @@ exports.getMeeting = async (req, res) => {
 // @access  Private (Admin only)
 exports.createMeeting = async (req, res) => {
   try {
-    const { title, date, time, location, description, bookId, maxAttendees } =
+    const { title, date, time, location, description, bookId, maxAttendees, type } =
       req.body;
 
     // Validate book if provided
@@ -128,6 +128,7 @@ exports.createMeeting = async (req, res) => {
       description,
       book: bookId || null,
       maxAttendees: maxAttendees || 0,
+      type: type === "side" ? "side" : "bookclub",
       createdBy: req.user._id,
     });
 
@@ -169,6 +170,7 @@ exports.updateMeeting = async (req, res) => {
       status,
       maxAttendees,
       notes,
+      type,
     } = req.body;
 
     const meeting = await Meeting.findById(req.params.id);
@@ -201,6 +203,7 @@ exports.updateMeeting = async (req, res) => {
     if (status !== undefined) meeting.status = status;
     if (maxAttendees !== undefined) meeting.maxAttendees = maxAttendees;
     if (notes !== undefined) meeting.notes = notes;
+    if (type !== undefined) meeting.type = type === "side" ? "side" : "bookclub";
 
     await meeting.save();
 

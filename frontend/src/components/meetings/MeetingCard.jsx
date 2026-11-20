@@ -101,6 +101,14 @@ const MeetingCard = ({ meeting, onRSVP, onEdit, onDelete }) => {
       </div>
 
       {/* Title */}
+      {meeting.type === "side" && (
+        <span
+          className="inline-block text-xs font-bold px-2 py-0.5 rounded-full mb-1"
+          style={{ background: "var(--color-gold-tint)", color: "var(--color-secondary)" }}
+        >
+          🎉 Sideevent
+        </span>
+      )}
       <h3 className="text-2xl font-bold gradient-text mb-2">{meeting.title}</h3>
 
       {/* Location */}

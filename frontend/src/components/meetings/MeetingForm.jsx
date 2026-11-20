@@ -15,6 +15,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
     maxAttendees: 0,
     status: "upcoming",
     notes: "",
+    type: "bookclub",
   });
 
   const [books, setBooks] = useState([]);
@@ -49,6 +50,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
         maxAttendees: meeting.maxAttendees || 0,
         status: meeting.status || "upcoming",
         notes: meeting.notes || "",
+        type: meeting.type === "side" ? "side" : "bookclub",
       });
     }
   }, [meeting]);
@@ -77,6 +79,7 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
         maxAttendees: parseInt(formData.maxAttendees) || 0,
         status: formData.status,
         notes: formData.notes,
+        type: formData.type,
       };
 
       if (isEditing) {
@@ -127,6 +130,40 @@ const MeetingForm = ({ meeting = null, onSuccess, onCancel }) => {
             className="input-field"
             placeholder="e.g., Monthly Bookclub Discussion"
           />
+        </div>
+
+        {/* Type */}
+        <div>
+          <label className="block text-sm font-bold text-gray-700 mb-2">Type</label>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              ["bookclub", "📚 Bokklubbmøte"],
+              ["side", "🎉 Sideevent"],
+            ].map(([value, label]) => (
+              <label
+                key={value}
+                className="flex items-center gap-2 px-4 py-2 rounded-full cursor-pointer text-sm font-bold border-2"
+                style={
+                  formData.type === value
+                    ? { borderColor: "var(--color-primary)", background: "var(--color-wine-tint)", color: "var(--color-primary)" }
+                    : { borderColor: "var(--color-border)", color: "var(--color-text-muted)" }
+                }
+              >
+                <input
+                  type="radio"
+                  name="type"
+                  value={value}
+                  checked={formData.type === value}
+                  onChange={handleChange}
+                  className="sr-only"
+                />
+                {label}
+              </label>
+            ))}
+          </div>
+          <p className="text-xs mt-1" style={{ color: "var(--color-text-faint)" }}>
+            Sideeventer teller ikke med i oppmøte-statistikken eller møte-lesemerkene.
+          </p>
         </div>
 
         {/* Date and Time */}

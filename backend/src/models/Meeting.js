@@ -35,6 +35,16 @@ const meetingSchema = new mongoose.Schema(
       maxlength: [2000, "Description cannot exceed 2000 characters"],
     },
 
+    // "bookclub" = a regular book club meeting; "side" = a side event
+    // (outing, party, ...). Only bookclub meetings count toward attendance
+    // stats and the meeting badges. Meetings from before this field existed
+    // have no value and count as bookclub - query with { $ne: "side" }.
+    type: {
+      type: String,
+      enum: ["bookclub", "side"],
+      default: "bookclub",
+    },
+
     // Book being discussed (optional)
     book: {
       type: mongoose.Schema.Types.ObjectId,
