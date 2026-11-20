@@ -23,10 +23,15 @@ process.on("unhandledRejection", (err, promise) => {
   server.close(() => process.exit(1));
 });
 
-// Handle SIGTERM
+// Handle SIGTERM (Railway redeploys, scripts/btc stop). Closing the HTTP
+// server alone isn't enough - the schedulers' timers and the database
+// connection would keep the process alive forever - so exit explicitly once
+// in-flight requests are done, with a hard deadline in case one hangs.
 process.on("SIGTERM", () => {
   console.log("SIGTERM signal received: closing HTTP server");
+  setTimeout(() => process.exit(0), 5000).unref();
   server.close(() => {
     console.log("HTTP server closed");
+    process.exit(0);
   });
 });

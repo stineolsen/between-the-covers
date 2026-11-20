@@ -1,0 +1,108 @@
+#!/bin/zsh
+# Start/stop Between the Covers locally (backend on :5001, frontend on :5173).
+#
+#   btc start    start both in the background and open the browser
+#   btc stop     stop both
+#   btc restart  stop + start
+#   btc status   are they running?
+#   btc logs     follow both logs (Ctrl+C to stop following - the app keeps running)
+#
+# Logs and pids live in .dev/ in the repo root (git-ignored).
+
+ROOT="${0:A:h:h}"
+RUN="$ROOT/.dev"
+BACKEND_PORT=5001
+FRONTEND_PORT=5173
+mkdir -p "$RUN"
+
+listening() { lsof -nP -iTCP:"$1" -sTCP:LISTEN -t 2>/dev/null | head -1; }
+
+# npm -> nodemon/vite -> node: stop the whole tree. Collect every pid
+# first, ask them all to stop, then force whatever is still alive after a
+# few seconds.
+tree_pids() {
+  local pid=$1 child
+  echo "$pid"
+  for child in $(pgrep -P "$pid" 2>/dev/null); do tree_pids "$child"; done
+}
+
+kill_tree() {
+  local pids=($(tree_pids "$1")) p i
+  kill "${pids[@]}" 2>/dev/null
+  for i in {1..10}; do
+    local alive=0
+    for p in "${pids[@]}"; do kill -0 "$p" 2>/dev/null && alive=1; done
+    (( alive )) || return 0
+    sleep 0.5
+  done
+  kill -9 "${pids[@]}" 2>/dev/null
+}
+
+stop_one() {
+  local name=$1 port=$2 pidfile="$RUN/$1.pid" pid
+  if [[ -f "$pidfile" ]]; then
+    pid=$(<"$pidfile")
+    kill -0 "$pid" 2>/dev/null && kill_tree "$pid"
+    rm -f "$pidfile"
+  fi
+  # Anything still holding the port (e.g. started by hand)
+  pid=$(listening "$port")
+  [[ -n "$pid" ]] && kill_tree "$pid"
+  echo "⏹  $name stoppet"
+}
+
+wait_for() {
+  local port=$1 i
+  for i in {1..40}; do
+    [[ -n "$(listening "$port")" ]] && return 0
+    sleep 0.5
+  done
+  return 1
+}
+
+start() {
+  if [[ -n "$(listening $BACKEND_PORT)" || -n "$(listening $FRONTEND_PORT)" ]]; then
+    echo "Appen kjører allerede (eller noe annet bruker port $BACKEND_PORT/$FRONTEND_PORT). Bruk 'btc restart'."
+    status
+    return 1
+  fi
+
+  echo "▶  Starter backend …"
+  (cd "$ROOT/backend" && NODE_OPTIONS="--require $ROOT/scripts/public-dns.cjs" nohup npm run dev >"$RUN/backend.log" 2>&1 & echo $! >"$RUN/backend.pid")
+  echo "▶  Starter frontend …"
+  (cd "$ROOT/frontend" && nohup npm run dev >"$RUN/frontend.log" 2>&1 & echo $! >"$RUN/frontend.pid")
+
+  wait_for $BACKEND_PORT && echo "✅ Backend:  http://localhost:$BACKEND_PORT" || echo "⚠️  Backend startet ikke - se 'btc logs'"
+  wait_for $FRONTEND_PORT && echo "✅ Frontend: http://localhost:$FRONTEND_PORT" || echo "⚠️  Frontend startet ikke - se 'btc logs'"
+
+  # The database connects a few seconds after the server is up
+  local i
+  for i in {1..30}; do
+    if grep -q "MongoDB Connected" "$RUN/backend.log" 2>/dev/null; then echo "✅ Database tilkoblet"; break; fi
+    if grep -qiE "ETIMEOUT|querySrv|buffering timed out|MongoServerError|MongooseServerSelectionError" "$RUN/backend.log" 2>/dev/null; then
+      echo "⚠️  Fikk ikke kontakt med databasen - se 'btc logs'"; break
+    fi
+    sleep 0.5
+  done
+
+  [[ -n "$(listening $FRONTEND_PORT)" ]] && open "http://localhost:$FRONTEND_PORT"
+}
+
+status() {
+  local b f
+  b=$(listening $BACKEND_PORT); f=$(listening $FRONTEND_PORT)
+  [[ -n "$b" ]] && echo "🟢 Backend kjører  (port $BACKEND_PORT)" || echo "⚪ Backend er stoppet"
+  [[ -n "$f" ]] && echo "🟢 Frontend kjører (port $FRONTEND_PORT)" || echo "⚪ Frontend er stoppet"
+}
+
+case "$1" in
+  start)   start ;;
+  stop)    stop_one backend $BACKEND_PORT; stop_one frontend $FRONTEND_PORT ;;
+  restart) stop_one backend $BACKEND_PORT; stop_one frontend $FRONTEND_PORT; sleep 1; start ;;
+  status)  status ;;
+  logs)    tail -n 30 -f "$RUN/backend.log" "$RUN/frontend.log" ;;
+  *)
+    echo "Bruk: btc start | stop | restart | status | logs"
+    exit 1
+    ;;
+esac

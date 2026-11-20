@@ -38,3 +38,6 @@ advent-images/
 
 # Claude
 .claude/
+
+# Local dev run state (scripts/btc)
+.dev/
