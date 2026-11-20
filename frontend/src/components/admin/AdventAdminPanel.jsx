@@ -514,9 +514,9 @@ const AdventAdminPanel = () => {
                       >
                         {door.publishedToLibraryAt ? "✅ I biblioteket" : "🔒 Skjult til frist"}
                       </span>
-                      {!door.imageOriginalKey && (
+                      {(!door.imageOriginalKey || door.imageMissing) && (
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-bold" style={{ background: "var(--color-terracotta-tint)", color: "var(--color-terracotta)" }}>
-                          ⚠ Mangler bilder
+                          {door.imageMissing ? "⚠ Bildet er borte – last opp på nytt" : "⚠ Mangler bilder"}
                         </span>
                       )}
                     </div>
@@ -536,7 +536,7 @@ const AdventAdminPanel = () => {
                       </button>
                     </div>
                     <label className="text-xs font-bold px-3 py-1.5 rounded-full cursor-pointer" style={{ background: "var(--color-sunken)", color: "var(--color-text-muted)" }}>
-                      {uploadingDay === door.day ? "Laster opp..." : door.imageOriginalKey ? "🖼️ Bytt bilde" : "🖼️ Last opp bilde"}
+                      {uploadingDay === door.day ? "Laster opp..." : door.imageOriginalKey && !door.imageMissing ? "🖼️ Bytt bilde" : "🖼️ Last opp bilde"}
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/webp"

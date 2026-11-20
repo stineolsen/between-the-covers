@@ -2,6 +2,7 @@ const AdventDay = require("../models/AdventDay");
 const AdventAttempt = require("../models/AdventAttempt");
 const AdventResult = require("../models/AdventResult");
 const Book = require("../models/Book");
+const AdventImage = require("../models/AdventImage");
 const fs = require("fs");
 const path = require("path");
 const { now, doorOpensAt, doorDeadline } = require("../utils/calendarClock");
@@ -177,6 +178,15 @@ exports.getDayImage = async (req, res) => {
     const key = requestedLevel === "final" ? door.imageOriginalKey : door[`imageLevel${requestedLevel}Key`];
     if (!key) return res.sendStatus(404);
 
+    // Not .lean(): a hydrated doc gives `data` as a plain Node Buffer
+    const image = await AdventImage.findOne({ key }).select("data contentType");
+    if (image) {
+      res.set("Content-Type", image.contentType || "image/jpeg");
+      res.set("Cache-Control", "private, max-age=3600");
+      return res.send(image.data);
+    }
+    // Images uploaded before they moved into MongoDB - only still there if
+    // no deploy has happened since
     const filePath = path.join(ADVENT_IMAGE_ROOT, key);
     if (!filePath.startsWith(ADVENT_IMAGE_ROOT) || !fs.existsSync(filePath)) return res.sendStatus(404);
     res.sendFile(filePath);
@@ -385,7 +395,21 @@ exports.adminListDays = async (req, res) => {
   try {
     const year = Number(req.params.year);
     const days = await AdventDay.find({ year }).sort({ day: 1 });
-    res.status(200).json({ success: true, year, days });
+    // Flag doors whose image record points at nothing (e.g. the old on-disk
+    // images, lost on a deploy) so admin can see which ones to re-upload
+    const stored = new Set(
+      (await AdventImage.find({ key: { $regex: `^${year}/` } }).select("key").lean()).map((i) => i.key),
+    );
+    const hasImage = (key) =>
+      !!key && (stored.has(key) || fs.existsSync(path.join(ADVENT_IMAGE_ROOT, key)));
+    res.status(200).json({
+      success: true,
+      year,
+      days: days.map((d) => ({
+        ...d.toObject(),
+        imageMissing: !!d.imageOriginalKey && !hasImage(d.imageOriginalKey),
+      })),
+    });
   } catch (error) {
     console.error("Advent admin list error:", error);
     res.status(500).json({ success: false, message: "Klarte ikke hente luker" });
@@ -496,6 +520,7 @@ exports.adminDeleteDay = async (req, res) => {
       AdventResult.deleteMany({ adventDay: door._id }),
     ]);
 
+    await AdventImage.deleteMany({ key: { $regex: `^${year}/${day}/` } });
     const imageDir = path.join(ADVENT_IMAGE_ROOT, String(year), String(day));
     if (imageDir.startsWith(ADVENT_IMAGE_ROOT) && fs.existsSync(imageDir)) {
       fs.rmSync(imageDir, { recursive: true, force: true });
