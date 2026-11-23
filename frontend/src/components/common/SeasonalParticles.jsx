@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { useSeasonalTheme } from "../../contexts/SeasonalThemeContext";
 
 const FIREWORK_COLORS = ["#b5182f", "#1f5d3e", "#e8c468", "#2a3a6a", "#ffffff"];
@@ -111,6 +112,10 @@ const FogLayer = () => (
 
 const SeasonalParticles = () => {
   const { season, isAnniversary } = useSeasonalTheme();
+  const { pathname } = useLocation();
+
+  // Only on the front page - falling effects on every page got to be a bit much
+  if (pathname !== "/") return null;
 
   // December 9th: snow (the Jul base) plus fireworks (the celebration),
   // regardless of whatever season is actually configured - reuses both
