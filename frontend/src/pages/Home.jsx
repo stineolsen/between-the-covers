@@ -14,6 +14,7 @@ import ReadingGoalCard from "../components/common/ReadingGoalCard";
 import BookCoverFallback from "../components/common/BookCoverFallback";
 import WrappedBanner from "../components/home/WrappedBanner";
 import AdventCalendarBanner from "../components/home/AdventCalendarBanner";
+import SecretSantaBanner from "../components/home/SecretSantaBanner";
 import HomeGhosts from "../components/home/HomeGhosts";
 import AnniversaryBanner from "../components/home/AnniversaryBanner";
 import AnnouncementCard from "../components/home/AnnouncementCard";
@@ -130,6 +131,7 @@ const Home = () => {
         <WrappedBanner />
         <ClubWrappedRow />
         <AdventCalendarBanner />
+        <SecretSantaBanner />
 
         {/* Main grid: activity (main) + meeting/goal/shelf (side) */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
