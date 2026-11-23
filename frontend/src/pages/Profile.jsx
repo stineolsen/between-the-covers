@@ -6,6 +6,7 @@ import { usersApi } from "../api/usersApi";
 import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
 import ProfileWrappedShares from "../components/wrapped/ProfileWrappedShares";
 import YearSoFar from "../components/wrapped/YearSoFar";
+import PhoneWidgetCard from "../components/common/PhoneWidgetCard";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";
 import { booksApi } from "../api/booksApi";
@@ -756,6 +757,8 @@ const Profile = () => {
             </div>
           )}
         </div>
+
+        <PhoneWidgetCard />
       </div>
 
       {/* Avatar Modal */}

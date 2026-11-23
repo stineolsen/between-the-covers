@@ -30,6 +30,7 @@ const settingsRoutes = require("./routes/settingsRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
 const badgeRoutes = require("./routes/badgeRoutes");
 const secretSantaRoutes = require("./routes/secretSantaRoutes");
+const widgetRoutes = require("./routes/widgetRoutes");
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 // Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/widget", widgetRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/user-books", userBookRoutes);

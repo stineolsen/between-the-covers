@@ -171,6 +171,18 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    // Phone widget (Scriptable) key: only a SHA-256 hash is stored - the key
+    // itself is shown to the member once. It can only read /api/widget.
+    widgetTokenHash: {
+      type: String,
+      default: null,
+      select: false,
+      index: { unique: true, sparse: true },
+    },
+    widgetTokenCreatedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
