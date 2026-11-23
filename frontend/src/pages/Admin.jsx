@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import { authApi } from "../api/authApi";
 import { productsApi } from "../api/productsApi";
@@ -153,6 +153,9 @@ const Admin = () => {
   const [bookSearchQuery, setBookSearchQuery] = useState("");
   const [bookSearchResults, setBookSearchResults] = useState([]);
   const [searchingBooks, setSearchingBooks] = useState(false);
+  // Only the latest search may update the results - a slow earlier reply
+  // must not overwrite a newer one
+  const bookSearchSeq = useRef(0);
   const [selectedBookForLink, setSelectedBookForLink] = useState(null);
   const [now] = useState(() => Date.now());
   const [wrappedWindowStart, setWrappedWindowStart] = useState("");
@@ -538,9 +541,9 @@ const Admin = () => {
 
   const handleOpenLinkPicker = (req) => {
     setLinkingRequestId(req._id);
-    setBookSearchQuery(req.title || "");
-    setBookSearchResults([]);
-    setSelectedBookForLink(null);
+    // Search straight away for the prefilled title - before, the results
+    // only appeared once the admin edited the text
+    handleSearchBooksForLink(req.title || "");
   };
 
   const handleCloseLinkPicker = () => {
@@ -551,20 +554,22 @@ const Admin = () => {
   };
 
   const handleSearchBooksForLink = async (query) => {
+    const seq = ++bookSearchSeq.current;
     setBookSearchQuery(query);
     setSelectedBookForLink(null);
     if (!query.trim()) {
       setBookSearchResults([]);
+      setSearchingBooks(false);
       return;
     }
     try {
       setSearchingBooks(true);
       const data = await booksApi.getBooks({ search: query.trim() });
-      setBookSearchResults((data.books || []).slice(0, 6));
+      if (seq === bookSearchSeq.current) setBookSearchResults((data.books || []).slice(0, 6));
     } catch (err) {
       console.error(err);
     } finally {
-      setSearchingBooks(false);
+      if (seq === bookSearchSeq.current) setSearchingBooks(false);
     }
   };
 
