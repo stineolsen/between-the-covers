@@ -47,6 +47,39 @@ const userBookSchema = new mongoose.Schema(
       default: null,
     },
 
+    // Reading progress (while currently reading). pageCount is the page count
+    // of the member's own edition - it overrides the Book's pageCount for
+    // their progress and reading plan only, never for anyone else.
+    pageCount: {
+      type: Number,
+      min: 1,
+      default: null,
+    },
+    currentPage: {
+      type: Number,
+      min: 0,
+      default: 0,
+    },
+    progressUpdatedAt: {
+      type: Date,
+      default: null,
+    },
+
+    // Optional plan to finish by targetDate. startPage/startDate record where
+    // the member was when the plan was made, so "ahead/behind" is measured
+    // against the original pace.
+    readingPlan: {
+      type: new mongoose.Schema(
+        {
+          targetDate: { type: Date, required: true },
+          startPage: { type: Number, default: 0 },
+          startDate: { type: Date, required: true },
+        },
+        { _id: false },
+      ),
+      default: null,
+    },
+
     // User's personal notes
     notes: {
       type: String,
@@ -84,7 +117,7 @@ userBookSchema.pre("save", function () {
 userBookSchema.pre(/^find/, function () {
   this.populate({
     path: "book",
-    select: "title author coverImage genres averageRating",
+    select: "title author coverImage genres averageRating pageCount isbn",
   });
 });
 

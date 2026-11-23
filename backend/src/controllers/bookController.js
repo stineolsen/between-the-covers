@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const { normalizeLanguageForAtlas } = require("../utils/importHelpers");
 const { searchHardcover } = require("../utils/hardcoverHelpers");
+const { lookupBook } = require("../utils/googleBooks");
 
 // @desc    Search Hardcover.app for book metadata (Add Book search — a third
 //          source alongside the frontend's direct Open Library / NB calls).
@@ -730,5 +731,23 @@ exports.getCoverImage = async (req, res) => {
   } catch (error) {
     console.error("Get cover image error:", error);
     res.status(502).json({ success: false, message: "Klarte ikke hente omslaget" });
+  }
+};
+
+// @desc    Look a library book up in Google Books (page count, year, ...)
+// @route   GET /api/books/:id/google-books
+// @access  Private
+exports.getGoogleBooksInfo = async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).select("title author isbn");
+    if (!book) return res.status(404).json({ success: false, message: "Fant ikke boken" });
+    const info = await lookupBook(book);
+    res.status(200).json({ success: true, info });
+  } catch (error) {
+    console.error("Google Books lookup error:", error.message);
+    res.status(error.status === 429 ? 429 : 502).json({
+      success: false,
+      message: error.status === 429 ? error.message : "Klarte ikke hente fra Google Books akkurat nå",
+    });
   }
 };

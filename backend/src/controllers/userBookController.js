@@ -91,6 +91,13 @@ exports.setBookStatus = async (req, res) => {
     });
 
     if (userBook) {
+      // Starting a book again (re-read, or back from TBR/DNF) starts its
+      // progress and plan afresh; the edition page count is kept.
+      if (status === "currently-reading" && userBook.status !== "currently-reading") {
+        userBook.currentPage = 0;
+        userBook.progressUpdatedAt = null;
+        userBook.readingPlan = null;
+      }
       // Update existing entry
       userBook.status = status;
       if (notes !== undefined) userBook.notes = notes;
@@ -105,7 +112,7 @@ exports.setBookStatus = async (req, res) => {
       });
       await userBook.populate(
         "book",
-        "title author coverImage genres averageRating",
+        "title author coverImage genres averageRating pageCount isbn",
       );
     }
 
@@ -374,5 +381,70 @@ exports.getReadingStats = async (req, res) => {
       success: false,
       message: "Failed to fetch reading statistics",
     });
+  }
+};
+
+// @desc    Update reading progress, the member's edition page count and/or
+//          their reading plan. Body (all optional):
+//          { pageCount: number|null, currentPage: number, percent: number,
+//            plan: { targetDate: "YYYY-MM-DD" } | null }
+// @route   PATCH /api/user-books/:id/progress
+// @access  Private (own entries only)
+exports.updateProgress = async (req, res) => {
+  try {
+    const userBook = await UserBook.findOne({ _id: req.params.id, user: req.user._id });
+    if (!userBook) {
+      return res.status(404).json({ success: false, message: "Fant ikke boken i lesehistorikken din" });
+    }
+    const { pageCount, currentPage, percent, plan } = req.body;
+    const bad = (message) => res.status(400).json({ success: false, message });
+
+    // Edition page count first - progress below is measured against it
+    if (pageCount !== undefined) {
+      if (pageCount === null || pageCount === "") {
+        userBook.pageCount = null;
+      } else {
+        const n = Math.round(Number(pageCount));
+        if (!Number.isFinite(n) || n < 1 || n > 20000) return bad("Sidetallet må være et tall mellom 1 og 20 000");
+        userBook.pageCount = n;
+      }
+    }
+    const total = userBook.pageCount || userBook.book?.pageCount || null;
+    // A smaller edition can't leave you past its last page
+    if (total && userBook.currentPage > total) userBook.currentPage = total;
+
+    if (percent !== undefined && percent !== null && percent !== "") {
+      const p = Number(percent);
+      if (!Number.isFinite(p) || p < 0 || p > 100) return bad("Prosent må være mellom 0 og 100");
+      if (!total) return bad("Legg inn sidetallet for utgaven din før du oppgir prosent");
+      userBook.currentPage = Math.round((p / 100) * total);
+      userBook.progressUpdatedAt = new Date();
+    } else if (currentPage !== undefined && currentPage !== null && currentPage !== "") {
+      const page = Math.round(Number(currentPage));
+      if (!Number.isFinite(page) || page < 0) return bad("Siden må være 0 eller mer");
+      if (total && page > total) return bad(`Boken har bare ${total} sider`);
+      userBook.currentPage = page;
+      userBook.progressUpdatedAt = new Date();
+    }
+
+    if (plan !== undefined) {
+      if (plan === null) {
+        userBook.readingPlan = null;
+      } else {
+        if (!total) return bad("Legg inn sidetallet for utgaven din før du lager en leseplan");
+        const target = new Date(`${plan.targetDate}T12:00:00`);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (Number.isNaN(target.getTime())) return bad("Ugyldig dato");
+        if (target < today) return bad("Datoen kan ikke være tilbake i tid");
+        userBook.readingPlan = { targetDate: target, startPage: userBook.currentPage || 0, startDate: new Date() };
+      }
+    }
+
+    await userBook.save();
+    res.status(200).json({ success: true, userBook });
+  } catch (error) {
+    console.error("Update progress error:", error);
+    res.status(500).json({ success: false, message: "Klarte ikke lagre fremdriften" });
   }
 };

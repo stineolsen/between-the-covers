@@ -31,6 +31,7 @@ import EditBook from "./pages/EditBook";
 import Meetings from "./pages/Meetings";
 import MeetingDetail from "./pages/MeetingDetail";
 import ReadingHistory from "./pages/ReadingHistory";
+import ReadingPlans from "./pages/ReadingPlans";
 import Shop from "./pages/Shop";
 import Profile from "./pages/Profile";
 import PublicProfile from "./pages/PublicProfile";
@@ -154,6 +155,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <ReadingHistory />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/leseplaner"
+                  element={
+                    <ProtectedRoute>
+                      <ReadingPlans />
                     </ProtectedRoute>
                   }
                 />

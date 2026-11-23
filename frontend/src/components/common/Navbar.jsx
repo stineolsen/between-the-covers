@@ -233,6 +233,14 @@ const Navbar = () => {
                             Historikk
                           </Link>
                           <Link
+                            to="/leseplaner"
+                            onClick={() => setMenuOpen(false)}
+                            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:opacity-80"
+                            style={{ color: "var(--color-text)" }}
+                          >
+                            Leseplaner
+                          </Link>
+                          <Link
                             to="/meetings"
                             onClick={() => setMenuOpen(false)}
                             className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-semibold hover:opacity-80"

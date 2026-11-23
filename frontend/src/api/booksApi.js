@@ -7,6 +7,13 @@ export const booksApi = {
     return response.data;
   },
 
+  // Google Books lookup for a library book (page count, year, ...) - via
+  // the backend so the API key stays secret
+  getGoogleBooksInfo: async (id) => {
+    const response = await api.get(`/api/books/${id}/google-books`);
+    return response.data;
+  },
+
   // Get single book by ID
   getBook: async (id) => {
     const response = await api.get(`/api/books/${id}`);

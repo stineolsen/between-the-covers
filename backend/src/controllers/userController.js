@@ -20,12 +20,21 @@ exports.getMembers = async (req, res, next) => {
     const currentlyReadingBooks = await UserBook.find({
       user: { $in: visibleMembers.map((member) => member._id) },
       status: "currently-reading",
-    }).select("user book");
+    }).select("user book pageCount currentPage progressUpdatedAt");
 
+    // progressPercent only for members who have actually logged progress
+    // (and with a known page count) - null otherwise, so the page can tell
+    // "not started" apart from "hasn't said".
     const readingByUser = {};
     currentlyReadingBooks.forEach((userBook) => {
+      if (!userBook.book) return;
       const key = userBook.user.toString();
-      (readingByUser[key] ||= []).push(userBook.book);
+      const total = userBook.pageCount || userBook.book.pageCount || null;
+      const progressPercent =
+        total && userBook.progressUpdatedAt
+          ? Math.min(100, Math.round(((userBook.currentPage || 0) / total) * 100))
+          : null;
+      (readingByUser[key] ||= []).push({ ...userBook.book.toObject(), progressPercent });
     });
 
     const membersWithReading = visibleMembers.map((member) => ({

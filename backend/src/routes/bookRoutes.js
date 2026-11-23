@@ -11,6 +11,7 @@ const {
   uploadCover,
   searchExternalSources,
   getCoverImage,
+  getGoogleBooksInfo,
 } = require("../controllers/bookController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 const { uploadSingle } = require("../middleware/uploadMiddleware");
@@ -25,6 +26,7 @@ router.get("/status/:status", protect, getBooksByStatus);
 // Must come before "/:id" — otherwise Express matches "search-external" as :id.
 router.get("/search-external", protect, searchExternalSources);
 router.get("/:id/cover-image", protect, getCoverImage);
+router.get("/:id/google-books", protect, getGoogleBooksInfo);
 router.get("/:id", protect, getBook);
 
 // All members can add books

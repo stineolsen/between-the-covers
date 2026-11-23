@@ -11,6 +11,7 @@ const {
   toggleOwned,
   getBookOwners,
   toggleHidden,
+  updateProgress,
 } = require("../controllers/userBookController");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -33,6 +34,7 @@ router.patch("/:bookId/hidden", toggleHidden);
 router.post("/", setBookStatus);
 
 // Update finished date
+router.patch("/:id/progress", updateProgress);
 router.patch("/:id", updateFinishedDate);
 
 // Remove book

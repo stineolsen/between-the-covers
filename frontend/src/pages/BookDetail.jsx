@@ -9,6 +9,7 @@ import ReviewList from "../components/reviews/ReviewList";
 import ReviewForm from "../components/reviews/ReviewForm";
 import MarkAsReadModal from "../components/books/MarkAsReadModal";
 import StatusSelector from "../components/books/StatusSelector";
+import ReadingProgressCard from "../components/books/ReadingProgressCard";
 import RecommendModal from "../components/books/RecommendModal";
 import AddToListMenu from "../components/books/AddToListMenu";
 import UserAvatar from "../components/common/UserAvatar";
@@ -36,6 +37,8 @@ const BookDetail = () => {
 
   // User book status states
   const [userBookStatus, setUserBookStatus] = useState(null);
+  // Full entry, for the progress/reading plan card while currently reading
+  const [userBook, setUserBook] = useState(null);
   const [userBookId, setUserBookId] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
   // "When did you read it / stars / comment" dialog after marking as read
@@ -185,6 +188,7 @@ const BookDetail = () => {
   const fetchUserBookStatus = async () => {
     try {
       const data = await userBooksApi.getUserBookStatus(id);
+      setUserBook(data.userBook || null);
       if (data.userBook) {
         setUserBookStatus(data.userBook.status);
         setUserBookId(data.userBook._id);
@@ -241,11 +245,13 @@ const BookDetail = () => {
         await userBooksApi.removeUserBook(userBookId);
         setUserBookStatus(null);
         setUserBookId(null);
+        setUserBook(null);
         toast.success("Status fjernet!");
       } else {
         const result = await userBooksApi.setBookStatus(id, status);
         setUserBookStatus(status);
         setUserBookId(result.userBook?._id);
+        setUserBook(result.userBook || null);
         if (status === "read" && result.userBook?._id) setShowReadDialog(true);
         else toast.success("Lese status oppdatert!");
       }
@@ -396,6 +402,10 @@ const BookDetail = () => {
             </div>
           </div>
         </div>
+
+        {userBookStatus === "currently-reading" && userBook && (
+          <ReadingProgressCard key={userBook._id} userBook={userBook} book={book} onChange={setUserBook} />
+        )}
 
         <div className="grid md:grid-cols-3 gap-4 animate-fadeIn">
           {/* Sidebar */}

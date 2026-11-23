@@ -70,11 +70,23 @@ const Members = () => {
                       {member.currentlyReading.map((book) => (
                         <p
                           key={book._id}
-                          className="text-xs truncate"
-                          title={book.title}
+                          className="text-xs flex justify-center gap-1 min-w-0"
+                          title={
+                            book.progressPercent != null
+                              ? `${book.title} (${book.progressPercent} % lest)`
+                              : book.title
+                          }
                           style={{ color: "var(--color-text-muted)" }}
                         >
-                          📖 {book.title}
+                          <span className="truncate">📖 {book.title}</span>
+                          {book.progressPercent != null && (
+                            <b
+                              className="tabular-nums flex-shrink-0"
+                              style={{ color: "var(--color-primary)" }}
+                            >
+                              {book.progressPercent} %
+                            </b>
+                          )}
                         </p>
                       ))}
                     </div>

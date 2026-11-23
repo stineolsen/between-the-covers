@@ -30,6 +30,13 @@ export const userBooksApi = {
     return response.data;
   },
 
+  // Progress / edition page count / reading plan - send only what changes:
+  // { currentPage } or { percent }, { pageCount }, { plan: { targetDate } | null }
+  updateProgress: async (id, updates) => {
+    const response = await api.patch(`/api/user-books/${id}/progress`, updates);
+    return response.data;
+  },
+
   // Update finished reading date
   updateFinishedDate: async (id, finishedAt) => {
     const response = await api.patch(`/api/user-books/${id}`, { finishedAt });
