@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 import BarcodeScannerView from "./BarcodeScannerView";
+import { mapGenres, canonicalGenre } from "../../utils/genres";
 
 const OL_COVER = (coverId) =>
   coverId ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg` : null;
@@ -91,6 +92,11 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
     series: "", seriesNumber: "", coverImageUrl: "",
   });
   const [genreInput, setGenreInput] = useState("");
+  // The library's own genres - search results are mapped onto these, and
+  // anything that would be a new genre waits in pendingGenres until the
+  // member says yes (the default is no).
+  const [existingGenres, setExistingGenres] = useState([]);
+  const [pendingGenres, setPendingGenres] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -138,6 +144,13 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   };
 
   useEffect(() => {
+    booksApi
+      .getGenres()
+      .then((data) => setExistingGenres((data.genres || []).map((g) => g.name)))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
     if (initialQuery.trim()) performSearch(initialQuery);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -150,6 +163,8 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   };
 
   const handleSelect = (doc) => {
+    const { matched, unknown } = mapGenres(doc.genres, existingGenres);
+    setPendingGenres(unknown);
     setForm({
       title: doc.title,
       author: doc.author,
@@ -157,7 +172,7 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
       publishedYear: doc.year,
       pageCount: doc.pageCount,
       isbn: doc.isbn,
-      genres: doc.genres,
+      genres: matched,
       language: doc.language || "English",
       series: doc.series,
       seriesNumber: doc.seriesNumber ?? "",
@@ -172,11 +187,16 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
   const addGenre = () => {
-    const g = genreInput.trim();
+    const g = genreInput.trim() && canonicalGenre(genreInput, existingGenres);
     if (g && !form.genres.includes(g)) {
       setForm((prev) => ({ ...prev, genres: [...prev.genres, g] }));
     }
     setGenreInput("");
+  };
+
+  const acceptPendingGenres = () => {
+    setForm((prev) => ({ ...prev, genres: [...prev.genres, ...pendingGenres.filter((g) => !prev.genres.includes(g))] }));
+    setPendingGenres([]);
   };
 
   const removeGenre = (g) =>
@@ -426,6 +446,29 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
                     </span>
                   ))}
                 </div>
+                {pendingGenres.length > 0 && (
+                  <div className="mt-3 p-4 rounded-xl" style={{ background: "var(--color-sunken)" }} role="group" aria-labelledby="pending-genres-q">
+                    <p id="pending-genres-q" className="text-sm font-bold mb-2">Vil du legge til følgende sjangere?</p>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {pendingGenres.map((g) => (
+                        <span key={g} className="px-3 py-1 rounded-full text-sm font-semibold" style={{ border: "1.5px dashed var(--color-text-faint)", color: "var(--color-text-muted)" }}>
+                          {g}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-xs mb-3" style={{ color: "var(--color-text-faint)" }}>
+                      Disse finnes ikke i biblioteket ennå, og blir nye sjangere i filteret.
+                    </p>
+                    <div className="flex gap-3 items-center">
+                      <button type="button" onClick={() => setPendingGenres([])} className="btn-primary text-sm px-6 py-2">
+                        Nei
+                      </button>
+                      <button type="button" onClick={acceptPendingGenres} className="text-sm font-semibold underline underline-offset-2" style={{ color: "var(--color-text-muted)" }}>
+                        Ja, legg dem til
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
