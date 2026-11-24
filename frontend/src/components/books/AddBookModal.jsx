@@ -153,14 +153,14 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
     setForm({
       title: doc.title,
       author: doc.author,
-      description: "",
+      description: doc.description || "",
       publishedYear: doc.year,
       pageCount: doc.pageCount,
       isbn: doc.isbn,
       genres: doc.genres,
-      language: doc.language,
+      language: doc.language || "English",
       series: doc.series,
-      seriesNumber: "",
+      seriesNumber: doc.seriesNumber ?? "",
       coverImageUrl: doc.coverUrl,
     });
     setGenreInput("");

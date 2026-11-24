@@ -41,28 +41,78 @@ function looksLikeIsbn(q) {
   return /^\d{9}[\dXx]$/.test(stripped) || /^\d{13}$/.test(stripped);
 }
 
-function normalizeHardcoverBook(book) {
-  if (!book) return null;
-  const author = (book.cached_contributors || [])
+// Hardcover's language names -> the English names the rest of the app uses
+// (backend normalizes these for MongoDB's text index anyway)
+const normalizeLanguage = (name) => {
+  if (!name) return "";
+  if (/^norw|bokmål|nynorsk/i.test(name)) return "Norwegian";
+  return name;
+};
+
+// Authors only - Hardcover also lists translators, illustrators, narrators...
+// `contributions` are { author: { name }, contribution: "Author" | ... }.
+const authorsFrom = (contributions = []) => {
+  const list = Array.isArray(contributions) ? contributions : [];
+  const authors = list.filter((c) => !c?.contribution || c.contribution === "Author");
+  return (authors.length ? authors : list)
     .map((c) => c?.author?.name || c?.name)
     .filter(Boolean)
     .join(", ");
-  const genres = (book.cached_tags || [])
+};
+
+// On a book, cached_tags is grouped by category: { Genre: [{ tag }], Mood: [...], Tag: [...] }
+const genresFromCachedTags = (cachedTags) =>
+  (Array.isArray(cachedTags) ? cachedTags : cachedTags?.Genre || [])
     .map((t) => t?.tag || t?.name)
     .filter(Boolean)
     .slice(0, 6);
 
+const EMPTY = { year: "", pageCount: "", isbn: "", genres: [], language: "", series: "", seriesNumber: "", description: "" };
+
+// A text-search hit (Typesense document). Work-level data: the ISBN list
+// spans every edition in every language, so no ISBN is picked from it -
+// scanning/typing an ISBN gives the exact edition instead. Language isn't
+// in the search index either; English matches what Open Library hits get.
+function normalizeSearchDocument(doc) {
+  if (!doc?.title) return null;
+  const series = doc.featured_series?.series?.name || (doc.series_names || [])[0] || "";
   return {
-    key: `hc-${book.id || book.slug}`,
-    title: book.title || "",
-    author,
-    year: "",
-    pageCount: "",
-    isbn: "",
-    genres,
-    language: "",
-    series: "",
-    coverUrl: book.image?.url || "",
+    ...EMPTY,
+    key: `hc-${doc.id || doc.slug}`,
+    title: doc.title,
+    author: authorsFrom(doc.contributions) || (doc.author_names || []).join(", "),
+    year: doc.release_year || "",
+    pageCount: doc.pages || "",
+    genres: (doc.genres || []).slice(0, 6),
+    language: "English",
+    series,
+    seriesNumber: series && doc.featured_series?.position != null ? doc.featured_series.position : "",
+    description: doc.description || "",
+    coverUrl: doc.image?.url || "",
+  };
+}
+
+// An ISBN hit: one specific edition (pages, language, ISBN) of a book
+// (author, original year, genres, series, description).
+function normalizeEdition(edition, isbn) {
+  const book = edition?.book;
+  if (!book?.title) return null;
+  const featured = (book.book_series || [])[0];
+  const series = featured?.series?.name || "";
+  return {
+    ...EMPTY,
+    key: `hc-${book.id}-${edition.isbn_13 || isbn}`,
+    title: book.title,
+    author: authorsFrom(book.cached_contributors),
+    year: book.release_year || (edition.release_date || "").slice(0, 4) || "",
+    pageCount: edition.pages || book.pages || "",
+    isbn: edition.isbn_13 || isbn,
+    genres: genresFromCachedTags(book.cached_tags),
+    language: normalizeLanguage(edition.language?.language),
+    series,
+    seriesNumber: series && featured?.position != null ? featured.position : "",
+    description: book.description || "",
+    coverUrl: edition.image?.url || book.image?.url || "",
   };
 }
 
@@ -70,13 +120,23 @@ const ISBN_QUERY = `
   query ($isbn: String!) {
     editions(where: { _or: [{ isbn_13: { _eq: $isbn } }, { isbn_10: { _eq: $isbn } }] }, limit: 5) {
       isbn_13
+      pages
+      release_date
+      language { language }
+      image { url }
       book {
         id
-        slug
         title
+        pages
+        release_year
+        description
         cached_contributors
         cached_tags
         image { url }
+        book_series(where: { featured: { _eq: true } }, limit: 1) {
+          position
+          series { name }
+        }
       }
     }
   }
@@ -92,24 +152,15 @@ const TEXT_SEARCH_QUERY = `
 
 async function searchByIsbn(isbn) {
   const data = await hardcoverGraphQL(ISBN_QUERY, { isbn });
-  const editions = data?.editions || [];
-  return editions
-    .map((e) => {
-      const normalized = normalizeHardcoverBook(e.book);
-      if (normalized) normalized.isbn = e.isbn_13 || isbn;
-      return normalized;
-    })
-    .filter(Boolean);
+  return (data?.editions || []).map((e) => normalizeEdition(e, isbn)).filter(Boolean);
 }
 
 async function searchByText(q) {
   const data = await hardcoverGraphQL(TEXT_SEARCH_QUERY, { q });
-  // Hardcover's search() returns a loosely-typed JSON blob (`results`) whose
-  // exact shape isn't pinned down in their public docs — defensively probe
-  // the couple of shapes their examples show rather than assuming one.
+  // search() returns a loosely-typed Typesense blob: { hits: [{ document }] }
   const raw = data?.search?.results;
   const hits = Array.isArray(raw) ? raw : raw?.hits || raw?.data || [];
-  return hits.map((hit) => normalizeHardcoverBook(hit.document || hit)).filter(Boolean);
+  return hits.map((hit) => normalizeSearchDocument(hit.document || hit)).filter(Boolean);
 }
 
 // The public entry point: best-effort search, never throws.
