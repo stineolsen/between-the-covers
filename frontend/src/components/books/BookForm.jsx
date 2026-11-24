@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
+import GenrePicker from "./GenrePicker";
 
 const BookForm = ({ bookId = null, initialData = null }) => {
   const navigate = useNavigate();
@@ -27,7 +28,6 @@ const BookForm = ({ bookId = null, initialData = null }) => {
 
   const [coverImage, setCoverImage] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
-  const [genreInput, setGenreInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [seriesSuggestions, setSeriesSuggestions] = useState([]);
@@ -94,23 +94,6 @@ const BookForm = ({ bookId = null, initialData = null }) => {
       };
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleAddGenre = () => {
-    if (genreInput.trim() && !formData.genres.includes(genreInput.trim())) {
-      setFormData((prev) => ({
-        ...prev,
-        genres: [...prev.genres, genreInput.trim()],
-      }));
-      setGenreInput("");
-    }
-  };
-
-  const handleRemoveGenre = (genreToRemove) => {
-    setFormData((prev) => ({
-      ...prev,
-      genres: prev.genres.filter((g) => g !== genreToRemove),
-    }));
   };
 
   const handleSubmit = async (e) => {
@@ -455,47 +438,10 @@ const BookForm = ({ bookId = null, initialData = null }) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Sjangere
             </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={genreInput}
-                onChange={(e) => setGenreInput(e.target.value)}
-                onKeyPress={(e) =>
-                  e.key === "Legg til" && (e.preventDefault(), handleAddGenre())
-                }
-                className="input-field flex-1"
-                placeholder="Legg til en sjanger og trykk på legg til"
-              />
-              <button
-                type="button"
-                onClick={handleAddGenre}
-                className="btn-accent"
-              >
-                Legg til
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {formData.genres.map((genre, index) => (
-                <span
-                  key={index}
-                  className="px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all transform hover:scale-110"
-                  style={{
-                    background: "var(--color-wine-tint)",
-                    color: "var(--color-primary)",
-                    border: "1.5px solid var(--color-primary)",
-                  }}
-                >
-                  {genre}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveGenre(genre)}
-                    className="font-bold text-lg hover:opacity-70"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
+            <GenrePicker
+              value={formData.genres}
+              onChange={(genres) => setFormData((prev) => ({ ...prev, genres }))}
+            />
           </div>
 
           {/* Library Links */}

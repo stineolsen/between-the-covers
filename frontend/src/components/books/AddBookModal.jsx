@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { booksApi } from "../../api/booksApi";
 import BarcodeScannerView from "./BarcodeScannerView";
-import { mapGenres, canonicalGenre } from "../../utils/genres";
+import { mapGenres } from "../../utils/genres";
+import GenrePicker from "./GenrePicker";
 
 const OL_COVER = (coverId) =>
   coverId ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg` : null;
@@ -91,7 +92,6 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
     pageCount: "", isbn: "", genres: [], language: "Engelsk",
     series: "", seriesNumber: "", coverImageUrl: "",
   });
-  const [genreInput, setGenreInput] = useState("");
   // The library's own genres - search results are mapped onto these, and
   // anything that would be a new genre waits in pendingGenres until the
   // member says yes (the default is no).
@@ -178,7 +178,6 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
       seriesNumber: doc.seriesNumber ?? "",
       coverImageUrl: doc.coverUrl,
     });
-    setGenreInput("");
     setSubmitError("");
     setStep("confirm");
   };
@@ -186,21 +185,10 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const addGenre = () => {
-    const g = genreInput.trim() && canonicalGenre(genreInput, existingGenres);
-    if (g && !form.genres.includes(g)) {
-      setForm((prev) => ({ ...prev, genres: [...prev.genres, g] }));
-    }
-    setGenreInput("");
-  };
-
   const acceptPendingGenres = () => {
     setForm((prev) => ({ ...prev, genres: [...prev.genres, ...pendingGenres.filter((g) => !prev.genres.includes(g))] }));
     setPendingGenres([]);
   };
-
-  const removeGenre = (g) =>
-    setForm((prev) => ({ ...prev, genres: prev.genres.filter((x) => x !== g) }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -426,26 +414,11 @@ const AddBookModal = ({ onClose, onCreated, initialQuery = "" }) => {
               {/* Genres */}
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Sjangere</label>
-                <div className="flex gap-2 mb-2">
-                  <input
-                    type="text"
-                    value={genreInput}
-                    onChange={(e) => setGenreInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addGenre(); } }}
-                    className="input-field flex-1"
-                    placeholder="Legg til sjanger og trykk Enter"
-                  />
-                  <button type="button" onClick={addGenre} className="btn-accent">Legg til</button>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {form.genres.map((g) => (
-                    <span key={g} className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold"
-                      style={{ background: "var(--color-wine-tint)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }}>
-                      {g}
-                      <button type="button" onClick={() => removeGenre(g)} className="font-bold hover:opacity-70">×</button>
-                    </span>
-                  ))}
-                </div>
+                <GenrePicker
+                  value={form.genres}
+                  onChange={(genres) => setForm((prev) => ({ ...prev, genres }))}
+                  existingGenres={existingGenres}
+                />
                 {pendingGenres.length > 0 && (
                   <div className="mt-3 p-4 rounded-xl" style={{ background: "var(--color-sunken)" }} role="group" aria-labelledby="pending-genres-q">
                     <p id="pending-genres-q" className="text-sm font-bold mb-2">Vil du legge til følgende sjangere?</p>

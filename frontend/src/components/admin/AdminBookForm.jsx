@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { booksApi } from "../../api/booksApi";
+import GenrePicker from "../books/GenrePicker";
 
 const EMPTY_FORM = {
   title: "",
@@ -47,7 +48,6 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
   const [coverPreview, setCoverPreview] = useState(
     isEdit && book.coverImage ? booksApi.getCoverUrl(book.coverImage) : null
   );
-  const [genreInput, setGenreInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [seriesSuggestions, setSeriesSuggestions] = useState([]);
@@ -67,17 +67,6 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
     setCoverFile(file);
     setCoverPreview(URL.createObjectURL(file));
   };
-
-  const addGenre = () => {
-    const g = genreInput.trim();
-    if (g && !form.genres.includes(g)) {
-      setForm((prev) => ({ ...prev, genres: [...prev.genres, g] }));
-    }
-    setGenreInput("");
-  };
-
-  const removeGenre = (g) =>
-    setForm((prev) => ({ ...prev, genres: prev.genres.filter((x) => x !== g) }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -262,29 +251,7 @@ const AdminBookForm = ({ book, onSuccess, onCancel }) => {
       {/* Genres */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-1">Sjangere</label>
-        <div className="flex gap-2 mb-2">
-          <input
-            type="text"
-            value={genreInput}
-            onChange={(e) => setGenreInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addGenre(); } }}
-            className="input-field flex-1"
-            placeholder="Legg til sjanger og trykk Enter"
-          />
-          <button type="button" onClick={addGenre} className="btn-accent">Legg til</button>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {form.genres.map((g) => (
-            <span
-              key={g}
-              className="flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold"
-              style={{ background: "var(--color-wine-tint)", color: "var(--color-primary)", border: "1.5px solid var(--color-primary)" }}
-            >
-              {g}
-              <button type="button" onClick={() => removeGenre(g)} className="hover:opacity-70 font-bold">×</button>
-            </span>
-          ))}
-        </div>
+        <GenrePicker value={form.genres} onChange={(genres) => setForm((prev) => ({ ...prev, genres }))} />
       </div>
 
       {/* Actions */}

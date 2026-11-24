@@ -310,3 +310,35 @@ export function canonicalGenre(typed, existing = []) {
   const inLibrary = hit?.filter((g) => existing.includes(g));
   return inLibrary?.length ? inLibrary[0] : String(typed).trim();
 }
+
+/**
+ * Genres to suggest while typing in the genre picker, best match first:
+ * names that start with the query, then names containing it, then genres
+ * reached through a synonym ("krim" -> Crime, "sci" -> Science Fiction).
+ * `existing` is ordered by how many books use each genre.
+ */
+export function suggestGenres(query, existing = [], exclude = []) {
+  const q = keyOf(query);
+  const skip = new Set(exclude);
+  const available = existing.filter((g) => !skip.has(g));
+  if (!q) return available;
+
+  const starts = [];
+  const contains = [];
+  for (const g of available) {
+    const k = keyOf(g);
+    if (k.startsWith(q) || k.split(/[\s&/-]+/).some((w) => w.startsWith(q))) starts.push(g);
+    else if (k.includes(q)) contains.push(g);
+  }
+  const viaSynonym = [];
+  const inLibrary = new Set(available);
+  for (const [term, target] of Object.entries(SYNONYMS)) {
+    // Combined synonyms ("historical fantasy" -> Historical + Fantasy) would
+    // make "his" suggest Fantasy - only use single-genre ones here
+    if (!term.startsWith(q) || Array.isArray(target)) continue;
+    for (const g of [target]) {
+      if (inLibrary.has(g) && !starts.includes(g) && !contains.includes(g) && !viaSynonym.includes(g)) viaSynonym.push(g);
+    }
+  }
+  return [...starts, ...contains, ...viaSynonym];
+}
