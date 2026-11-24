@@ -7,9 +7,9 @@ import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
 import ProfileWrappedShares from "../components/wrapped/ProfileWrappedShares";
 import YearSoFar from "../components/wrapped/YearSoFar";
 import PhoneWidgetCard from "../components/common/PhoneWidgetCard";
+import CollapsibleBookShelf from "../components/common/CollapsibleBookShelf";
 import { authApi } from "../api/authApi";
 import { userBooksApi } from "../api/userBooksApi";
-import { booksApi } from "../api/booksApi";
 import {
   getPushSubscriptionState,
   subscribeToPush,
@@ -77,6 +77,23 @@ const Profile = () => {
 
   const [ownedBooks, setOwnedBooks] = useState([]);
   const [ownedLoading, setOwnedLoading] = useState(true);
+
+  const [readBooks, setReadBooks] = useState([]);
+  const [readLoading, setReadLoading] = useState(true);
+
+  useEffect(() => {
+    userBooksApi.getUserBooks({ status: "read" })
+      .then((data) =>
+        // Most recently finished first, like on other members' profiles
+        setReadBooks(
+          [...(data.userBooks || [])].sort(
+            (a, b) => new Date(b.finishedAt || 0) - new Date(a.finishedAt || 0),
+          ),
+        ),
+      )
+      .catch(() => setReadBooks([]))
+      .finally(() => setReadLoading(false));
+  }, []);
 
   useEffect(() => {
     userBooksApi.getUserBooks({ owned: true })
@@ -713,50 +730,27 @@ const Profile = () => {
         {new Date().getFullYear() >= 2027 && <YearSoFar />}
 
         {/* Bookshelf */}
-        <div className="container-gradient mt-6">
-          <h2 className="text-xl font-bold gradient-text mb-4">
-            📖 Min bokhylle ({ownedBooks.length})
-          </h2>
-
-          {ownedLoading ? (
-            <div className="flex justify-center py-6">
-              <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--color-wine-tint)", borderTopColor: "transparent" }} />
-            </div>
-          ) : ownedBooks.length === 0 ? (
-            <p className="text-text-faint text-sm text-center py-6">
+        <CollapsibleBookShelf
+          className="mt-6"
+          title="📖 Min bokhylle"
+          books={ownedBooks}
+          loading={ownedLoading}
+          emptyText={
+            <>
               Du har ikke lagt til noen bøker i bokhyllen din enda.<br />
               Åpne en bok og trykk «Legg til bokhyllen».
-            </p>
-          ) : (
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-              {ownedBooks.map(({ book }) => {
-                if (!book) return null;
-                const cover = booksApi.getCoverUrl(book.coverImage);
-                return (
-                  <Link
-                    key={book._id}
-                    to={`/books/${book._id}`}
-                    title={`${book.title} — ${book.author}`}
-                    className="group block"
-                  >
-                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow" style={{ background: "var(--color-sunken)" }}>
-                      {cover ? (
-                        <img src={cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center p-2"
-                          style={{ background: "var(--color-wine-tint)" }}>
-                          <span className="text-xs text-center text-text-faint font-medium line-clamp-3 leading-tight">
-                            {book.title}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+            </>
+          }
+        />
+
+        {/* Every book I've read */}
+        <CollapsibleBookShelf
+          className="mt-6"
+          title="✅ Leste bøker"
+          books={readBooks}
+          loading={readLoading}
+          emptyText="Du har ikke markert noen bøker som lest enda."
+        />
 
         <PhoneWidgetCard />
       </div>

@@ -403,6 +403,11 @@ exports.getPublicProfile = async (req, res, next) => {
     // Owned books (bookshelf) — book auto-populated by UserBook pre-find middleware
     const bookshelf = await UserBook.find({ user: user._id, owned: true }).sort({ updatedAt: -1 }).lean();
 
+    // Every book they've read, most recently finished first
+    const readBooks = await UserBook.find({ user: user._id, status: 'read' })
+      .sort({ finishedAt: -1, updatedAt: -1 })
+      .lean();
+
     // Highest-rated reviews → favorite books
     const favoriteReviews = await Review.find({ user: user._id })
       .sort({ rating: -1 })
@@ -418,6 +423,7 @@ exports.getPublicProfile = async (req, res, next) => {
       readCount,
       reviewCount,
       bookshelf: bookshelf.map(ub => ({ book: ub.book })),
+      readBooks: readBooks.filter((ub) => ub.book).map((ub) => ({ book: ub.book, finishedAt: ub.finishedAt })),
       favoriteBooks,
     });
   } catch (error) {

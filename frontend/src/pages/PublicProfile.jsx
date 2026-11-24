@@ -6,6 +6,7 @@ import { useAuth } from "../contexts/useAuth";
 import UserAvatar from "../components/common/UserAvatar";
 import ProfileBadgeShelf from "../components/common/ProfileBadgeShelf";
 import ProfileWrappedShares from "../components/wrapped/ProfileWrappedShares";
+import CollapsibleBookShelf from "../components/common/CollapsibleBookShelf";
 
 const TAG_CONFIG = {
   admin:          { label: 'Admin',          bg: 'linear-gradient(135deg, #f093fb, #f5576c)' },
@@ -84,7 +85,7 @@ const PublicProfile = () => {
     );
   }
 
-  const { user, tags, bookshelf, favoriteBooks } = profile;
+  const { user, tags, bookshelf, readBooks, favoriteBooks } = profile;
 
   return (
     <div className="min-h-screen py-12">
@@ -158,46 +159,10 @@ const PublicProfile = () => {
         </div>
 
         {/* Bookshelf */}
-        {bookshelf && bookshelf.length > 0 && (
-          <div className="container-gradient">
-            <h2 className="text-xl font-bold gradient-text mb-4">
-              Bokhylle ({bookshelf.length})
-            </h2>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
-              {bookshelf.map(({ book }) => {
-                if (!book) return null;
-                const cover = booksApi.getCoverUrl(book.coverImage);
-                return (
-                  <Link
-                    key={book._id}
-                    to={`/books/${book._id}`}
-                    title={`${book.title} — ${book.author}`}
-                    className="group block"
-                  >
-                    <div className="aspect-[2/3] rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-shadow" style={{ background: "var(--color-sunken)" }}>
-                      {cover ? (
-                        <img
-                          src={cover}
-                          alt={book.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center p-2"
-                          style={{ background: "linear-gradient(135deg, #667eea22, #764ba222)" }}
-                        >
-                          <span className="text-xs text-center font-medium line-clamp-3 leading-tight" style={{ color: "var(--color-text-faint)" }}>
-                            {book.title}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {bookshelf && bookshelf.length > 0 && <CollapsibleBookShelf title="Bokhylle" books={bookshelf} />}
+
+        {/* Every book they've read */}
+        {readBooks && readBooks.length > 0 && <CollapsibleBookShelf title="Leste bøker" books={readBooks} />}
 
         {/* Favorite books */}
         {favoriteBooks && favoriteBooks.length > 0 && (
